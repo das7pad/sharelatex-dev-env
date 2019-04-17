@@ -4,6 +4,7 @@ python ?= python3
 unittest ?= $(venv)/bin/python -m unittest
 
 UNITTESTS ?= \
+	generator/tests \
 
 .PHONY: all
 all: test
