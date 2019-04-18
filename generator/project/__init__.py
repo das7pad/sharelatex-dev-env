@@ -1,10 +1,12 @@
 import pathlib
 import typing
 
+from generator.template import TEMPLATES
+
 
 class Project:
     _languages = {}  # type: typing.Dict[str, typing.Type[Project]]
-    language = None
+    language = ''
 
     def __init__(
         self,
@@ -146,6 +148,21 @@ class Project:
         }
         env.update(self._kwargs)
         return env
+
+    def _get_template_path(
+        self,
+        name: str,
+        templates: pathlib.Path = TEMPLATES,
+    ):
+        languages = []
+        for cls in self.__class__.mro():
+            if issubclass(cls, Project):
+                languages.append(cls.language)
+
+        for language in languages:
+            path = templates / language / name
+            if path.exists():
+                return path
 
     def process(
         self,

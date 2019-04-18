@@ -192,6 +192,34 @@ class TestProject(unittest.TestCase):
         env = project._get_env()
         self.assertTrue(env['has_install_deps'])
 
+    def test_get_template_path(self):
+        project = GenericProject(
+            name='NAME',
+            path=self.project_path,
+        )
+
+        templates = pathlib.Path(tempfile.mkdtemp())
+        file = 'dummy.j2'
+        try:
+            (templates / GenericProject.language).mkdir(exist_ok=True)
+            (templates / GenericProject.language / file).write_text('CHILD')
+            (templates / file).write_text('PARENT')
+
+            path = project._get_template_path(
+                name=file,
+                templates=templates,
+            )
+            self.assertEqual(path.read_text(), 'CHILD')
+
+            (templates / GenericProject.language / file).unlink()
+            path = project._get_template_path(
+                name=file,
+                templates=templates,
+            )
+            self.assertEqual(path.read_text(), 'PARENT')
+        finally:
+            shutil.rmtree(templates)
+
     def test_process(self):
         project = GenericProject(
             name='NAME',

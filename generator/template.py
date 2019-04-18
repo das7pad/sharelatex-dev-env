@@ -4,6 +4,10 @@ import typing
 import jinja2
 
 
+REPO = pathlib.Path(__file__).parent.parent.parent
+TEMPLATES = REPO / 'templates'  # type: pathlib.Path
+
+
 class Template:
     def __init__(
         self,
