@@ -7,10 +7,12 @@ class Project:
         self,
         name: str,
         path: pathlib.Path,
+        dry_run: bool = False,
         **kwargs
     ):
         self._name = name
         self._path = path
+        self._dry_run = dry_run
         self._kwargs = kwargs
         self._changed = False
 
@@ -32,11 +34,13 @@ class Project:
     def from_path(
         cls,
         path: pathlib.Path,
+        dry_run: bool = False,
     ) -> 'Project':
         raw = cls.get_cfg_path(path).read_text()
         kwargs = cls._parse_cfg(raw)
         return cls(
             path=path,
+            dry_run=dry_run,
             **kwargs
         )
 
@@ -64,10 +68,21 @@ class Project:
 
         return kwargs
 
+    def _write(
+        self,
+        path: pathlib.Path,
+        content: str,
+    ):
+        if self._dry_run:
+            print('[DRY RUN] skipping write to {path}'.format(path=path))
+            return 0
+
+        return path.write_text(content)
+
     def process(
         self,
     ):
-        self.get_cfg_path(self._path).write_text(self._serialize_cfg())
+        self._write(self.get_cfg_path(self._path), self._serialize_cfg())
 
     def _serialize_cfg(
         self,

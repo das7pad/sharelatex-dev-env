@@ -37,6 +37,28 @@ class TestProject(unittest.TestCase):
         self.assertEqual(project['arg'], 'OTHER_VAL')
         self.assertTrue(project._changed)
 
+    def test_write(self):
+        project = Project(
+            name='NAME',
+            path=self.project_path,
+            dry_run=False,
+        )
+        target = self.project_path / 'dummy.txt'
+        actual = project._write(target, 'DATA')
+        self.assertEqual(actual, len('DATA'))
+        self.assertEqual(target.read_text(), 'DATA')
+
+    def test_write_dry_run(self):
+        project = Project(
+            name='NAME',
+            path=self.project_path,
+            dry_run=True,
+        )
+        target = self.project_path / 'dummy.txt'
+        actual = project._write(target, 'DATA')
+        self.assertEqual(actual, 0)
+        self.assertFalse(target.exists())
+
     def test_parser(self):
         project_in = strip_indent(
             """

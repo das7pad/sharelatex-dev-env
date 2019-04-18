@@ -18,6 +18,12 @@ def get_args(args: typing.Optional[typing.List[str]] = None):
         help='One or more project paths',
     )
 
+    parser.add_argument(
+        '--dry-run',
+        action='store_true',
+        help='Skip writing',
+    )
+
     return parser.parse_args(args)
 
 
@@ -27,6 +33,7 @@ def main(args):
 
         project = Project.from_path(
             path=path,
+            dry_run=args.dry_run,
         )
         project.process()
 
