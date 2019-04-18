@@ -4,7 +4,7 @@ import typing
 import jinja2
 
 
-REPO = pathlib.Path(__file__).parent.parent.parent
+REPO = pathlib.Path(__file__).parent.parent
 TEMPLATES = REPO / 'templates'  # type: pathlib.Path
 
 
