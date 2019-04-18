@@ -220,6 +220,38 @@ class TestProject(unittest.TestCase):
         finally:
             shutil.rmtree(templates)
 
+    def test_get_template_cached(self):
+        project = GenericProject(
+            name='NAME',
+            path=self.project_path,
+        )
+
+        templates = pathlib.Path(tempfile.mkdtemp())
+        file = 'dummy.j2'
+        other_file = 'not_dummy.j2'
+        try:
+            (templates / file).touch()
+            (templates / other_file).touch()
+
+            template_0 = project._get_template(
+                name=file,
+                templates=templates,
+            )
+            template_1 = project._get_template(
+                name=file,
+                templates=templates,
+            )
+            self.assertIs(template_0, template_1)
+
+            template_2 = project._get_template(
+                name=other_file,
+                templates=templates,
+            )
+            self.assertIsNot(template_0, template_2)
+
+        finally:
+            shutil.rmtree(templates)
+
     def test_process(self):
         project = GenericProject(
             name='NAME',

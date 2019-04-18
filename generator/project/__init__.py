@@ -1,12 +1,14 @@
 import pathlib
 import typing
 
+from generator.template import Template
 from generator.template import TEMPLATES
 
 
 class Project:
     _languages = {}  # type: typing.Dict[str, typing.Type[Project]]
     language = ''
+    _template_cache = {}
 
     def __init__(
         self,
@@ -163,6 +165,31 @@ class Project:
             path = templates / language / name
             if path.exists():
                 return path
+
+    def _get_template(
+        self,
+        name: str,
+        comment_prefix: str = None,
+        templates: pathlib.Path = TEMPLATES,
+    ):
+        key = (self.__class__, name)
+        if key in self._template_cache:
+            return self._template_cache[key]
+        path = self._get_template_path(
+            name=name,
+            templates=templates,
+        )
+
+        kwargs = {}
+        if comment_prefix is not None:
+            kwargs['comment_prefix'] = comment_prefix,
+
+        template = Template(
+            path=path,
+            **kwargs
+        )
+        self._template_cache[key] = template
+        return template
 
     def process(
         self,
