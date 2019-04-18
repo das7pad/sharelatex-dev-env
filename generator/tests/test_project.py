@@ -10,12 +10,26 @@ def strip_indent(raw):
     return raw.replace('\n' + ' ' * 12, '\n').lstrip('\n')
 
 
+class GenericProject(Project):
+    language = 'LANGUAGE'
+
+    @classmethod
+    def register(cls):
+        Project._languages[cls.language] = cls
+
+    @classmethod
+    def deregister(cls):
+        del Project._languages[cls.language]
+
+
 class TestProject(unittest.TestCase):
     def setUp(self):
         self.project_path = pathlib.Path(tempfile.mkdtemp())
+        GenericProject.register()
 
     def tearDown(self):
         shutil.rmtree(self.project_path)
+        GenericProject.deregister()
 
     def test_simple_access(self):
         project = Project(
@@ -97,10 +111,9 @@ class TestProject(unittest.TestCase):
         Project.get_cfg_path(self.project_path).write_text(project_in)
 
         actual = Project.from_path(self.project_path)
-        expected = Project(
+        expected = GenericProject(
             name='NAME',
             path=self.project_path,
-            language='LANGUAGE',
             node_version='1.2.3',
             acceptance_creds=None,
             dependencies=[
@@ -124,10 +137,9 @@ class TestProject(unittest.TestCase):
             --docker-repos=example.com/images
             """
         )
-        project = Project(
+        project = GenericProject(
             name='NAME',
             path=self.project_path,
-            language='LANGUAGE',
             node_version='1.2.3',
             acceptance_creds=None,
             dependencies=[
@@ -152,10 +164,9 @@ class TestProject(unittest.TestCase):
             --unknown-arg=VALUE
             """
         )
-        project = Project(
+        project = GenericProject(
             name='NAME',
             path=self.project_path,
-            language='LANGUAGE',
             node_version='1.2.3',
             acceptance_creds=None,
             dependencies=[
@@ -170,10 +181,9 @@ class TestProject(unittest.TestCase):
         self.assertEqual(actual, expected)
 
     def test_process(self):
-        project = Project(
+        project = GenericProject(
             name='NAME',
             path=self.project_path,
-            language='LANGUAGE',
             node_version='1.2.3',
             acceptance_creds=None,
             dependencies=[

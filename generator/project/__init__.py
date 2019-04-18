@@ -3,6 +3,9 @@ import typing
 
 
 class Project:
+    _languages = {}  # type: typing.Dict[str, typing.Type[Project]]
+    language = None
+
     def __init__(
         self,
         name: str,
@@ -26,6 +29,9 @@ class Project:
         if self._path != other._path:
             return False
 
+        if self.language != other.language:
+            return False
+
         if self._kwargs != other._kwargs:
             return False
         return True
@@ -44,6 +50,20 @@ class Project:
         self._changed = True
         return value
 
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        cls._languages[cls.language] = cls
+
+    @classmethod
+    def _get_subclass(
+        cls,
+        language: str,
+    ) -> 'typing.Type[Project]':
+        for lang, target in cls._languages.items():
+            if language == lang:
+                return target
+        return cls
+
     @classmethod
     def from_path(
         cls,
@@ -52,7 +72,11 @@ class Project:
     ) -> 'Project':
         raw = cls.get_cfg_path(path).read_text()
         kwargs = cls._parse_cfg(raw)
-        return cls(
+
+        target = cls._get_subclass(kwargs['language'])
+        del kwargs['language']
+
+        return target(
             path=path,
             dry_run=dry_run,
             **kwargs
@@ -103,6 +127,7 @@ class Project:
     ) -> str:
         lines = [
             self._name,
+            '--language={}'.format(self.language)
         ]
 
         for field, value in self._kwargs.items():
