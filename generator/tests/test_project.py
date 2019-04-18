@@ -30,6 +30,7 @@ class TestProject(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.project_path)
         GenericProject.deregister()
+        Project._template_cache.clear()
 
     def test_simple_access(self):
         project = Project(
