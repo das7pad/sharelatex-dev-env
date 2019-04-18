@@ -58,6 +58,11 @@ class Project:
 
         return kwargs
 
+    def process(
+        self,
+    ):
+        self.get_cfg_path(self._path).write_text(self._serialize_cfg())
+
     def _serialize_cfg(
         self,
     ) -> str:
