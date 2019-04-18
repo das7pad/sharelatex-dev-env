@@ -7,21 +7,11 @@ class Project:
         self,
         name: str,
         path: pathlib.Path,
-        language: str,
-        node_version: str,
-        acceptance_creds: typing.Optional[str],
-        dependencies: typing.List[str],
-        docker_repos: str,
         **kwargs
     ):
         self._name = name
         self._path = path
-        self._language = language
-        self._node_version = node_version
-        self._acceptance_creds = acceptance_creds
-        self._dependencies = dependencies
-        self._docker_repos = docker_repos
-        self._unknown_kwargs = kwargs
+        self._kwargs = kwargs
 
     @classmethod
     def from_path(
@@ -71,20 +61,7 @@ class Project:
             self._name,
         ]
 
-        fields = [
-            '_language',
-            '_node_version',
-            '_acceptance_creds',
-            '_dependencies',
-            '_docker_repos',
-        ]
-        cfg = {}
-        for field in fields:
-            cfg[field[1:]] = self.__dict__[field]
-
-        cfg.update(self._unknown_kwargs)
-
-        for field, value in cfg.items():
+        for field, value in self._kwargs.items():
             if isinstance(value, list):
                 value = ','.join(value)
             lines.append(
