@@ -217,7 +217,23 @@ class Project:
         self._write(target, new)
         return True
 
+    def _get_files_to_update(
+        self,
+    ) -> typing.List[typing.Tuple[str, typing.Optional[str]]]:
+        return []
+
     def process(
         self,
+        templates: pathlib.Path = TEMPLATES,
     ):
+        files = self._get_files_to_update()
+        env = self._get_env()
+        for file, comment_prefix in files:
+            self._update_file(
+                name=file,
+                env=env,
+                comment_prefix=comment_prefix,
+                templates=templates,
+            )
+
         self._write(self.get_cfg_path(self._path), self._serialize_cfg())

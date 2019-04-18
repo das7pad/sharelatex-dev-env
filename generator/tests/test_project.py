@@ -277,28 +277,36 @@ class TestProject(unittest.TestCase):
             shutil.rmtree(templates)
 
     def test_process(self):
-        project = GenericProject(
+        class DemoProject(GenericProject):
+            def _get_files_to_update(self):
+                return [('dummy', None)]
+
+        project = DemoProject(
             name='NAME',
             path=self.project_path,
-            node_version='1.2.3',
-            acceptance_creds=None,
-            dependencies=[
-                'mongo',
-                'redis',
-            ],
-            docker_repos='example.com/images'
         )
-        project.process()
 
-        cfg_actual = project.get_cfg_path(self.project_path).read_text()
+        target = self.project_path / 'dummy'
         cfg_expected = strip_indent(
             """
             NAME
             --language=LANGUAGE
-            --node-version=1.2.3
-            --acceptance-creds=None
-            --dependencies=mongo,redis
-            --docker-repos=example.com/images
             """
         )
-        self.assertEqual(cfg_actual, cfg_expected)
+        templates = pathlib.Path(tempfile.mkdtemp())
+        try:
+            (templates / 'dummy.j2').write_text(
+                '{{ name }}'
+            )
+
+            project.process(
+                templates=templates
+            )
+
+            cfg_actual = project.get_cfg_path(self.project_path).read_text()
+
+            self.assertEqual(cfg_actual, cfg_expected)
+            self.assertEqual(target.read_text(), 'NAME')
+
+        finally:
+            shutil.rmtree(templates)
