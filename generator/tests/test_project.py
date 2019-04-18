@@ -1,4 +1,5 @@
 import pathlib
+import shutil
 import tempfile
 import unittest
 
@@ -11,11 +12,10 @@ def strip_indent(raw):
 
 class TestProject(unittest.TestCase):
     def setUp(self):
-        self.project_path = pathlib.Path(tempfile.mktemp())
+        self.project_path = pathlib.Path(tempfile.mkdtemp())
 
     def tearDown(self):
-        if self.project_path.exists():
-            self.project_path.unlink()
+        shutil.rmtree(self.project_path)
 
     def test_parser(self):
         project_in = strip_indent(
@@ -51,11 +51,12 @@ class TestProject(unittest.TestCase):
             --docker-repos=example.com/images
             """
         )
-        self.project_path.write_text(project_in)
+        Project.get_cfg_path(self.project_path).write_text(project_in)
 
-        actual = Project.from_cfg(self.project_path)
+        actual = Project.from_path(self.project_path)
         expected = Project(
             name='NAME',
+            path=self.project_path,
             language='LANGUAGE',
             node_version='1.2.3',
             acceptance_creds=None,
