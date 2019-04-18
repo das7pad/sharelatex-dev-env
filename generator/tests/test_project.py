@@ -49,6 +49,7 @@ class TestProject(unittest.TestCase):
             --acceptance-creds=None
             --dependencies=mongo,redis
             --docker-repos=example.com/images
+            --unknown-arg=VALUE
             """
         )
         Project.get_cfg_path(self.project_path).write_text(project_in)
@@ -64,7 +65,8 @@ class TestProject(unittest.TestCase):
                 'mongo',
                 'redis',
             ],
-            docker_repos='example.com/images'
+            docker_repos='example.com/images',
+            unknown_arg='VALUE',
         )
 
         self.assertDictEqual(actual.__dict__, expected.__dict__)
@@ -91,6 +93,35 @@ class TestProject(unittest.TestCase):
                 'redis',
             ],
             docker_repos='example.com/images'
+        )
+        actual = project._serialize_cfg()
+
+        self.assertEqual(actual, expected)
+
+    def test_serialize_unknown(self):
+        expected = strip_indent(
+            """
+            NAME
+            --language=LANGUAGE
+            --node-version=1.2.3
+            --acceptance-creds=None
+            --dependencies=mongo,redis
+            --docker-repos=example.com/images
+            --unknown-arg=VALUE
+            """
+        )
+        project = Project(
+            name='NAME',
+            path=self.project_path,
+            language='LANGUAGE',
+            node_version='1.2.3',
+            acceptance_creds=None,
+            dependencies=[
+                'mongo',
+                'redis',
+            ],
+            docker_repos='example.com/images',
+            unknown_arg='VALUE',
         )
         actual = project._serialize_cfg()
 

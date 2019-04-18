@@ -21,6 +21,7 @@ class Project:
         self._acceptance_creds = acceptance_creds
         self._dependencies = dependencies
         self._docker_repos = docker_repos
+        self._unknown_kwargs = kwargs
 
     @classmethod
     def from_path(
@@ -77,13 +78,18 @@ class Project:
             '_dependencies',
             '_docker_repos',
         ]
+        cfg = {}
         for field in fields:
-            value = self.__dict__[field]
+            cfg[field[1:]] = self.__dict__[field]
+
+        cfg.update(self._unknown_kwargs)
+
+        for field, value in cfg.items():
             if isinstance(value, list):
                 value = ','.join(value)
             lines.append(
                 '--{field}={value}'.format(
-                    field=field[1:].replace('_', '-'),
+                    field=field.replace('_', '-'),
                     value=value,
                 )
             )
