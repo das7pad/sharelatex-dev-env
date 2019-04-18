@@ -191,6 +191,32 @@ class Project:
         self._template_cache[key] = template
         return template
 
+    def _update_file(
+        self,
+        name: str,
+        env: dict,
+        comment_prefix: str = None,
+        templates: pathlib.Path = TEMPLATES,
+    ):
+        target = self._path / name
+        if target.exists():
+            current = target.read_text()
+        else:
+            current = ''
+
+        template = self._get_template(
+            name=name + '.j2',
+            comment_prefix=comment_prefix,
+            templates=templates,
+        )
+
+        new = template.render(env)
+        if current == new:
+            return False
+
+        self._write(target, new)
+        return True
+
     def process(
         self,
     ):

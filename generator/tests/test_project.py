@@ -252,6 +252,29 @@ class TestProject(unittest.TestCase):
         finally:
             shutil.rmtree(templates)
 
+    def test_update_file(self):
+        project = GenericProject(
+            name='NAME',
+            path=self.project_path,
+        )
+
+        templates = pathlib.Path(tempfile.mkdtemp())
+        target = self.project_path / 'dummy'
+        try:
+            (templates / 'dummy.j2').write_text(
+                'THE {{ var }}'
+            )
+
+            project._update_file(
+                name='dummy',
+                env={'var': 'CONTENT'},
+                templates=templates,
+            )
+            self.assertEqual(target.read_text(), 'THE CONTENT')
+
+        finally:
+            shutil.rmtree(templates)
+
     def test_process(self):
         project = GenericProject(
             name='NAME',
