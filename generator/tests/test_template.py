@@ -6,7 +6,7 @@ from generator.template import Template
 
 
 def strip_indent(raw):
-    return raw.replace('\n' + ' ' * 12, '\n')
+    return raw.replace('\n' + ' ' * 12, '\n').lstrip('\n')
 
 
 class TestTemplate(unittest.TestCase):
