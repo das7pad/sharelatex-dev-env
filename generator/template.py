@@ -11,16 +11,14 @@ TEMPLATES = REPO / 'templates'  # type: pathlib.Path
 class Template:
     def __init__(
         self,
-        target_file: pathlib.Path,
-        actual_file: pathlib.Path,
+        path: pathlib.Path,
         comment_prefix: str = '# ',
     ):
-        self._target = target_file
-        self._actual = actual_file
+        self._path = path
         self._comment_prefix = comment_prefix
 
         self._template = jinja2.Template(
-            source=actual_file.read_text(),
+            source=path.read_text(),
             lstrip_blocks=True,
             trim_blocks=True,
             keep_trailing_newline=True,

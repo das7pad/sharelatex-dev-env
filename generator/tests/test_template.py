@@ -25,7 +25,6 @@ class TestTemplate(unittest.TestCase):
         self.template_path.write_text(template_in)
 
         template = Template(
-            pathlib.Path('/demo.txt'),
             self.template_path,
         )
 
@@ -53,7 +52,6 @@ class TestTemplate(unittest.TestCase):
         self.template_path.write_text(template_in)
 
         template = Template(
-            pathlib.Path('/demo.txt'),
             self.template_path,
         )
 
@@ -84,7 +82,6 @@ class TestTemplate(unittest.TestCase):
         self.template_path.write_text(template_in)
 
         template = Template(
-            pathlib.Path('/demo.txt'),
             self.template_path,
         )
 
