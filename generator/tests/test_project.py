@@ -68,3 +68,30 @@ class TestProject(unittest.TestCase):
         )
 
         self.assertDictEqual(actual.__dict__, expected.__dict__)
+
+    def test_serialize(self):
+        expected = strip_indent(
+            """
+            NAME
+            --language=LANGUAGE
+            --node-version=1.2.3
+            --acceptance-creds=None
+            --dependencies=mongo,redis
+            --docker-repos=example.com/images
+            """
+        )
+        project = Project(
+            name='NAME',
+            path=self.project_path,
+            language='LANGUAGE',
+            node_version='1.2.3',
+            acceptance_creds=None,
+            dependencies=[
+                'mongo',
+                'redis',
+            ],
+            docker_repos='example.com/images'
+        )
+        actual = project._serialize_cfg()
+
+        self.assertEqual(actual, expected)

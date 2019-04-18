@@ -57,3 +57,31 @@ class Project:
             kwargs[argument.replace('-', '_')] = value
 
         return kwargs
+
+    def _serialize_cfg(
+        self,
+    ) -> str:
+        lines = [
+            self._name,
+        ]
+
+        fields = [
+            '_language',
+            '_node_version',
+            '_acceptance_creds',
+            '_dependencies',
+            '_docker_repos',
+        ]
+        for field in fields:
+            value = self.__dict__[field]
+            if isinstance(value, list):
+                value = ','.join(value)
+            lines.append(
+                '--{field}={value}'.format(
+                    field=field[1:].replace('_', '-'),
+                    value=value,
+                )
+            )
+
+        lines.append('')
+        return '\n'.join(lines)
