@@ -19,7 +19,8 @@ class ESProject(Project):
 
     def process(
         self,
+        **kwargs
     ):
         self._update_nvmrc()
 
-        return super().process()
+        return super().process(**kwargs)
