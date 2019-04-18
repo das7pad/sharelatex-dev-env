@@ -111,7 +111,7 @@ class TestProject(unittest.TestCase):
             unknown_arg='VALUE',
         )
 
-        self.assertDictEqual(actual.__dict__, expected.__dict__)
+        self.assertEqual(actual, expected)
 
     def test_serialize(self):
         expected = strip_indent(

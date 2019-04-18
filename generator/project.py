@@ -16,6 +16,20 @@ class Project:
         self._kwargs = kwargs
         self._changed = False
 
+    def __eq__(self, other):
+        if not isinstance(other, Project):
+            return False
+
+        if self._name != other._name:
+            return False
+
+        if self._path != other._path:
+            return False
+
+        if self._kwargs != other._kwargs:
+            return False
+        return True
+
     def __contains__(self, item):
         return item in self._kwargs
 
