@@ -106,22 +106,6 @@ class Project:
 
         return kwargs
 
-    def _write(
-        self,
-        path: pathlib.Path,
-        content: str,
-    ):
-        if self._dry_run:
-            print('[DRY RUN] skipping write to {path}'.format(path=path))
-            return 0
-
-        return path.write_text(content)
-
-    def process(
-        self,
-    ):
-        self._write(self.get_cfg_path(self._path), self._serialize_cfg())
-
     def _serialize_cfg(
         self,
     ) -> str:
@@ -142,3 +126,19 @@ class Project:
 
         lines.append('')
         return '\n'.join(lines)
+
+    def _write(
+        self,
+        path: pathlib.Path,
+        content: str,
+    ):
+        if self._dry_run:
+            print('[DRY RUN] skipping write to {path}'.format(path=path))
+            return 0
+
+        return path.write_text(content)
+
+    def process(
+        self,
+    ):
+        self._write(self.get_cfg_path(self._path), self._serialize_cfg())
