@@ -17,6 +17,26 @@ class TestProject(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.project_path)
 
+    def test_simple_access(self):
+        project = Project(
+            name='NAME',
+            path=self.project_path,
+            arg='VAL',
+        )
+
+        self.assertIn('arg', project)
+        self.assertNotIn('other_arg', project)
+
+        self.assertEqual(project['arg'], 'VAL')
+        self.assertFalse(project._changed)
+
+        project['arg'] = 'VAL'
+        self.assertFalse(project._changed)
+
+        project['arg'] = 'OTHER_VAL'
+        self.assertEqual(project['arg'], 'OTHER_VAL')
+        self.assertTrue(project._changed)
+
     def test_parser(self):
         project_in = strip_indent(
             """

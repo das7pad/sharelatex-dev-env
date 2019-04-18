@@ -12,6 +12,21 @@ class Project:
         self._name = name
         self._path = path
         self._kwargs = kwargs
+        self._changed = False
+
+    def __contains__(self, item):
+        return item in self._kwargs
+
+    def __getitem__(self, item):
+        return self._kwargs[item]
+
+    def __setitem__(self, key, value):
+        if key in self and self[key] == value:
+            return value
+
+        self._kwargs[key] = value
+        self._changed = True
+        return value
 
     @classmethod
     def from_path(
