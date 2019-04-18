@@ -180,6 +180,18 @@ class TestProject(unittest.TestCase):
 
         self.assertEqual(actual, expected)
 
+    def test_env(self):
+        project = GenericProject(
+            name='NAME',
+            path=self.project_path,
+        )
+        env = project._get_env()
+        self.assertFalse(env['has_install_deps'])
+
+        (self.project_path / 'install_deps.sh').touch()
+        env = project._get_env()
+        self.assertTrue(env['has_install_deps'])
+
     def test_process(self):
         project = GenericProject(
             name='NAME',

@@ -138,6 +138,15 @@ class Project:
 
         return path.write_text(content)
 
+    def _get_env(self):
+        env = {
+            'name': self._name,
+            'language': self.language,
+            'has_install_deps': (self._path / 'install_deps.sh').exists(),
+        }
+        env.update(self._kwargs)
+        return env
+
     def process(
         self,
     ):
