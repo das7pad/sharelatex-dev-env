@@ -134,6 +134,24 @@ class Project:
         lines.append('')
         return '\n'.join(lines)
 
+    def _dump_cfg(self):
+        path = self.get_cfg_path(self._path)
+        if path.exists():
+            if not self._changed:
+                return False
+
+            # did the config actually changed?
+            reloaded = self._parse_cfg(path.read_text())
+            del reloaded['name']
+            del reloaded['language']
+            if self._kwargs == reloaded:
+                return False
+
+        return self._write(
+            path=path,
+            content=self._serialize_cfg(),
+        )
+
     def _write(
         self,
         path: pathlib.Path,
@@ -240,4 +258,4 @@ class Project:
                 templates=templates,
             )
 
-        self._write(self.get_cfg_path(self._path), self._serialize_cfg())
+        self._dump_cfg()

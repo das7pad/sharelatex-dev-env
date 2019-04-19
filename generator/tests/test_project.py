@@ -113,6 +113,26 @@ class TestProject(unittest.TestCase):
 
         self.assertDictEqual(actual, expected)
 
+    def test_keep_scrambled(self):
+        project_in = strip_indent(
+            """
+            --language=LANGUAGE
+            NAME
+            --arg=val
+            """
+        )
+
+        Project.get_cfg_path(self.project_path).write_text(project_in)
+
+        project = Project.from_path(self.project_path)
+
+        # some deployed file changed
+        project._changed = True
+
+        actual = Project.get_cfg_path(self.project_path).read_text()
+        self.assertFalse(project._dump_cfg())
+        self.assertEqual(actual, project_in)
+
     def test_init(self):
         project_in = strip_indent(
             """
