@@ -168,6 +168,7 @@ class Project:
             'name': self._name,
             'language': self.language,
             'has_install_deps': (self._path / 'install_deps.sh').exists(),
+            'has_entrypoint': (self._path / 'entrypoint.sh').exists(),
         }
         env.update(self._kwargs)
         return env
