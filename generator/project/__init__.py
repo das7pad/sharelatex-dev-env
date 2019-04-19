@@ -214,6 +214,7 @@ class Project:
         if current == new:
             return False
 
+        self._changed = True
         self._write(target, new)
         return True
 
