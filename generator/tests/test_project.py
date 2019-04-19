@@ -30,7 +30,6 @@ class TestProject(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.project_path)
         GenericProject.deregister()
-        Project._template_cache.clear()
 
     def test_simple_access(self):
         project = Project(
@@ -230,74 +229,42 @@ class TestProject(unittest.TestCase):
         self.assertTrue(env['has_install_deps'])
 
     def test_get_template_path(self):
-        project = GenericProject(
-            name='NAME',
-            path=self.project_path,
-        )
-
         templates = pathlib.Path(tempfile.mkdtemp())
         file = 'dummy.j2'
         try:
+            project = GenericProject(
+                name='NAME',
+                path=self.project_path,
+                templates=templates,
+            )
             (templates / GenericProject.language).mkdir(exist_ok=True)
             (templates / GenericProject.language / file).write_text('CHILD')
             (templates / file).write_text('PARENT')
 
-            path = project._get_template_path(
-                name=file,
-                templates=templates,
+            template = project._get_template(
+                name='dummy',
             )
+            path = pathlib.Path(template.filename)
             self.assertEqual(path.read_text(), 'CHILD')
 
             (templates / GenericProject.language / file).unlink()
-            path = project._get_template_path(
-                name=file,
-                templates=templates,
+            template = project._get_template(
+                name='dummy',
             )
+            path = pathlib.Path(template.filename)
             self.assertEqual(path.read_text(), 'PARENT')
         finally:
             shutil.rmtree(templates)
 
-    def test_get_template_cached(self):
-        project = GenericProject(
-            name='NAME',
-            path=self.project_path,
-        )
-
-        templates = pathlib.Path(tempfile.mkdtemp())
-        file = 'dummy.j2'
-        other_file = 'not_dummy.j2'
-        try:
-            (templates / file).touch()
-            (templates / other_file).touch()
-
-            template_0 = project._get_template(
-                name=file,
-                templates=templates,
-            )
-            template_1 = project._get_template(
-                name=file,
-                templates=templates,
-            )
-            self.assertIs(template_0, template_1)
-
-            template_2 = project._get_template(
-                name=other_file,
-                templates=templates,
-            )
-            self.assertIsNot(template_0, template_2)
-
-        finally:
-            shutil.rmtree(templates)
-
     def test_update_file(self):
-        project = GenericProject(
-            name='NAME',
-            path=self.project_path,
-        )
-
         templates = pathlib.Path(tempfile.mkdtemp())
         target = self.project_path / 'dummy'
         try:
+            project = GenericProject(
+                name='NAME',
+                path=self.project_path,
+                templates=templates,
+            )
             (templates / 'dummy.j2').write_text(
                 'THE {{ var }}'
             )
@@ -305,7 +272,6 @@ class TestProject(unittest.TestCase):
             project._update_file(
                 name='dummy',
                 env={'var': 'CONTENT'},
-                templates=templates,
             )
             self.assertEqual(target.read_text(), 'THE CONTENT')
 
@@ -315,12 +281,7 @@ class TestProject(unittest.TestCase):
     def test_process(self):
         class DemoProject(GenericProject):
             def _get_files_to_update(self):
-                return [('dummy', None)]
-
-        project = DemoProject(
-            name='NAME',
-            path=self.project_path,
-        )
+                return ['dummy']
 
         target = self.project_path / 'dummy'
         cfg_expected = strip_indent(
@@ -331,13 +292,16 @@ class TestProject(unittest.TestCase):
         )
         templates = pathlib.Path(tempfile.mkdtemp())
         try:
+            project = DemoProject(
+                name='NAME',
+                path=self.project_path,
+                templates=templates,
+            )
             (templates / 'dummy.j2').write_text(
                 '{{ name }}'
             )
 
-            project.process(
-                templates=templates
-            )
+            project.process()
 
             cfg_actual = project.get_cfg_path(self.project_path).read_text()
 

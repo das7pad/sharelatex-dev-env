@@ -17,7 +17,6 @@ class TestESProject(unittest.TestCase):
 
     def tearDown(self):
         shutil.rmtree(self.project_path)
-        Project._template_cache.clear()
 
     def test_subclass_init(self):
         project_in = strip_indent(

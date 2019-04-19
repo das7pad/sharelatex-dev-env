@@ -1,20 +1,22 @@
 import pathlib
 import typing
 
-from generator.template import Template
-from generator.template import TEMPLATES
+import jinja2
+
+REPO = pathlib.Path(__file__).parent.parent.parent
+TEMPLATES = REPO / 'templates'  # type: pathlib.Path
 
 
 class Project:
     _languages = {}  # type: typing.Dict[str, typing.Type[Project]]
     language = ''
-    _template_cache = {}
 
     def __init__(
         self,
         name: str,
         path: pathlib.Path,
         dry_run: bool = False,
+        templates: pathlib.Path = TEMPLATES,
         **kwargs
     ):
         self._name = name
@@ -22,6 +24,19 @@ class Project:
         self._dry_run = dry_run
         self._kwargs = kwargs
         self._changed = False
+
+        self._template_env = jinja2.Environment(
+            loader=jinja2.FileSystemLoader(
+                searchpath=[
+                    templates / cls.language
+                    for cls in self.__class__.mro()
+                    if issubclass(cls, Project)
+                ],
+            ),
+            lstrip_blocks=True,
+            trim_blocks=True,
+            keep_trailing_newline=True,
+        )
 
     def __eq__(self, other):
         if not isinstance(other, Project):
@@ -173,52 +188,18 @@ class Project:
         env.update(self._kwargs)
         return env
 
-    def _get_template_path(
-        self,
-        name: str,
-        templates: pathlib.Path = TEMPLATES,
-    ):
-        languages = []
-        for cls in self.__class__.mro():
-            if issubclass(cls, Project):
-                languages.append(cls.language)
-
-        for language in languages:
-            path = templates / language / name
-            if path.exists():
-                return path
-
     def _get_template(
         self,
         name: str,
-        comment_prefix: str = None,
-        templates: pathlib.Path = TEMPLATES,
     ):
-        key = (self.__class__, name)
-        if key in self._template_cache:
-            return self._template_cache[key]
-        path = self._get_template_path(
-            name=name,
-            templates=templates,
+        return self._template_env.get_template(
+            name=name + '.j2',
         )
-
-        kwargs = {}
-        if comment_prefix is not None:
-            kwargs['comment_prefix'] = comment_prefix,
-
-        template = Template(
-            path=path,
-            **kwargs
-        )
-        self._template_cache[key] = template
-        return template
 
     def _update_file(
         self,
         name: str,
         env: dict,
-        comment_prefix: str = None,
-        templates: pathlib.Path = TEMPLATES,
     ):
         target = self._path / name
         if target.exists():
@@ -227,12 +208,10 @@ class Project:
             current = ''
 
         template = self._get_template(
-            name=name + '.j2',
-            comment_prefix=comment_prefix,
-            templates=templates,
+            name=name,
         )
 
-        new = template.render(env)
+        new = template.render(**env)
         if current == new:
             return False
 
@@ -242,21 +221,18 @@ class Project:
 
     def _get_files_to_update(
         self,
-    ) -> typing.List[typing.Tuple[str, typing.Optional[str]]]:
+    ) -> typing.List[str]:
         return []
 
     def process(
         self,
-        templates: pathlib.Path = TEMPLATES,
     ):
         files = self._get_files_to_update()
         env = self._get_env()
-        for file, comment_prefix in files:
+        for file in files:
             self._update_file(
                 name=file,
                 env=env,
-                comment_prefix=comment_prefix,
-                templates=templates,
             )
 
         self._dump_cfg()

@@ -8,6 +8,6 @@ class ESProject(Project):
         self,
     ):
         return super()._get_files_to_update() + [
-            ('.nvmrc', None),
-            ('Dockerfile', None),
+            '.nvmrc',
+            'Dockerfile',
         ]
