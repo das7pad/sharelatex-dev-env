@@ -17,11 +17,13 @@ class Template:
         self._path = path
         self._comment_prefix = comment_prefix
 
-        self._template = jinja2.Template(
-            source=path.read_text(),
+        self._template = jinja2.Environment(
+            loader=jinja2.FileSystemLoader([TEMPLATES]),
             lstrip_blocks=True,
             trim_blocks=True,
             keep_trailing_newline=True,
+        ).from_string(
+            source=path.read_text()
         )
 
     def render(self, env: dict):
