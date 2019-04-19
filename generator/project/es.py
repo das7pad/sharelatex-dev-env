@@ -9,4 +9,5 @@ class ESProject(Project):
     ):
         return super()._get_files_to_update() + [
             ('.nvmrc', None),
+            ('Dockerfile', None),
         ]
