@@ -95,9 +95,12 @@ class Project:
         raw: str,
     ) -> typing.Dict[str, typing.Union[str, typing.List[str]]]:
         kwargs = {}
-        kwargs['name'], *arguments = raw.splitlines()
 
-        for line in arguments:
+        for line in raw.splitlines():
+            if line[:2] != '--':
+                kwargs['name'] = line
+                continue
+
             argument, value = line[2:].split('=', 1)
 
             if ',' in value:

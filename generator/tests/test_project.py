@@ -97,6 +97,22 @@ class TestProject(unittest.TestCase):
 
         self.assertDictEqual(actual, expected)
 
+    def test_parser_scrambled(self):
+        project_in = strip_indent(
+            """
+            --arg=val
+            NAME
+            """
+        )
+
+        actual = Project._parse_cfg(project_in)
+        expected = {
+            'name': 'NAME',
+            'arg': 'val',
+        }
+
+        self.assertDictEqual(actual, expected)
+
     def test_init(self):
         project_in = strip_indent(
             """
