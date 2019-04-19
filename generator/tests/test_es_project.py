@@ -45,7 +45,7 @@ class TestESProject(unittest.TestCase):
             path=self.project_path,
             node_version='2.3.4',
         )
-        project._update_nvmrc()
+        project.process()
 
         self.assertTrue(project._changed)
         self.assertEqual(nvm_rc.read_text(), '2.3.4\n')
