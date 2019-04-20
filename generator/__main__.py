@@ -27,7 +27,10 @@ def get_args(args: typing.Optional[typing.List[str]] = None):
     return parser.parse_args(args)
 
 
-def main(args):
+def main(args: argparse.Namespace = None):
+    if not args:
+        args = get_args()
+
     for raw_path in args.path:
         path = pathlib.Path(raw_path)
 
@@ -39,4 +42,4 @@ def main(args):
 
 
 if __name__ == '__main__':
-    main(get_args())
+    main()

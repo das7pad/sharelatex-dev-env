@@ -17,10 +17,19 @@ $(venv)/bin/pip: $(venv)/bin/python
 	$(venv)/bin/pip install --upgrade pip
 	touch $(venv)/bin/pip
 
+$(venv)/bin/generate: $(venv)/bin/pip
+$(venv)/bin/generate: requirements.txt
+$(venv)/bin/generate: setup.py
+$(venv)/bin/generate: $(shell find generator -name '*.py')
+	$(venv)/bin/pip install --upgrade --editable .
+
 $(venv)/.deps: $(venv)/bin/pip
 $(venv)/.deps: requirements.txt
 	$(venv)/bin/pip install -r requirements.txt
 	touch $(venv)/.deps
+
+.PHONY: install
+install: $(venv)/bin/generate
 
 .PHONY: test
 test: $(UNITTESTS)
