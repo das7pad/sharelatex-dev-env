@@ -7,7 +7,18 @@ class ESProject(Project):
     def _get_files_to_update(
         self,
     ):
-        return super()._get_files_to_update() + [
+        files = super()._get_files_to_update() + [
             '.nvmrc',
             'Dockerfile',
+            'docker-compose.yml',
+            'docker-compose.ci.yml',
         ]
+
+        if 'script_version' in self._kwargs:
+            version = self._kwargs['script_version']
+            if version == '1.1.11':
+                files.append(
+                    'docker-compose-config.yml'
+                )
+
+        return files
