@@ -13,6 +13,7 @@ class ESProject(Project):
             'docker-compose.yml',
             'docker-compose.ci.yml',
             'Jenkinsfile',
+            'Makefile',
         ]
 
         if 'script_version' in self._kwargs:
