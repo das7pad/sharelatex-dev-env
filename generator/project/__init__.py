@@ -215,7 +215,7 @@ class Project:
         if target.exists():
             current = target.read_text()
         else:
-            current = ''
+            current = None
 
         template = self._get_template(
             name=name,
