@@ -10,3 +10,8 @@
 	rm -rf test/unit/js
 	rm -rf test/acceptance/js
 {% endblock %}
+
+{% set test_deps = [
+	'test_unit',
+	'test_acceptance',
+	] %}
