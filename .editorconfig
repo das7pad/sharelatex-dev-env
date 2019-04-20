@@ -16,5 +16,5 @@ trim_trailing_whitespace = true
 [{Makefile,Makefile.j2}]
 indent_style = tab
 
-[*{.json,.yml}]
+[*{.json,.json.j2,.yml,.yml.j2}]
 indent_size = 2
