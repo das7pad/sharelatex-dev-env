@@ -25,10 +25,12 @@ class GenericProject(Project):
 class TestProject(unittest.TestCase):
     def setUp(self):
         self.project_path = pathlib.Path(tempfile.mkdtemp())
+        self.templates_path = pathlib.Path(tempfile.mkdtemp())
         GenericProject.register()
 
     def tearDown(self):
         shutil.rmtree(self.project_path)
+        shutil.rmtree(self.templates_path)
         GenericProject.deregister()
 
     def test_simple_access(self):
@@ -229,123 +231,110 @@ class TestProject(unittest.TestCase):
         self.assertTrue(env['has_install_deps'])
 
     def test_get_template_path(self):
-        templates = pathlib.Path(tempfile.mkdtemp())
+        templates = self.templates_path
         file = 'dummy.j2'
-        try:
-            project = GenericProject(
-                name='NAME',
-                path=self.project_path,
-                templates=templates,
-            )
-            (templates / GenericProject.language).mkdir(exist_ok=True)
-            (templates / GenericProject.language / file).write_text('CHILD')
-            (templates / file).write_text('PARENT')
+        project = GenericProject(
+            name='NAME',
+            path=self.project_path,
+            templates=templates,
+        )
+        (templates / GenericProject.language).mkdir(exist_ok=True)
+        (templates / GenericProject.language / file).write_text('CHILD')
+        (templates / file).write_text('PARENT')
 
-            template = project._get_template(
-                name='dummy',
-            )
-            path = pathlib.Path(template.filename)
-            self.assertEqual(path.read_text(), 'CHILD')
+        template = project._get_template(
+            name='dummy',
+        )
+        path = pathlib.Path(template.filename)
+        self.assertEqual(path.read_text(), 'CHILD')
 
-            (templates / GenericProject.language / file).unlink()
-            template = project._get_template(
-                name='dummy',
-            )
-            path = pathlib.Path(template.filename)
-            self.assertEqual(path.read_text(), 'PARENT')
-        finally:
-            shutil.rmtree(templates)
+        (templates / GenericProject.language / file).unlink()
+        template = project._get_template(
+            name='dummy',
+        )
+        path = pathlib.Path(template.filename)
+        self.assertEqual(path.read_text(), 'PARENT')
 
     def test_get_template_path_version(self):
-        templates = pathlib.Path(tempfile.mkdtemp())
+        templates = self.templates_path
         file = 'dummy.j2'
         script_version = '1.2.3'
-        try:
-            project = GenericProject(
-                name='NAME',
-                path=self.project_path,
-                templates=templates,
-                script_version=script_version,
-            )
-            (templates / script_version).mkdir(exist_ok=True)
-            (templates / script_version / file).write_text('VERSION')
-            (templates / file).write_text('GLOBAL')
+        project = GenericProject(
+            name='NAME',
+            path=self.project_path,
+            templates=templates,
+            script_version=script_version,
+        )
+        (templates / script_version).mkdir(exist_ok=True)
+        (templates / script_version / file).write_text('VERSION')
+        (templates / file).write_text('GLOBAL')
 
-            template = project._get_template(
-                name='dummy',
-            )
-            path = pathlib.Path(template.filename)
-            self.assertEqual(path.read_text(), 'VERSION')
+        template = project._get_template(
+            name='dummy',
+        )
+        path = pathlib.Path(template.filename)
+        self.assertEqual(path.read_text(), 'VERSION')
 
-            (templates / script_version / file).unlink()
-            template = project._get_template(
-                name='dummy',
-            )
-            path = pathlib.Path(template.filename)
-            self.assertEqual(path.read_text(), 'GLOBAL')
-        finally:
-            shutil.rmtree(templates)
+        (templates / script_version / file).unlink()
+        template = project._get_template(
+            name='dummy',
+        )
+        path = pathlib.Path(template.filename)
+        self.assertEqual(path.read_text(), 'GLOBAL')
 
     def test_get_template_path_preference(self):
-        templates = pathlib.Path(tempfile.mkdtemp())
+        templates = self.templates_path
         file = 'dummy.j2'
         script_version = '1.2.3'
-        try:
-            project = GenericProject(
-                name='NAME',
-                path=self.project_path,
-                templates=templates,
-                script_version=script_version,
-            )
-            (templates / GenericProject.language).mkdir(exist_ok=True)
-            (templates / GenericProject.language / file).write_text('LANG')
-            (templates / script_version).mkdir(exist_ok=True)
-            (templates / script_version / file).write_text('VERSION')
-            (templates / file).write_text('PARENT')
+        project = GenericProject(
+            name='NAME',
+            path=self.project_path,
+            templates=templates,
+            script_version=script_version,
+        )
+        (templates / GenericProject.language).mkdir(exist_ok=True)
+        (templates / GenericProject.language / file).write_text('LANG')
+        (templates / script_version).mkdir(exist_ok=True)
+        (templates / script_version / file).write_text('VERSION')
+        (templates / file).write_text('PARENT')
 
-            template = project._get_template(
-                name='dummy',
-            )
-            path = pathlib.Path(template.filename)
-            self.assertEqual(path.read_text(), 'LANG')
+        template = project._get_template(
+            name='dummy',
+        )
+        path = pathlib.Path(template.filename)
+        self.assertEqual(path.read_text(), 'LANG')
 
-            (templates / GenericProject.language / file).unlink()
-            template = project._get_template(
-                name='dummy',
-            )
-            path = pathlib.Path(template.filename)
-            self.assertEqual(path.read_text(), 'VERSION')
+        (templates / GenericProject.language / file).unlink()
+        template = project._get_template(
+            name='dummy',
+        )
+        path = pathlib.Path(template.filename)
+        self.assertEqual(path.read_text(), 'VERSION')
 
-            (templates / script_version / file).unlink()
-            template = project._get_template(
-                name='dummy',
-            )
-            path = pathlib.Path(template.filename)
-            self.assertEqual(path.read_text(), 'PARENT')
-        finally:
-            shutil.rmtree(templates)
+        (templates / script_version / file).unlink()
+        template = project._get_template(
+            name='dummy',
+        )
+        path = pathlib.Path(template.filename)
+        self.assertEqual(path.read_text(), 'PARENT')
 
     def test_update_file(self):
-        templates = pathlib.Path(tempfile.mkdtemp())
+        templates = self.templates_path
         target = self.project_path / 'dummy'
-        try:
-            project = GenericProject(
-                name='NAME',
-                path=self.project_path,
-                templates=templates,
-            )
-            (templates / 'dummy.j2').write_text(
-                'THE {{ var }}'
-            )
+        project = GenericProject(
+            name='NAME',
+            path=self.project_path,
+            templates=templates,
+        )
+        (templates / 'dummy.j2').write_text(
+            'THE {{ var }}'
+        )
 
-            project._update_file(
-                name='dummy',
-                env={'var': 'CONTENT'},
-            )
-            self.assertEqual(target.read_text(), 'THE CONTENT')
-
-        finally:
-            shutil.rmtree(templates)
+        project._update_file(
+            name='dummy',
+            env={'var': 'CONTENT'},
+        )
+        self.assertEqual(target.read_text(), 'THE CONTENT')
 
     def test_process(self):
         class DemoProject(GenericProject):
@@ -359,23 +348,19 @@ class TestProject(unittest.TestCase):
             --language=LANGUAGE
             """
         )
-        templates = pathlib.Path(tempfile.mkdtemp())
-        try:
-            project = DemoProject(
-                name='NAME',
-                path=self.project_path,
-                templates=templates,
-            )
-            (templates / 'dummy.j2').write_text(
-                '{{ name }}'
-            )
+        templates = self.templates_path
+        project = DemoProject(
+            name='NAME',
+            path=self.project_path,
+            templates=templates,
+        )
+        (templates / 'dummy.j2').write_text(
+            '{{ name }}'
+        )
 
-            project.process()
+        project.process()
 
-            cfg_actual = project.get_cfg_path(self.project_path).read_text()
+        cfg_actual = project.get_cfg_path(self.project_path).read_text()
 
-            self.assertEqual(cfg_actual, cfg_expected)
-            self.assertEqual(target.read_text(), 'NAME')
-
-        finally:
-            shutil.rmtree(templates)
+        self.assertEqual(cfg_actual, cfg_expected)
+        self.assertEqual(target.read_text(), 'NAME')
