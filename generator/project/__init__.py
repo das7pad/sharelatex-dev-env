@@ -3,6 +3,8 @@ import typing
 
 import jinja2
 
+from generator.version import __version__
+
 REPO = pathlib.Path(__file__).parent.parent.parent
 TEMPLATES = REPO / 'templates'  # type: pathlib.Path
 
@@ -189,6 +191,7 @@ class Project:
 
     def _get_env(self):
         env = {
+            'version': __version__,
             'name': self._name,
             'language': self.language,
             'has_install_deps': (self._path / 'install_deps.sh').exists(),
