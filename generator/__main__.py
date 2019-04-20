@@ -24,6 +24,12 @@ def get_args(args: typing.Optional[typing.List[str]] = None):
         help='Skip writing',
     )
 
+    parser.add_argument(
+        '--update',
+        action='store_true',
+        help='Bump the templates to the latest version',
+    )
+
     return parser.parse_args(args)
 
 
@@ -37,6 +43,7 @@ def main(args: argparse.Namespace = None):
         project = Project.from_path(
             path=path,
             dry_run=args.dry_run,
+            update=args.update,
         )
         project.process()
 

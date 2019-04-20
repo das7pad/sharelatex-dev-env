@@ -1,3 +1,4 @@
+import copy
 import pathlib
 import typing
 
@@ -18,6 +19,7 @@ class Project:
         name: str,
         path: pathlib.Path,
         dry_run: bool = False,
+        update: bool = False,
         templates: pathlib.Path = TEMPLATES,
         **kwargs
     ):
@@ -25,7 +27,12 @@ class Project:
         self._path = path
         self._dry_run = dry_run
         self._kwargs = kwargs
+        self._org_kwargs = copy.deepcopy(kwargs)
+        self._update = update
         self._changed = False
+
+        if update:
+            self['script_version'] = __version__
 
         search_path = []
         for cls in self.__class__.mro():
@@ -97,6 +104,7 @@ class Project:
         cls,
         path: pathlib.Path,
         dry_run: bool = False,
+        update: bool = False,
     ) -> 'Project':
         raw = cls.get_cfg_path(path).read_text()
         kwargs = cls._parse_cfg(raw)
@@ -107,6 +115,7 @@ class Project:
         return target(
             path=path,
             dry_run=dry_run,
+            update=update,
             **kwargs
         )
 
@@ -234,9 +243,31 @@ class Project:
     ) -> typing.List[str]:
         return []
 
+    def _delete_orphan_files(
+        self,
+    ) -> int:
+        kwargs = self._kwargs
+        self._kwargs = self._org_kwargs
+        old_files = set(self._get_files_to_update())
+
+        self._kwargs = kwargs
+        new_files = set(self._get_files_to_update())
+
+        diff = old_files - new_files
+        if not diff:
+            return 0
+
+        self._changed = True
+        for file in diff:
+            (self._path / file).unlink()
+
+        return len(diff)
+
     def process(
         self,
     ):
+        self._delete_orphan_files()
+
         files = self._get_files_to_update()
         env = self._get_env()
         for file in files:
