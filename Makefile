@@ -11,7 +11,6 @@ all: test
 
 $(venv)/bin/python:
 	$(python) -m venv $(venv)
-	touch $(venv)/bin/python
 
 $(venv)/bin/pip: $(venv)/bin/python
 	$(venv)/bin/pip install --upgrade pip
