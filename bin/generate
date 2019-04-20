@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+pushd "$(dirname `readlink -f ${BASH_SOURCE[0]}`)" > /dev/null
+
+make --quiet -C ../ install
+GENERATE=$(realpath ../venv/bin/generate)
+
+popd > /dev/null
+
+exec ${GENERATE} $@
