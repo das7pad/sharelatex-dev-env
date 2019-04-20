@@ -286,6 +286,45 @@ class TestProject(unittest.TestCase):
         finally:
             shutil.rmtree(templates)
 
+    def test_get_template_path_preference(self):
+        templates = pathlib.Path(tempfile.mkdtemp())
+        file = 'dummy.j2'
+        script_version = '1.2.3'
+        try:
+            project = GenericProject(
+                name='NAME',
+                path=self.project_path,
+                templates=templates,
+                script_version=script_version,
+            )
+            (templates / GenericProject.language).mkdir(exist_ok=True)
+            (templates / GenericProject.language / file).write_text('LANG')
+            (templates / script_version).mkdir(exist_ok=True)
+            (templates / script_version / file).write_text('VERSION')
+            (templates / file).write_text('PARENT')
+
+            template = project._get_template(
+                name='dummy',
+            )
+            path = pathlib.Path(template.filename)
+            self.assertEqual(path.read_text(), 'LANG')
+
+            (templates / GenericProject.language / file).unlink()
+            template = project._get_template(
+                name='dummy',
+            )
+            path = pathlib.Path(template.filename)
+            self.assertEqual(path.read_text(), 'VERSION')
+
+            (templates / script_version / file).unlink()
+            template = project._get_template(
+                name='dummy',
+            )
+            path = pathlib.Path(template.filename)
+            self.assertEqual(path.read_text(), 'PARENT')
+        finally:
+            shutil.rmtree(templates)
+
     def test_update_file(self):
         templates = pathlib.Path(tempfile.mkdtemp())
         target = self.project_path / 'dummy'
