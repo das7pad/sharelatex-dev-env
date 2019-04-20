@@ -20,12 +20,10 @@ DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 
 
 clean:
+{% block clean %}
 	docker rmi ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 	docker rmi {{ docker_repos }}/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
-	rm -f app.js
-	rm -rf app/js
-	rm -rf test/unit/js
-	rm -rf test/acceptance/js
+{%- endblock %}
 
 test: test_unit test_acceptance
 

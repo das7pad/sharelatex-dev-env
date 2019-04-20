@@ -14,8 +14,11 @@ DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 	docker-compose ${DOCKER_COMPOSE_FLAGS}
 
 clean:
+{% block clean %}
 	docker rmi ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 	docker rmi {{ docker_repos }}/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
+{%- endblock %}
+
 {% block lint %}
 lint:
 	$(DOCKER_COMPOSE) run --rm test_unit npm run lint

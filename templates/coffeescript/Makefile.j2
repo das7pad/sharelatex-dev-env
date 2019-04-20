@@ -2,3 +2,11 @@
 
 {% block lint %}
 {% endblock %}
+
+{% block clean %}
+{{ super() }}
+	rm -f app.js
+	rm -rf app/js
+	rm -rf test/unit/js
+	rm -rf test/acceptance/js
+{% endblock %}
