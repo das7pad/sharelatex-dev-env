@@ -1,0 +1,92 @@
+pipeline {
+  agent {
+    label 'sharelatex'
+  }
+
+  options {
+    timeout(time: 30, unit: 'MINUTES')
+  }
+
+  environment {
+    DOCKER_COMPOSE_FLAGS = "-f docker-compose.ci.yml"
+  }
+
+  stages {
+    stage('Build') {
+      steps {
+        sh 'make build'
+      }
+    }
+{% block lint %}
+
+    stage('Linting') {
+      steps {
+        sh 'make lint'
+      }
+    }
+{% endblock %}
+
+    stage('Unit Tests') {
+      steps {
+        sh 'make test_unit'
+      }
+    }
+
+{% if acceptance_creds == 'aws' %}
+    stage('Acceptance Tests S3') {
+      when {
+        allOf {
+          expression {
+            env.SHARELATEX_S3_DOCSTORE_TEST_AWS_BUCKET != null
+          }
+          expression {
+            env.SHARELATEX_S3_DOCSTORE_TEST_AWS_KEYS != null
+          }
+        }
+      }
+      environment {
+        AWS_BUCKET = "${env.SHARELATEX_S3_DOCSTORE_TEST_AWS_BUCKET}"
+        AWS_ACCESS = credentials('SHARELATEX_S3_DOCSTORE_TEST_AWS_KEYS')
+      }
+      steps {
+        script {
+          sh 'AWS_ACCESS_KEY_ID=$AWS_ACCESS_USR AWS_SECRET_ACCESS_KEY=$AWS_ACCESS_PSW make test_acceptance'
+        }
+      }
+    }
+{% else %}
+    stage('Acceptance Tests') {
+      steps {
+        script {
+          sh 'make test_acceptance'
+        }
+      }
+    }
+{% endif %}
+
+    stage('docker push') {
+      when {
+        expression {
+          env.SHARELATEX_DOCKER_REPOS != null
+        }
+      }
+      environment {
+        IMAGE = "${env.SHARELATEX_DOCKER_REPOS}/{{ name }}:$BRANCH_NAME-$BUILD_NUMBER"
+      }
+      steps {
+        script {
+          sh 'docker build -t $IMAGE .'
+          sh 'docker push $IMAGE'
+          sh 'docker rmi $IMAGE'
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      sh 'make test_clean'
+      sh 'make clean'
+    }
+  }
+}

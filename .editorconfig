@@ -18,3 +18,6 @@ indent_style = tab
 
 [*{.json,.json.j2,.yml,.yml.j2}]
 indent_size = 2
+
+[{Jenkinsfile.j2,Jenkinsfile.ce.j2}]
+indent_size = 2

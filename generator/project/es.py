@@ -13,6 +13,7 @@ class ESProject(Project):
             'docker-compose.yml',
             'docker-compose.ci.yml',
             'Jenkinsfile',
+            'Jenkinsfile.ce',
             'Makefile',
         ]
 
