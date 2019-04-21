@@ -34,17 +34,3 @@ class TestESProject(unittest.TestCase):
         )
 
         self.assertEqual(actual, expected)
-
-    def test_update_node_version(self):
-        nvm_rc = self.project_path / '.nvmrc'
-        nvm_rc.write_text('1.2.3\n')
-
-        project = ESProject(
-            name='NAME',
-            path=self.project_path,
-            node_version='2.3.4',
-        )
-        project.process()
-
-        self.assertTrue(project._changed)
-        self.assertEqual(nvm_rc.read_text(), '2.3.4\n')
