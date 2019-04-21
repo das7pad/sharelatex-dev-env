@@ -241,7 +241,10 @@ class Project:
     def _get_files_to_update(
         self,
     ) -> typing.List[str]:
-        return []
+        return [
+            '.github/ISSUE_TEMPLATE.md',
+            '.github/PULL_REQUEST_TEMPLATE.md',
+        ]
 
     def _delete_orphan_files(
         self,
