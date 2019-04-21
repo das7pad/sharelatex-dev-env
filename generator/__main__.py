@@ -13,8 +13,9 @@ def get_args(args: typing.Optional[typing.List[str]] = None):
 
     parser.add_argument(
         'path',
-        nargs='+',
+        nargs='*',
         type=pathlib.Path,
+        default=[pathlib.Path.cwd()],
         help='One or more project paths',
     )
 
