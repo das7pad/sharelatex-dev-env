@@ -12,6 +12,52 @@ pipeline {
   }
 
   stages {
+{% if name == 'clsi' %}
+    stage('Pull Texlive') {
+      when {
+        expression {
+          env.SHARELATEX_DOCKER_REPOS != null
+        }
+      }
+      environment {
+        TEXLIVE_IMAGE = "${env.SHARELATEX_DOCKER_REPOS}/texlive:full-2017"
+      }
+      steps {
+        script {
+          sh  '''
+              set -ex
+              docker pull $TEXLIVE_IMAGE \
+              || (
+                docker build \
+                  -t $TEXLIVE_IMAGE \
+                  --build-arg TEXLIVE_SCHEME=full \
+                  https://github.com/das7pad/sharelatex-docker-images.git#:texlive \
+                && \
+                docker push $TEXLIVE_IMAGE
+              )
+              '''
+          sh 'docker tag $TEXLIVE_IMAGE quay.io/sharelatex/texlive-full:2017.1'
+        }
+      }
+    }
+    stage('Build Texlive') {
+      when {
+        expression {
+          env.SHARELATEX_DOCKER_REPOS == null
+        }
+      }
+      steps {
+        script {
+          sh  '''
+              docker build \
+                -t quay.io/sharelatex/texlive-full:2017.1 \
+                --build-arg TEXLIVE_SCHEME=full \
+                https://github.com/das7pad/sharelatex-docker-images.git#:texlive
+              '''
+        }
+      }
+    }
+{% endif %}
     stage('Build') {
       steps {
         sh 'make build'
