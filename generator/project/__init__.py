@@ -262,7 +262,9 @@ class Project:
 
         self._changed = True
         for file in diff:
-            (self._path / file).unlink()
+            path = self._path / file
+            if path.exists():
+                path.unlink()
 
         return len(diff)
 
