@@ -169,10 +169,10 @@ class TestProject(unittest.TestCase):
             """
             NAME
             --language=LANGUAGE
-            --node-version=1.2.3
             --acceptance-creds=None
             --dependencies=mongo,redis
             --docker-repos=example.com/images
+            --node-version=1.2.3
             """
         )
         project = GenericProject(
@@ -195,10 +195,10 @@ class TestProject(unittest.TestCase):
             """
             NAME
             --language=LANGUAGE
-            --node-version=1.2.3
             --acceptance-creds=None
             --dependencies=mongo,redis
             --docker-repos=example.com/images
+            --node-version=1.2.3
             --unknown-arg=VALUE
             """
         )
@@ -217,6 +217,36 @@ class TestProject(unittest.TestCase):
         actual = project._serialize_cfg()
 
         self.assertEqual(actual, expected)
+
+    def test_serialize_sequence(self):
+        expected = strip_indent(
+            """
+            NAME
+            --language=LANGUAGE
+            --other-arg=1
+            --unknown-arg=VALUE
+            --script-version=3.2.1
+            """
+        )
+        project_1 = GenericProject(
+            name='NAME',
+            path=self.project_path,
+            script_version='3.2.1',
+            unknown_arg='VALUE',
+            other_arg='1',
+        )
+        project_2 = GenericProject(
+            name='NAME',
+            path=self.project_path,
+            unknown_arg='VALUE',
+            other_arg='1',
+            script_version='3.2.1',
+        )
+        actual_1 = project_1._serialize_cfg()
+        actual_2 = project_2._serialize_cfg()
+
+        self.assertEqual(actual_1, expected)
+        self.assertEqual(actual_2, expected)
 
     def test_env(self):
         project = GenericProject(

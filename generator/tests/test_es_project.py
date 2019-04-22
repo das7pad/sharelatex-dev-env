@@ -34,3 +34,51 @@ class TestESProject(unittest.TestCase):
         )
 
         self.assertEqual(actual, expected)
+
+    def test_serialize_sequence(self):
+        expected = strip_indent(
+            """
+            NAME
+            --language=es
+            --node-version=1.2.3
+            --acceptance-creds=None
+            --dependencies=mongo,redis
+            --docker-repos=example.com/images
+            --other-arg=1
+            --unknown-arg=VALUE
+            --script-version=3.2.1
+            """
+        )
+        project_1 = ESProject(
+            name='NAME',
+            path=self.project_path,
+            script_version='3.2.1',
+            node_version='1.2.3',
+            dependencies=[
+                'mongo',
+                'redis',
+            ],
+            docker_repos='example.com/images',
+            acceptance_creds=None,
+            unknown_arg='VALUE',
+            other_arg='1',
+        )
+        project_2 = ESProject(
+            name='NAME',
+            path=self.project_path,
+            unknown_arg='VALUE',
+            docker_repos='example.com/images',
+            node_version='1.2.3',
+            dependencies=[
+                'mongo',
+                'redis',
+            ],
+            script_version='3.2.1',
+            acceptance_creds=None,
+            other_arg='1',
+        )
+        actual_1 = project_1._serialize_cfg()
+        actual_2 = project_2._serialize_cfg()
+
+        self.assertEqual(actual_1, expected)
+        self.assertEqual(actual_2, expected)

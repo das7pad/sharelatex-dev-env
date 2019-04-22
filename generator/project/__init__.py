@@ -13,6 +13,7 @@ TEMPLATES = REPO / 'templates'  # type: pathlib.Path
 class Project:
     _languages = {}  # type: typing.Dict[str, typing.Type[Project]]
     language = ''
+    insert_marker = 'INSERT_MARKER'
 
     def __init__(
         self,
@@ -146,15 +147,36 @@ class Project:
 
         return kwargs
 
+    def _get_cfg_fields(
+        self,
+    ) -> typing.List[str]:
+        return [
+            'language',
+            self.insert_marker,
+            'script_version',
+        ]
+
     def _serialize_cfg(
         self,
     ) -> str:
+        cfg = self._kwargs.copy()
+        cfg['language'] = self.language
+
+        field_preference = self._get_cfg_fields()
+
+        unknown_fields = set(cfg.keys()) - set(field_preference)
+        pos = field_preference.index(self.insert_marker)
+
+        for key in sorted(unknown_fields, reverse=True):
+            field_preference.insert(pos, key)
+
+        def get_pos(item):
+            return field_preference.index(item[0])
+
         lines = [
             self._name,
-            '--language={}'.format(self.language)
         ]
-
-        for field, value in self._kwargs.items():
+        for field, value in sorted(cfg.items(), key=get_pos):
             if isinstance(value, list):
                 value = ','.join(value)
             lines.append(
