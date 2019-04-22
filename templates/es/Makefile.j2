@@ -27,13 +27,9 @@ lint:
 	$(DOCKER_COMPOSE) run --rm test_unit npm run lint
 
 {% endblock %}
-
-{%- set test_deps = [
-	'lint',
-	'test_unit',
-	'test_acceptance',
-	] %}
-test: {{ test_deps|join(' ') }}
+{% block test %}
+test: lint test_unit test_acceptance
+{% endblock %}
 
 test_unit:
 	@[ ! -d test/unit ] && echo "{{ name }} has no unit tests" || $(DOCKER_COMPOSE) run --rm test_unit
