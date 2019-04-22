@@ -29,6 +29,15 @@ services:
 {% if name == 'filestore' %}
       ENABLE_CONVERSIONS: "true"
 {% endif %}
+{% if name == 'clsi' %}
+      TEXLIVE_IMAGE: quay.io/sharelatex/texlive-full:2017.1
+      TEXLIVE_IMAGE_USER: "tex"
+      DOCKER_RUNNER: "true"
+      COMPILES_HOST_DIR: $PWD/compiles
+      SYNCTEX_BIN_HOST_PATH: $PWD/bin/synctex
+      SQLITE_PATH: /app/compiles/db.sqlite
+      SHARELATEX_CONFIG: /app/config/settings.defaults.coffee
+{% endif %}
     depends_on:
 {% for dependency in dependencies %}
       - {{ dependency }}
@@ -37,6 +46,17 @@ services:
     user: node
 {% endif %}
     command: npm run test:acceptance:_run
+{% if name in [
+  'clsi',
+] %}
+    volumes:
+{% endif %}
+{% if name == 'clsi' %}
+      - /var/run/docker.sock:/var/run/docker.sock:rw,z
+      - ./compiles:/app/compiles:z
+      - ./cache:/app/cache:z
+      - ./bin/synctex:/app/bin/synctex:z
+{% endif %}
 
 
 
