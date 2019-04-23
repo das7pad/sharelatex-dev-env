@@ -99,10 +99,12 @@ pipeline {
       environment {
         AWS_BUCKET = "${env.SHARELATEX_S3_DOCSTORE_TEST_AWS_BUCKET}"
         AWS_ACCESS = credentials('SHARELATEX_S3_DOCSTORE_TEST_AWS_KEYS')
+        AWS_ACCESS_KEY_ID = "$AWS_ACCESS_USR"
+        AWS_SECRET_ACCESS_KEY = "$AWS_ACCESS_PSW"
       }
       steps {
         script {
-          sh 'AWS_ACCESS_KEY_ID=$AWS_ACCESS_USR AWS_SECRET_ACCESS_KEY=$AWS_ACCESS_PSW make test_acceptance'
+          sh 'make test_acceptance'
         }
       }
     }
