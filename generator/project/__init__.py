@@ -218,14 +218,23 @@ class Project:
 
         return path.write_text(content)
 
+    def _get_possible_project_files(
+        self,
+    ) -> typing.Dict[str, str]:
+        return {
+            'has_install_deps': 'install_deps.sh',
+            'has_entrypoint': 'entrypoint.sh',
+        }
+
     def _get_env(self):
         env = {
             'version': __version__,
             'name': self._name,
             'language': self.language,
-            'has_install_deps': (self._path / 'install_deps.sh').exists(),
-            'has_entrypoint': (self._path / 'entrypoint.sh').exists(),
         }
+        for label, file in self._get_possible_project_files().items():
+            env[label] = (self._path / file).exists()
+
         env.update(self._kwargs)
         return env
 
