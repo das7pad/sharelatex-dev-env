@@ -1,4 +1,5 @@
 import argparse
+import logging
 import pathlib
 import typing
 
@@ -37,6 +38,11 @@ def get_args(args: typing.Optional[typing.List[str]] = None):
 def main(args: argparse.Namespace = None):
     if not args:
         args = get_args()
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s %(levelname)s %(name)s: %(message)s',
+    )
 
     for raw_path in args.path:
         path = pathlib.Path(raw_path)

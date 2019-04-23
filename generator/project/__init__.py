@@ -1,4 +1,5 @@
 import copy
+import logging
 import pathlib
 import typing
 
@@ -8,6 +9,9 @@ from generator.version import __version__
 
 REPO = pathlib.Path(__file__).parent.parent.parent
 TEMPLATES = REPO / 'templates'  # type: pathlib.Path
+
+
+logger = logging.getLogger(__name__)
 
 
 class Project:
@@ -213,7 +217,10 @@ class Project:
         content: str,
     ):
         if self._dry_run:
-            print('[DRY RUN] skipping write to {path}'.format(path=path))
+            logger.info(
+                '[DRY RUN] skipping write to %s',
+                path,
+            )
             return 0
 
         return path.write_text(content)
