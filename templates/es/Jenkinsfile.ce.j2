@@ -11,11 +11,6 @@ pipeline {
   agent {
     label 'sharelatex'
   }
-
-  options {
-    timeout(time: 30, unit: 'MINUTES')
-  }
-
   environment {
     DOCKER_COMPOSE_FLAGS = "-f docker-compose.ci.yml"
   }
@@ -32,6 +27,9 @@ pipeline {
             expression {
               env.SHARELATEX_DOCKER_REPOS != null
             }
+          }
+          options {
+            timeout(time: 2, unit: 'HOURS')
           }
           environment {
             TEXLIVE_IMAGE = "${env.SHARELATEX_DOCKER_REPOS}/texlive:full-2017"
@@ -60,6 +58,9 @@ pipeline {
               env.SHARELATEX_DOCKER_REPOS == null
             }
           }
+          options {
+            timeout(time: 2, unit: 'HOURS')
+          }
           steps {
             script {
               sh  '''
@@ -76,6 +77,9 @@ pipeline {
     }
 {% endif %}
     stage('CI') {
+      options {
+        timeout(time: 30, unit: 'MINUTES')
+      }
       stages {
         stage('Build') {
           steps {
@@ -134,6 +138,9 @@ pipeline {
     }
 
     stage('Submit results') {
+      options {
+        timeout(time: 30, unit: 'MINUTES')
+      }
       stages {
         stage('docker push') {
           when {
