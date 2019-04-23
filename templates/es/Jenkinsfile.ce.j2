@@ -4,6 +4,9 @@
 {% set tag_texlive_docker_image = (
     'quay.io/sharelatex/texlive-full:2017.1'
   ) %}
+{% set tag_app_docker_image = (
+    '${env.SHARELATEX_DOCKER_REPOS}/' + name + ':$BRANCH_NAME-$BUILD_NUMBER'
+  ) %}
 pipeline {
   agent {
     label 'sharelatex'
@@ -125,7 +128,7 @@ pipeline {
         }
       }
       environment {
-        IMAGE = "${env.SHARELATEX_DOCKER_REPOS}/{{ name }}:$BRANCH_NAME-$BUILD_NUMBER"
+        IMAGE = "{{ tag_app_docker_image }}"
       }
       steps {
         script {

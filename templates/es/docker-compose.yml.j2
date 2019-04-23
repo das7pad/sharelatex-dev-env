@@ -1,5 +1,6 @@
 {% from 'macros/header.j2' import header with context %}
 {{ header('#') }}
+{% set ci_image = 'ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER' %}
 
 version: "3.1"
 
@@ -62,7 +63,7 @@ services:
 
   tar:
     build: .
-    image: ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+    image: {{ ci_image }}
     volumes:
       - ./:/tmp/build/
     command: tar -czf /tmp/build/build.tar.gz --exclude=build.tar.gz --exclude-vcs .
