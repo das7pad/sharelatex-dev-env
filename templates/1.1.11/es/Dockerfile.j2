@@ -16,21 +16,17 @@ COPY . /app
 FROM node:{{ node_version }}
 
 {% block runtime %}
-WORKDIR /app
-
-CMD ["node", "--expose-gc", "app.js"]
-{% if has_entrypoint %}
-ENTRYPOINT ["/bin/sh", "entrypoint.sh"]
-{% endif %}
-
-{% if has_install_deps %}
-COPY --from=app /app/install_deps.sh /app
-RUN sh ./install_deps.sh
-{% endif %}
-
 COPY --from=app /app /app
 
-{% if not has_entrypoint %}
+WORKDIR /app
+{% if has_install_deps %}
+RUN chmod 0755 ./install_deps.sh && ./install_deps.sh
+{% endif %}
+{% if has_entrypoint %}
+ENTRYPOINT ["/bin/sh", "entrypoint.sh"]
+{% else %}
 USER node
 {% endif %}
+
+CMD ["node", "--expose-gc", "app.js"]
 {% endblock %}
