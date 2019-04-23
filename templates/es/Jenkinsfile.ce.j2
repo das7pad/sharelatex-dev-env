@@ -21,120 +21,136 @@ pipeline {
   }
 
   stages {
-{% if name == 'clsi' %}
-    stage('Pull Texlive') {
-      when {
-        expression {
-          env.SHARELATEX_DOCKER_REPOS != null
+{% if name in [
+    'clsi',
+  ] %}
+    stage('Prepare environment') {
+      stages {
+        {% if name == 'clsi' %}
+        stage('Pull Texlive') {
+          when {
+            expression {
+              env.SHARELATEX_DOCKER_REPOS != null
+            }
+          }
+          environment {
+            TEXLIVE_IMAGE = "${env.SHARELATEX_DOCKER_REPOS}/texlive:full-2017"
+          }
+          steps {
+            script {
+              sh  '''
+                  set -ex
+                  docker pull $TEXLIVE_IMAGE \
+                  || (
+                    docker build \
+                      -t $TEXLIVE_IMAGE \
+                      --build-arg TEXLIVE_SCHEME=full \
+                      {{ url_texlive_docker_image }} \
+                    && \
+                    docker push $TEXLIVE_IMAGE
+                  )
+                  '''
+              sh 'docker tag $TEXLIVE_IMAGE {{ tag_texlive_docker_image }}'
+            }
+          }
         }
-      }
-      environment {
-        TEXLIVE_IMAGE = "${env.SHARELATEX_DOCKER_REPOS}/texlive:full-2017"
-      }
-      steps {
-        script {
-          sh  '''
-              set -ex
-              docker pull $TEXLIVE_IMAGE \
-              || (
-                docker build \
-                  -t $TEXLIVE_IMAGE \
-                  --build-arg TEXLIVE_SCHEME=full \
-                  {{ url_texlive_docker_image }} \
-                && \
-                docker push $TEXLIVE_IMAGE
-              )
-              '''
-          sh 'docker tag $TEXLIVE_IMAGE {{ tag_texlive_docker_image }}'
+        stage('Build Texlive') {
+          when {
+            expression {
+              env.SHARELATEX_DOCKER_REPOS == null
+            }
+          }
+          steps {
+            script {
+              sh  '''
+                  docker build \
+                    -t {{ tag_texlive_docker_image }} \
+                    --build-arg TEXLIVE_SCHEME=full \
+                    {{ url_texlive_docker_image }}
+                  '''
+            }
+          }
         }
-      }
-    }
-    stage('Build Texlive') {
-      when {
-        expression {
-          env.SHARELATEX_DOCKER_REPOS == null
-        }
-      }
-      steps {
-        script {
-          sh  '''
-              docker build \
-                -t {{ tag_texlive_docker_image }} \
-                --build-arg TEXLIVE_SCHEME=full \
-                {{ url_texlive_docker_image }}
-              '''
-        }
+        {% endif %}
       }
     }
 {% endif %}
-    stage('Build') {
-      steps {
-        sh 'make build'
-      }
-    }
+    stage('CI') {
+      stages {
+        stage('Build') {
+          steps {
+            sh 'make build'
+          }
+        }
 {% block lint %}
 
-    stage('Linting') {
-      steps {
-        sh 'make lint'
-      }
-    }
+        stage('Linting') {
+          steps {
+            sh 'make lint'
+          }
+        }
 {% endblock %}
 
-    stage('Unit Tests') {
-      steps {
-        sh 'make test_unit'
-      }
-    }
+        stage('Unit Tests') {
+          steps {
+            sh 'make test_unit'
+          }
+        }
 
 {% if acceptance_creds == 'aws' %}
-    stage('Acceptance Tests S3') {
-      when {
-        allOf {
-          expression {
-            env.SHARELATEX_S3_DOCSTORE_TEST_AWS_BUCKET != null
+        stage('Acceptance Tests S3') {
+          when {
+            allOf {
+              expression {
+                env.SHARELATEX_S3_DOCSTORE_TEST_AWS_BUCKET != null
+              }
+              expression {
+                env.SHARELATEX_S3_DOCSTORE_TEST_AWS_KEYS != null
+              }
+            }
           }
-          expression {
-            env.SHARELATEX_S3_DOCSTORE_TEST_AWS_KEYS != null
+          environment {
+            AWS_BUCKET = "${env.SHARELATEX_S3_DOCSTORE_TEST_AWS_BUCKET}"
+            AWS_ACCESS = credentials('SHARELATEX_S3_DOCSTORE_TEST_AWS_KEYS')
+            AWS_ACCESS_KEY_ID = "$AWS_ACCESS_USR"
+            AWS_SECRET_ACCESS_KEY = "$AWS_ACCESS_PSW"
+          }
+          steps {
+            script {
+              sh 'make test_acceptance'
+            }
           }
         }
-      }
-      environment {
-        AWS_BUCKET = "${env.SHARELATEX_S3_DOCSTORE_TEST_AWS_BUCKET}"
-        AWS_ACCESS = credentials('SHARELATEX_S3_DOCSTORE_TEST_AWS_KEYS')
-        AWS_ACCESS_KEY_ID = "$AWS_ACCESS_USR"
-        AWS_SECRET_ACCESS_KEY = "$AWS_ACCESS_PSW"
-      }
-      steps {
-        script {
-          sh 'make test_acceptance'
-        }
-      }
-    }
 {% else %}
-    stage('Acceptance Tests') {
-      steps {
-        script {
-          sh 'make test_acceptance'
+        stage('Acceptance Tests') {
+          steps {
+            script {
+              sh 'make test_acceptance'
+            }
+          }
         }
+{% endif %}
       }
     }
-{% endif %}
 
-    stage('docker push') {
-      when {
-        expression {
-          env.SHARELATEX_DOCKER_REPOS != null
-        }
-      }
-      environment {
-        IMAGE = "{{ tag_app_docker_image }}"
-      }
-      steps {
-        script {
-          sh 'docker build -t $IMAGE .'
-          sh 'docker push $IMAGE'
-          sh 'docker rmi $IMAGE'
+    stage('Submit results') {
+      stages {
+        stage('docker push') {
+          when {
+            expression {
+              env.SHARELATEX_DOCKER_REPOS != null
+            }
+          }
+          environment {
+            IMAGE = "{{ tag_app_docker_image }}"
+          }
+          steps {
+            script {
+              sh 'docker build -t $IMAGE .'
+              sh 'docker push $IMAGE'
+              sh 'docker rmi $IMAGE'
+            }
+          }
         }
       }
     }
