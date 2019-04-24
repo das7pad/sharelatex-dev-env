@@ -27,6 +27,6 @@ services:
       SQLITE_PATH: /app/compiles/db.sqlite
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:rw,z
-      - ./compiles:/app/compiles:Z
-      - ./cache:/app/cache:Z
-      - ./bin/synctex:/app/bin/synctex:Z
+      - ./compiles:/app/compiles:z
+      - ./cache:/app/cache:z
+      - ./bin/synctex:/app/bin/synctex:z
