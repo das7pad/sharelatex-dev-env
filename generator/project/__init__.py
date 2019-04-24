@@ -231,6 +231,7 @@ class Project:
         return {
             'has_install_deps': 'install_deps.sh',
             'has_entrypoint': 'entrypoint.sh',
+            'has_setup_env': 'setup_env.sh',
         }
 
     def _get_env(self):

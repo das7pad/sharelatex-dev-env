@@ -30,6 +30,11 @@ RUN sh ./install_deps.sh
 
 COPY --from=app /app /app
 
+{% if has_setup_env %}
+RUN sh ./setup_env.sh
+
+{% endif -%}
+
 {% if not has_entrypoint %}
 USER node
 {% endif %}
