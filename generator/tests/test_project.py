@@ -64,6 +64,22 @@ class TestProject(unittest.TestCase):
         self.assertEqual(actual, len('DATA'))
         self.assertEqual(target.read_text(), 'DATA')
 
+    def test_write_create_parent_dir(self):
+        project = Project(
+            name='NAME',
+            path=self.project_path,
+            dry_run=False,
+        )
+        target = self.project_path / 'dir' / 'nested_dir' / 'dummy.txt'
+        self.assertFalse(target.exists())
+        self.assertFalse(target.parent.exists())
+        self.assertFalse(target.parent.parent.exists())
+
+        project._write(target, 'DATA')
+
+        self.assertTrue(target.exists())
+        self.assertEqual(target.read_text(), 'DATA')
+
     def test_write_dry_run(self):
         project = Project(
             name='NAME',
@@ -74,6 +90,20 @@ class TestProject(unittest.TestCase):
         actual = project._write(target, 'DATA')
         self.assertEqual(actual, 0)
         self.assertFalse(target.exists())
+
+    def test_write_dry_run_skip_create_parent_dir(self):
+        project = Project(
+            name='NAME',
+            path=self.project_path,
+            dry_run=True,
+        )
+        target = self.project_path / 'dir' / 'nested_dir' / 'dummy.txt'
+
+        project._write(target, 'DATA')
+
+        self.assertFalse(target.exists())
+        self.assertFalse(target.parent.exists())
+        self.assertFalse(target.parent.parent.exists())
 
     def test_parser(self):
         project_in = strip_indent(

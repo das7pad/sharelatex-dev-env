@@ -223,6 +223,7 @@ class Project:
             )
             return 0
 
+        path.parent.mkdir(parents=True, exist_ok=True)
         return path.write_text(content)
 
     def _get_possible_project_files(
