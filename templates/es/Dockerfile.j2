@@ -24,8 +24,8 @@ ENTRYPOINT ["/bin/sh", "entrypoint.sh"]
 {% endif %}
 
 {% if has_install_deps %}
-COPY --from=app /app/install_deps.sh /app
-RUN sh ./install_deps.sh
+COPY install_deps.sh /app
+RUN sh /app/install_deps.sh
 {% endif %}
 
 COPY --from=app /app /app
