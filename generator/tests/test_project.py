@@ -290,58 +290,6 @@ class TestProject(unittest.TestCase):
         env = project._get_env()
         self.assertTrue(env['has_install_deps'])
 
-    def test_get_template_path(self):
-        templates = self.templates_path
-        file = 'dummy.j2'
-        project = GenericProject(
-            name='NAME',
-            path=self.project_path,
-            templates=templates,
-        )
-        (templates / GenericProject.language).mkdir(exist_ok=True)
-        (templates / GenericProject.language / file).write_text('CHILD')
-        (templates / file).write_text('PARENT')
-
-        template = project._get_template(
-            name='dummy',
-        )
-        path = pathlib.Path(template.filename)
-        self.assertEqual(path.read_text(), 'CHILD')
-
-        (templates / GenericProject.language / file).unlink()
-        template = project._get_template(
-            name='dummy',
-        )
-        path = pathlib.Path(template.filename)
-        self.assertEqual(path.read_text(), 'PARENT')
-
-    def test_get_template_path_version(self):
-        templates = self.templates_path
-        file = 'dummy.j2'
-        script_version = '1.2.3'
-        project = GenericProject(
-            name='NAME',
-            path=self.project_path,
-            templates=templates,
-            script_version=script_version,
-        )
-        (templates / script_version).mkdir(exist_ok=True)
-        (templates / script_version / file).write_text('VERSION')
-        (templates / file).write_text('GLOBAL')
-
-        template = project._get_template(
-            name='dummy',
-        )
-        path = pathlib.Path(template.filename)
-        self.assertEqual(path.read_text(), 'VERSION')
-
-        (templates / script_version / file).unlink()
-        template = project._get_template(
-            name='dummy',
-        )
-        path = pathlib.Path(template.filename)
-        self.assertEqual(path.read_text(), 'GLOBAL')
-
     def test_get_template_path_preference(self):
         templates = self.templates_path
         file = 'dummy.j2'
@@ -353,59 +301,32 @@ class TestProject(unittest.TestCase):
             templates=templates,
             script_version=script_version,
         )
-        lang = project.language
-        (templates / GenericProject.language).mkdir(exist_ok=True)
-        (templates / GenericProject.language / file).write_text('LANG')
-        (templates / script_version).mkdir(exist_ok=True)
-        (templates / script_version / file).write_text('VERSION')
-        (templates / script_version / lang).mkdir(exist_ok=True)
-        (templates / script_version / lang / file).write_text('VERSION_LANG')
-        (templates / script_version / name).mkdir(exist_ok=True)
-        (templates / script_version / name / file).write_text('VERSION_NAME')
-        (templates / name).mkdir(exist_ok=True)
-        (templates / name / file).write_text('NAME')
-        (templates / file).write_text('PARENT')
+        language = project.language
 
-        template = project._get_template(
-            name='dummy',
-        )
-        path = pathlib.Path(template.filename)
-        self.assertEqual(path.read_text(), 'VERSION_NAME')
-        path.unlink()
+        preference = [
+            ('VERSION_NAME', [script_version, name]),
+            ('NAME', [name]),
+            ('VERSION_LANG', [script_version, language]),
+            ('LANG', [language]),
+            ('VERSION', [script_version]),
+            ('GLOBAL', []),
+        ]
 
-        template = project._get_template(
-            name='dummy',
-        )
-        path = pathlib.Path(template.filename)
-        self.assertEqual(path.read_text(), 'NAME')
-        path.unlink()
+        for content, path_parts in preference:
+            path = templates
+            for part in path_parts:
+                path = path / '_' / part
 
-        template = project._get_template(
-            name='dummy',
-        )
-        path = pathlib.Path(template.filename)
-        self.assertEqual(path.read_text(), 'VERSION_LANG')
-        path.unlink()
+            path.mkdir(parents=True, exist_ok=True)
+            (path / file).write_text(content)
 
-        template = project._get_template(
-            name='dummy',
-        )
-        path = pathlib.Path(template.filename)
-        self.assertEqual(path.read_text(), 'LANG')
-
-        (templates / GenericProject.language / file).unlink()
-        template = project._get_template(
-            name='dummy',
-        )
-        path = pathlib.Path(template.filename)
-        self.assertEqual(path.read_text(), 'VERSION')
-
-        (templates / script_version / file).unlink()
-        template = project._get_template(
-            name='dummy',
-        )
-        path = pathlib.Path(template.filename)
-        self.assertEqual(path.read_text(), 'PARENT')
+        for content, _ in preference:
+            template = project._get_template(
+                name='dummy',
+            )
+            path = pathlib.Path(template.filename)
+            self.assertEqual(path.read_text(), content)
+            path.unlink()
 
     def test_update_file(self):
         templates = self.templates_path

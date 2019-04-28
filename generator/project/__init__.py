@@ -43,19 +43,21 @@ class Project:
 
         if 'script_version' in kwargs:
             search_path.append(
-                templates / kwargs['script_version'] / name
+                templates / '_' / kwargs['script_version'] / '_' / name
             )
-        search_path.append(templates / name)
+        search_path.append(templates / '_' / name)
 
         for cls in self.__class__.mro():
             if not issubclass(cls, Project):
                 continue
 
+            postfix = (pathlib.Path('_') / cls.language) if cls.language else ''
+
             if 'script_version' in kwargs:
                 search_path.append(
-                    templates / kwargs['script_version'] / cls.language
+                    templates / '_' / kwargs['script_version'] / postfix
                 )
-            search_path.append(templates / cls.language)
+            search_path.append(templates / postfix)
 
         self._template_env = jinja2.Environment(
             loader=jinja2.FileSystemLoader(
