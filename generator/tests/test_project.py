@@ -346,8 +346,9 @@ class TestProject(unittest.TestCase):
         templates = self.templates_path
         file = 'dummy.j2'
         script_version = '1.2.3'
+        name = 'NAME'
         project = GenericProject(
-            name='NAME',
+            name=name,
             path=self.project_path,
             templates=templates,
             script_version=script_version,
@@ -359,7 +360,25 @@ class TestProject(unittest.TestCase):
         (templates / script_version / file).write_text('VERSION')
         (templates / script_version / lang).mkdir(exist_ok=True)
         (templates / script_version / lang / file).write_text('VERSION_LANG')
+        (templates / script_version / name).mkdir(exist_ok=True)
+        (templates / script_version / name / file).write_text('VERSION_NAME')
+        (templates / name).mkdir(exist_ok=True)
+        (templates / name / file).write_text('NAME')
         (templates / file).write_text('PARENT')
+
+        template = project._get_template(
+            name='dummy',
+        )
+        path = pathlib.Path(template.filename)
+        self.assertEqual(path.read_text(), 'VERSION_NAME')
+        path.unlink()
+
+        template = project._get_template(
+            name='dummy',
+        )
+        path = pathlib.Path(template.filename)
+        self.assertEqual(path.read_text(), 'NAME')
+        path.unlink()
 
         template = project._get_template(
             name='dummy',

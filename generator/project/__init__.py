@@ -40,6 +40,13 @@ class Project:
             self['script_version'] = __version__
 
         search_path = []
+
+        if 'script_version' in kwargs:
+            search_path.append(
+                templates / kwargs['script_version'] / name
+            )
+        search_path.append(templates / name)
+
         for cls in self.__class__.mro():
             if not issubclass(cls, Project):
                 continue
