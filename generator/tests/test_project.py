@@ -352,11 +352,21 @@ class TestProject(unittest.TestCase):
             templates=templates,
             script_version=script_version,
         )
+        lang = project.language
         (templates / GenericProject.language).mkdir(exist_ok=True)
         (templates / GenericProject.language / file).write_text('LANG')
         (templates / script_version).mkdir(exist_ok=True)
         (templates / script_version / file).write_text('VERSION')
+        (templates / script_version / lang).mkdir(exist_ok=True)
+        (templates / script_version / lang / file).write_text('VERSION_LANG')
         (templates / file).write_text('PARENT')
+
+        template = project._get_template(
+            name='dummy',
+        )
+        path = pathlib.Path(template.filename)
+        self.assertEqual(path.read_text(), 'VERSION_LANG')
+        path.unlink()
 
         template = project._get_template(
             name='dummy',
