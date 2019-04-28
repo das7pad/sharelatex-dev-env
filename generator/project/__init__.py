@@ -132,18 +132,17 @@ class Project:
         script_version: str = None,
     ):
         search_path = []
-        if script_version:
-            search_path.append(
-                templates / '_' / script_version / '_' / project_name
-            )
-        search_path.append(templates / '_' / project_name)
-
+        categories = [
+            project_name,
+        ]
         for candidate in cls.mro():
             if not issubclass(candidate, Project):
                 continue
+            categories.append(candidate.language)
 
-            if candidate.language:
-                postfix = (pathlib.Path('_') / candidate.language)
+        for category in categories:
+            if category:
+                postfix = pathlib.Path('_') / category
             else:
                 postfix = ''
 
