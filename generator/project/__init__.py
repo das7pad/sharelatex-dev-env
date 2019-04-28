@@ -37,27 +37,17 @@ class Project:
         self._changed = False
 
         if update:
-            self['script_version'] = __version__
+            self['script_version'] = script_version = __version__
+        elif 'script_version' in self:
+            script_version = self['script_version']
+        else:
+            script_version = None
 
-        search_path = []
-
-        if 'script_version' in kwargs:
-            search_path.append(
-                templates / '_' / kwargs['script_version'] / '_' / name
-            )
-        search_path.append(templates / '_' / name)
-
-        for cls in self.__class__.mro():
-            if not issubclass(cls, Project):
-                continue
-
-            postfix = (pathlib.Path('_') / cls.language) if cls.language else ''
-
-            if 'script_version' in kwargs:
-                search_path.append(
-                    templates / '_' / kwargs['script_version'] / postfix
-                )
-            search_path.append(templates / postfix)
+        search_path = self._get_search_path(
+            templates=templates,
+            project_name=name,
+            script_version=script_version,
+        )
 
         self._template_env = jinja2.Environment(
             loader=jinja2.FileSystemLoader(
@@ -132,6 +122,36 @@ class Project:
             update=update,
             **kwargs
         )
+
+    @classmethod
+    def _get_search_path(
+        cls,
+        templates: pathlib.Path,
+        project_name: str,
+        script_version: str = None,
+    ):
+        search_path = []
+        if script_version:
+            search_path.append(
+                templates / '_' / script_version / '_' / project_name
+            )
+        search_path.append(templates / '_' / project_name)
+
+        for candidate in cls.mro():
+            if not issubclass(candidate, Project):
+                continue
+
+            if candidate.language:
+                postfix = (pathlib.Path('_') / candidate.language)
+            else:
+                postfix = ''
+
+            if script_version:
+                search_path.append(
+                    templates / '_' / script_version / postfix
+                )
+            search_path.append(templates / postfix)
+        return search_path
 
     @staticmethod
     def get_cfg_path(path: pathlib.Path) -> pathlib.Path:
