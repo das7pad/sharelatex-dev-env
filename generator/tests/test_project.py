@@ -347,21 +347,18 @@ class TestProject(unittest.TestCase):
         self.assertEqual(target.read_text(), 'THE CONTENT')
 
     def test_delete_orphan(self):
-        class DemoProject(GenericProject):
-            def _get_files_to_update(self):
-                if self['script_version'] == '0.0.0':
-                    return ['old']
-                return ['new']
-
         templates = self.templates_path
-        (templates / 'old.j2').touch()
+        old_version = '0.0.0'
+        old_path = templates / '_' / old_version / 'old.j2'
+        old_path.parent.mkdir(parents=True)
+        old_path.touch()
         (templates / 'new.j2').touch()
 
-        project = DemoProject(
+        project = GenericProject(
             name='NAME',
             path=self.project_path,
             templates=templates,
-            script_version='0.0.0',
+            script_version=old_version,
             update=True,
         )
         (self.project_path / 'old').touch()
@@ -371,10 +368,6 @@ class TestProject(unittest.TestCase):
         self.assertFalse((self.project_path / 'old').exists())
 
     def test_process(self):
-        class DemoProject(GenericProject):
-            def _get_files_to_update(self):
-                return ['dummy']
-
         target = self.project_path / 'dummy'
         cfg_expected = strip_indent(
             """
@@ -383,7 +376,7 @@ class TestProject(unittest.TestCase):
             """
         )
         templates = self.templates_path
-        project = DemoProject(
+        project = GenericProject(
             name='NAME',
             path=self.project_path,
             templates=templates,

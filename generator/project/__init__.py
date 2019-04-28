@@ -33,6 +33,7 @@ class Project:
         self._dry_run = dry_run
         self._kwargs = kwargs
         self._org_kwargs = copy.deepcopy(kwargs)
+        self._templates = templates
         self._update = update
         self._changed = False
 
@@ -309,20 +310,53 @@ class Project:
 
     def _get_files_to_update(
         self,
+        search_path: typing.List[pathlib.Path] = None,
     ) -> typing.List[str]:
-        return [
-            '.github/ISSUE_TEMPLATE.md',
-            '.github/PULL_REQUEST_TEMPLATE.md',
-        ]
+        files = set()
+        blacklist = (
+            '_',
+            'macros',
+        )
+        if not search_path:
+            search_path = self._template_env.loader.searchpath
+
+        for directory in search_path:
+            if not directory.exists():
+                continue
+            intermediate = []
+            for file in directory.iterdir():
+                if file.name in blacklist:
+                    continue
+
+                if file.is_dir():
+                    intermediate.extend(file.glob('*'))
+                else:
+                    intermediate.append(file)
+
+            files.update(
+                str(file.relative_to(directory).with_suffix(''))
+                for file in intermediate
+            )
+
+        return list(sorted(files))
 
     def _delete_orphan_files(
         self,
     ) -> int:
-        kwargs = self._kwargs
-        self._kwargs = self._org_kwargs
-        old_files = set(self._get_files_to_update())
+        if 'script_version' in self._org_kwargs:
+            old_version = self._org_kwargs['script_version']
+        else:
+            old_version = None
+        old_files = set(
+            self._get_files_to_update(
+                search_path=self._get_search_path(
+                    templates=self._templates,
+                    project_name=self._name,
+                    script_version=old_version,
+                )
+            )
+        )
 
-        self._kwargs = kwargs
         new_files = set(self._get_files_to_update())
 
         diff = old_files - new_files
