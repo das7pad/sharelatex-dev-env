@@ -1,0 +1,33 @@
+{% extends '_/coffeescript/Jenkinsfile.ce.j2' %}
+
+{% block acceptance_tests %}
+        stage('Acceptance Tests') {
+          parallel {
+            stage('Module Acceptance Tests') {
+              steps {
+                sh 'make test_acceptance_modules_run'
+              }
+            }
+
+            stage('Frontend Tests') {
+              steps {
+                sh 'make test_frontend_build_run'
+              }
+            }
+
+            stage('App Acceptance Tests') {
+              steps {
+                sh 'make test_acceptance_app_run'
+              }
+            }
+          }
+        }
+{% endblock %}
+
+{% block post %}
+  post {
+    always {
+      sh 'make clean_ci'
+    }
+  }
+{% endblock %}
