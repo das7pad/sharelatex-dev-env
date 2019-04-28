@@ -148,8 +148,12 @@ class Project:
 
             if script_version:
                 search_path.append(
+                    templates / '_' / script_version / postfix / 'common'
+                )
+                search_path.append(
                     templates / '_' / script_version / postfix
                 )
+            search_path.append(templates / postfix / 'common')
             search_path.append(templates / postfix)
         return search_path
 
@@ -314,6 +318,7 @@ class Project:
         files = set()
         blacklist = (
             '_',
+            'common',
             'macros',
         )
         if not search_path:
