@@ -303,20 +303,22 @@ class TestProject(unittest.TestCase):
         )
         language = project.language
 
+        def merge_path(*path_parts: str):
+            merged = templates
+            for part in path_parts:
+                merged = merged / '_' / part
+            return merged
+
         preference = [
-            ('VERSION_NAME', [script_version, name]),
-            ('NAME', [name]),
-            ('VERSION_LANG', [script_version, language]),
-            ('LANG', [language]),
-            ('VERSION', [script_version]),
-            ('GLOBAL', []),
+            ('VERSION_NAME', merge_path(script_version, name)),
+            ('NAME', merge_path(name)),
+            ('VERSION_LANG', merge_path(script_version, language)),
+            ('LANG', merge_path(language)),
+            ('VERSION', merge_path(script_version)),
+            ('GLOBAL', templates),
         ]
 
-        for content, path_parts in preference:
-            path = templates
-            for part in path_parts:
-                path = path / '_' / part
-
+        for content, path in preference:
             path.mkdir(parents=True, exist_ok=True)
             (path / file).write_text(content)
 
