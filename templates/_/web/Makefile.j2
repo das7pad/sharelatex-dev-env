@@ -174,12 +174,10 @@ clean_modules:
 clean_css:
 	rm -f public/stylesheets/*.css*
 
+clean_ci: clean_build
 clean_ci: clean_test_acceptance_modules
 clean_ci: clean_test_frontend
 	$(DOCKER_COMPOSE) down -v -t 0
-	docker rmi -f \
-		ci/{{ label_docker_image }} \
-		{{ docker_repos }}/{{ label_docker_image }}
 
 test: test_unit test_frontend test_acceptance
 
@@ -232,6 +230,11 @@ build:
 	docker build --pull --tag ci/{{ label_docker_image }} \
 		--tag {{ docker_repos }}/{{ label_docker_image }} \
 		.
+
+clean_build:
+	docker rmi -f \
+		ci/{{ label_docker_image }} \
+		{{ docker_repos }}/{{ label_docker_image }} \
 
 build_test_frontend:
 	COMPOSE_PROJECT_NAME=frontend_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) build test_frontend
