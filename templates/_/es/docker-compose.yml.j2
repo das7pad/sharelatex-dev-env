@@ -18,7 +18,11 @@ services:
 {% endif %}
 
   test_acceptance:
+{% if name == 'web' %}
+    image: node:{{ node_version }}
+{% else %}
     build: .
+{% endif %}
     volumes:
       - .:/app
 {% if name == 'clsi' %}
@@ -50,6 +54,14 @@ services:
       SYNCTEX_BIN_HOST_PATH: $PWD/bin/synctex
       SHARELATEX_CONFIG: /app/config/settings.defaults.coffee
 {% endif %}
+{% if name == 'web' %}
+      SHARELATEX_ALLOW_PUBLIC_ACCESS: 'true'
+      PROJECT_HISTORY_ENABLED: 'true'
+      ENABLED_LINKED_FILE_TYPES: 'url,project_file,project_output_file,mendeley,zotero'
+      LINKED_URL_PROXY: 'http://localhost:6543'
+      SHARELATEX_CONFIG: /app/test/acceptance/config/settings.test.coffee
+      NODE_ENV: production
+{% endif %}
 {% if not has_entrypoint %}
     user: node
 {% endif %}
@@ -57,8 +69,22 @@ services:
 {% for dependency in dependencies %}
       - {{ dependency }}
 {% endfor %}
+{% if name == 'web' %}
+    command: npm run test:acceptance:app
+{% else %}
     command: npm run test:acceptance
+{% endif %}
 
+{% if name == 'web' %}
+  test_frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: npm run test:frontend -- --single-run
+{%- endif %}
 
 
   tar:

@@ -10,7 +10,12 @@ services:
 {% if not has_entrypoint %}
     user: node
 {% endif %}
+{% if name == 'web' %}
+{# run unit tests for app and all modules #}
+    command: npm run test:unit:ci
+{%- else %}
     command: npm run test:unit:_run
+{% endif %}
 
 
   test_acceptance:
@@ -39,6 +44,14 @@ services:
       SQLITE_PATH: /app/compiles/db.sqlite
       SHARELATEX_CONFIG: /app/config/settings.defaults.coffee
 {% endif %}
+{% if name == 'web' %}
+      SHARELATEX_ALLOW_PUBLIC_ACCESS: 'true'
+      PROJECT_HISTORY_ENABLED: 'true'
+      ENABLED_LINKED_FILE_TYPES: 'url,project_file,project_output_file,mendeley,zotero'
+      LINKED_URL_PROXY: 'http://localhost:6543'
+      SHARELATEX_CONFIG: /app/test/acceptance/config/settings.test.coffee
+      NODE_ENV: production
+{% endif %}
     depends_on:
 {% for dependency in dependencies %}
       - {{ dependency }}
@@ -59,6 +72,19 @@ services:
       - ./bin/synctex:/app/bin/synctex:z
 {% endif %}
 
+{% if name == 'web' %}
+  test_frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend.ci
+      args:
+        PROJECT_NAME: $PROJECT_NAME
+        BRANCH_NAME: $BRANCH_NAME
+        BUILD_NUMBER: $BUILD_NUMBER
+    working_dir: /app
+    command: npm run test:frontend -- --single-run
+    user: node
+{%- endif %}
 
 
   tar:
