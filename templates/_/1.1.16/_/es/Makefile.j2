@@ -20,7 +20,6 @@ DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 clean:
 {% block clean %}
 	docker rmi ci/{{ label_docker_image }}
-	docker rmi -f ci/{{ label_docker_image }}-cache
 	docker rmi {{ docker_repos }}/{{ label_docker_image }}
 {%- endblock %}
 
@@ -49,7 +48,6 @@ test_acceptance_pre_run:
 build:
 	docker build --pull --tag ci/{{ label_docker_image }} \
 		--tag {{ docker_repos }}/{{ label_docker_image }} \
-		--cache-from ci/{{ label_docker_image }}-cache \
 		.
 
 tar:

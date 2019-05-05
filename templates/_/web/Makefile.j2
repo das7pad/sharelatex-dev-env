@@ -228,11 +228,13 @@ lint:
 build:
 	docker build --pull --tag ci/{{ label_docker_image }} \
 		--tag {{ docker_repos }}/{{ label_docker_image }} \
+		--cache-from ci/{{ label_docker_image }}-cache \
 		.
 
 clean_build:
 	docker rmi -f \
 		ci/{{ label_docker_image }} \
+		ci/{{ label_docker_image }}-cache \
 		{{ docker_repos }}/{{ label_docker_image }} \
 
 build_test_frontend:
