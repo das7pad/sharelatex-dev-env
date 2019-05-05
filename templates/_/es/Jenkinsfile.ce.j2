@@ -5,7 +5,7 @@
     'quay.io/sharelatex/texlive-full:2017.1'
   ) %}
 {% set tag_app_docker_image = (
-    '${env.SHARELATEX_DOCKER_REPOS}/' + name + ':$BRANCH_NAME-$BUILD_NUMBER'
+    '$SHARELATEX_DOCKER_REPOS/' + name + ':$BRANCH_NAME-$BUILD_NUMBER'
   ) %}
 pipeline {
   agent {
@@ -32,7 +32,7 @@ pipeline {
             timeout(time: 2, unit: 'HOURS')
           }
           environment {
-            TEXLIVE_IMAGE = "${env.SHARELATEX_DOCKER_REPOS}/texlive:full-2017"
+            TEXLIVE_IMAGE = "$SHARELATEX_DOCKER_REPOS/texlive:full-2017"
           }
           steps {
             script {
@@ -115,7 +115,7 @@ pipeline {
             }
           }
           environment {
-            AWS_BUCKET = "${env.SHARELATEX_S3_DOCSTORE_TEST_AWS_BUCKET}"
+            AWS_BUCKET = "$SHARELATEX_S3_DOCSTORE_TEST_AWS_BUCKET"
             AWS_ACCESS = credentials('SHARELATEX_S3_DOCSTORE_TEST_AWS_KEYS')
             AWS_ACCESS_KEY_ID = "$AWS_ACCESS_USR"
             AWS_SECRET_ACCESS_KEY = "$AWS_ACCESS_PSW"
