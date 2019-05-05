@@ -1,11 +1,17 @@
 {% set url_texlive_docker_image = (
     'https://github.com/das7pad/sharelatex-docker-images.git#:texlive'
   ) %}
-{% set tag_texlive_docker_image = (
+{% set docker_image_texlive_origin = (
+    '$SHARELATEX_DOCKER_REPOS/texlive:full-2017'
+  ) %}
+{% set docker_image_texlive_upstream = (
     'quay.io/sharelatex/texlive-full:2017.1'
   ) %}
-{% set tag_app_docker_image = (
-    '$SHARELATEX_DOCKER_REPOS/' + name + ':$BRANCH_NAME-$BUILD_NUMBER'
+{% set docker_image_app = (
+    name + ':$BRANCH_NAME-$BUILD_NUMBER'
+  ) %}
+{% set docker_image_app_origin = (
+    '$SHARELATEX_DOCKER_REPOS/' + docker_image_app
   ) %}
 pipeline {
   agent {
@@ -32,7 +38,7 @@ pipeline {
             timeout(time: 2, unit: 'HOURS')
           }
           environment {
-            TEXLIVE_IMAGE = "$SHARELATEX_DOCKER_REPOS/texlive:full-2017"
+            TEXLIVE_IMAGE = "{{ docker_image_texlive_origin }}"
           }
           steps {
             script {
@@ -48,7 +54,7 @@ pipeline {
                     docker push $TEXLIVE_IMAGE
                   )
                   '''
-              sh 'docker tag $TEXLIVE_IMAGE {{ tag_texlive_docker_image }}'
+              sh 'docker tag $TEXLIVE_IMAGE {{ docker_image_texlive_upstream }}'
             }
           }
         }
@@ -65,7 +71,7 @@ pipeline {
             script {
               sh  '''
                   docker build \
-                    -t {{ tag_texlive_docker_image }} \
+                    -t {{ docker_image_texlive_upstream }} \
                     --build-arg TEXLIVE_SCHEME=full \
                     {{ url_texlive_docker_image }}
                   '''
@@ -151,7 +157,7 @@ pipeline {
             }
           }
           environment {
-            IMAGE = "{{ tag_app_docker_image }}"
+            IMAGE = "{{ docker_image_app_origin }}"
           }
           steps {
             script {
