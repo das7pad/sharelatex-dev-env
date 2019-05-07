@@ -16,9 +16,10 @@ COPY . /app
 FROM node:{{ node_version }}
 
 {% block runtime %}
+CMD ["node", "--expose-gc", "app.js"]
+
 WORKDIR /app
 
-CMD ["node", "--expose-gc", "app.js"]
 {% if has_entrypoint %}
 ENTRYPOINT ["/bin/sh", "entrypoint.sh"]
 {% endif %}
