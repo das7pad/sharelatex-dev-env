@@ -227,9 +227,14 @@ lint:
 	
 build:
 	docker pull node:{{ node_version }}
+	docker build --tag ci/{{ label_docker_image }}-build \
+		--cache-from ci/{{ label_docker_image }}-build-cache \
+		--target app \
+		.
 	docker build --tag ci/{{ label_docker_image }} \
 		--tag {{ docker_repos }}/{{ label_docker_image }} \
 		--cache-from ci/{{ label_docker_image }}-cache \
+		--cache-from ci/{{ label_docker_image }}-build \
 		.
 
 clean_build:
@@ -237,6 +242,8 @@ clean_build:
 		node:{{ node_version }} \
 		ci/{{ label_docker_image }} \
 		ci/{{ label_docker_image }}-cache \
+		ci/{{ label_docker_image }}-build \
+		ci/{{ label_docker_image }}-build-cache \
 		{{ docker_repos }}/{{ label_docker_image }} \
 
 build_test_frontend:

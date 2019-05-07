@@ -96,6 +96,12 @@ pipeline {
               && docker rmi $IMAGE_BRANCH \
               || true
             '''
+            sh '''
+              docker pull $IMAGE_BRANCH-build \
+              && docker tag $IMAGE_BRANCH-build $IMAGE_CI-build-cache \
+              && docker rmi $IMAGE_BRANCH-build \
+              || true
+            '''
           }
         }
       }
@@ -184,7 +190,9 @@ pipeline {
               sh 'docker push $IMAGE'
               sh 'docker tag $IMAGE $IMAGE_BRANCH'
               sh 'docker push $IMAGE_BRANCH'
-              sh 'docker rmi $IMAGE $IMAGE_BRANCH'
+              sh 'docker tag $IMAGE_CI-build $IMAGE_BRANCH-build'
+              sh 'docker push $IMAGE_BRANCH-build'
+              sh 'docker rmi $IMAGE $IMAGE_BRANCH $IMAGE_BRANCH-build'
             }
           }
         }

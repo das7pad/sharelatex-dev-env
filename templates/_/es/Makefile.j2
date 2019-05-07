@@ -23,6 +23,8 @@ clean:
 		node:{{ node_version }} \
 		ci/{{ label_docker_image }} \
 		ci/{{ label_docker_image }}-cache \
+		ci/{{ label_docker_image }}-build \
+		ci/{{ label_docker_image }}-build-cache \
 		{{ docker_repos }}/{{ label_docker_image }} \
 		--force
 {%- endblock %}
@@ -51,9 +53,14 @@ test_acceptance_pre_run:
 	@[ ! -f test/acceptance/scripts/pre-run ] && echo "{{ name }} has no pre acceptance tests task" || $(DOCKER_COMPOSE) run --rm test_acceptance test/acceptance/scripts/pre-run
 build:
 	docker pull node:{{ node_version }}
+	docker build --tag ci/{{ label_docker_image }}-build \
+		--cache-from ci/{{ label_docker_image }}-build-cache \
+		--target app \
+		.
 	docker build --tag ci/{{ label_docker_image }} \
 		--tag {{ docker_repos }}/{{ label_docker_image }} \
 		--cache-from ci/{{ label_docker_image }}-cache \
+		--cache-from ci/{{ label_docker_image }}-build \
 		.
 
 tar:
