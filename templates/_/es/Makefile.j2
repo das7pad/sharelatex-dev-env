@@ -19,9 +19,12 @@ DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 
 clean:
 {% block clean %}
-	docker rmi ci/{{ label_docker_image }}
-	docker rmi -f ci/{{ label_docker_image }}-cache
-	docker rmi {{ docker_repos }}/{{ label_docker_image }}
+	docker rmi \
+		node:{{ node_version }} \
+		ci/{{ label_docker_image }} \
+		ci/{{ label_docker_image }}-cache \
+		{{ docker_repos }}/{{ label_docker_image }} \
+		--force
 {%- endblock %}
 
 {% block lint %}
@@ -47,7 +50,8 @@ test_clean:
 test_acceptance_pre_run:
 	@[ ! -f test/acceptance/scripts/pre-run ] && echo "{{ name }} has no pre acceptance tests task" || $(DOCKER_COMPOSE) run --rm test_acceptance test/acceptance/scripts/pre-run
 build:
-	docker build --pull --tag ci/{{ label_docker_image }} \
+	docker pull node:{{ node_version }}
+	docker build --tag ci/{{ label_docker_image }} \
 		--tag {{ docker_repos }}/{{ label_docker_image }} \
 		--cache-from ci/{{ label_docker_image }}-cache \
 		.
