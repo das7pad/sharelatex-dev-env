@@ -12,7 +12,7 @@ if __name__ == '__main__':
     setup(
         name='generator',
         version=(
-            (REPO / 'generator' / 'version.py').read_text().split()[-1][1:-2]
+            (REPO / 'generator' / 'version.py').read_text().split()[-1][1:-1]
         ),
         packages=find_packages(),
         install_requires=[
