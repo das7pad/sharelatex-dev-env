@@ -45,21 +45,19 @@ pipeline {
             TEXLIVE_IMAGE = "{{ docker_image_texlive_origin }}"
           }
           steps {
-            script {
-              sh  '''
-                  set -ex
-                  docker pull $TEXLIVE_IMAGE \
-                  || (
-                    docker build \
-                      -t $TEXLIVE_IMAGE \
-                      --build-arg TEXLIVE_SCHEME=full \
-                      {{ url_texlive_docker_image }} \
-                    && \
-                    docker push $TEXLIVE_IMAGE
-                  )
-                  '''
-              sh 'docker tag $TEXLIVE_IMAGE {{ docker_image_texlive_upstream }}'
-            }
+            sh  '''
+                set -ex
+                docker pull $TEXLIVE_IMAGE \
+                || (
+                  docker build \
+                    -t $TEXLIVE_IMAGE \
+                    --build-arg TEXLIVE_SCHEME=full \
+                    {{ url_texlive_docker_image }} \
+                  && \
+                  docker push $TEXLIVE_IMAGE
+                )
+                '''
+            sh 'docker tag $TEXLIVE_IMAGE {{ docker_image_texlive_upstream }}'
           }
         }
         stage('Build Texlive') {
@@ -72,14 +70,12 @@ pipeline {
             timeout(time: 2, unit: 'HOURS')
           }
           steps {
-            script {
-              sh  '''
-                  docker build \
-                    -t {{ docker_image_texlive_upstream }} \
-                    --build-arg TEXLIVE_SCHEME=full \
-                    {{ url_texlive_docker_image }}
-                  '''
-            }
+            sh  '''
+                docker build \
+                  -t {{ docker_image_texlive_upstream }} \
+                  --build-arg TEXLIVE_SCHEME=full \
+                  {{ url_texlive_docker_image }}
+                '''
           }
         }
         {% endif %}
@@ -161,17 +157,13 @@ pipeline {
             AWS_SECRET_ACCESS_KEY = "$AWS_ACCESS_PSW"
           }
           steps {
-            script {
-              sh 'make test_acceptance'
-            }
+            sh 'make test_acceptance'
           }
         }
 {% else %}
         stage('Acceptance Tests') {
           steps {
-            script {
-              sh 'make test_acceptance'
-            }
+            sh 'make test_acceptance'
           }
         }
 {% endif %}
@@ -195,15 +187,13 @@ pipeline {
             IMAGE_BRANCH = "{{ docker_image_app_origin_branch }}"
           }
           steps {
-            script {
-              sh 'docker tag $IMAGE_CI $IMAGE'
-              sh 'docker push $IMAGE'
-              sh 'docker tag $IMAGE $IMAGE_BRANCH'
-              sh 'docker push $IMAGE_BRANCH'
-              sh 'docker tag $IMAGE_CI-build $IMAGE_BRANCH-build'
-              sh 'docker push $IMAGE_BRANCH-build'
-              sh 'docker rmi $IMAGE $IMAGE_BRANCH $IMAGE_BRANCH-build'
-            }
+            sh 'docker tag $IMAGE_CI $IMAGE'
+            sh 'docker push $IMAGE'
+            sh 'docker tag $IMAGE $IMAGE_BRANCH'
+            sh 'docker push $IMAGE_BRANCH'
+            sh 'docker tag $IMAGE_CI-build $IMAGE_BRANCH-build'
+            sh 'docker push $IMAGE_BRANCH-build'
+            sh 'docker rmi $IMAGE $IMAGE_BRANCH $IMAGE_BRANCH-build'
           }
         }
       }
