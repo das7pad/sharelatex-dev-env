@@ -212,7 +212,7 @@ pipeline {
 
 {% block post %}
   post {
-    always {
+    cleanup {
       sh 'make test_clean'
       sh 'make clean'
     }
