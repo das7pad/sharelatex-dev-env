@@ -196,6 +196,28 @@ pipeline {
             sh 'docker rmi $IMAGE $IMAGE_BRANCH $IMAGE_BRANCH-build'
           }
         }
+{% if name == 'web' %}
+        stage('archive public') {
+          steps {
+            sh '''docker run \
+              --rm \
+              --entrypoint tar \
+              $IMAGE_CI \
+                --create \
+                --xz \
+                -C /app/public \
+                . \
+              > public.tar.xz
+            '''
+            archiveArtifacts artifacts: 'public.tar.xz', fingerprint: true
+          }
+          post {
+            cleanup {
+              sh 'rm -f public.tar.xz'
+            }
+          }
+        }
+{% endif %}
       }
     }
   }
