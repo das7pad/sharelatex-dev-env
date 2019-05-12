@@ -31,6 +31,11 @@ pipeline {
   stages {
     stage('Prepare environment') {
       stages {
+        stage('Clean Previous artifacts') {
+          steps {
+            sh 'git clean -xdf'
+          }
+        }
         {% if name == 'clsi' %}
         stage('Pull Texlive') {
           when {
