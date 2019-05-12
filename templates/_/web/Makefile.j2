@@ -107,6 +107,10 @@ minify: $(CSS_FILES) $(JS_FILES) $(OUTPUT_SRC_FILES)
 	$(GRUNT) compile:minify
 	$(MAKE) minify_css
 	$(MAKE) minify_es
+	$(MAKE) hash_static_files
+
+hash_static_files: app/js/infrastructure/ExpressLocals.js
+	MINIFIED_JS='true' node $<
 
 minify_css: $(CSS_FILES) 
 	$(CLEANCSS) $(CLEANCSS_FLAGS) -o $(CSS_SL_FILE) $(CSS_SL_FILE)
