@@ -1,6 +1,21 @@
 {% extends '_/coffeescript/Jenkinsfile.ce.j2' %}
 
 {% block acceptance_tests %}
+        stage('Code Style') {
+          parallel {
+            stage('Lint') {
+              steps {
+                sh 'docker run --rm $IMAGE_CI make lint'
+              }
+            }
+
+            stage('Prettier') {
+              steps {
+                sh 'docker run --rm $IMAGE_CI make format'
+              }
+            }
+          }
+        }
         stage('Acceptance Tests') {
           parallel {
             stage('Module Acceptance Tests') {
