@@ -109,7 +109,7 @@ minify: $(CSS_FILES) $(JS_FILES) $(OUTPUT_SRC_FILES)
 	$(MAKE) minify_es
 	$(MAKE) hash_static_files
 
-hash_static_files: app/js/infrastructure/ExpressLocals.js
+hash_static_files: app/js/infrastructure/HashedFiles.js
 	MINIFIED_JS='true' node $<
 
 minify_css: $(CSS_FILES) 
