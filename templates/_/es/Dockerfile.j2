@@ -40,3 +40,9 @@ RUN /app/setup_env.sh
 USER node
 {% endif %}
 {% endblock %}
+
+ARG RELEASE
+ARG COMMIT
+ENV RELEASE=${RELEASE} \
+    SENTRY_RELEASE=${RELEASE} \
+    COMMIT=${COMMIT}
