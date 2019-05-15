@@ -60,7 +60,9 @@ services:
 {% if not has_entrypoint %}
     user: node
 {% endif %}
+{% if dependencies %}
     depends_on:
+{% endif %}
 {% for dependency in dependencies %}
       - {{ dependency }}
 {% endfor %}
