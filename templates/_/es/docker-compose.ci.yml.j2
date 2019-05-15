@@ -22,7 +22,11 @@ services:
     build: .
     image: {{ ci_image }}
     environment:
-      REDIS_HOST: redis
+{% for dependency in dependencies %}
+{% if dependency.startswith('redis') %}
+      {{ env_prefix[dependency[6:]] }}_REDIS_HOST: {{ dependency }}
+{% endif %}
+{% endfor %}
       MONGO_HOST: mongo
 {% if acceptance_creds == 'aws' %}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
@@ -92,10 +96,12 @@ services:
     command: tar -czf /tmp/build/build.tar.gz --exclude=build.tar.gz --exclude-vcs .
     user: root
 
-{% if 'redis' in dependencies %}
-  redis:
+{% for dependency in dependencies %}
+{% if dependency.startswith('redis') %}
+  {{ dependency }}:
     image: redis
 {% endif %}
+{% endfor %}
 
 {% if 'mongo' in dependencies %}
   mongo:

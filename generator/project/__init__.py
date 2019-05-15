@@ -277,6 +277,17 @@ class Project:
         for label, file in self._get_possible_project_files().items():
             env[label] = (self._path / file).exists()
 
+        env['env_prefix'] = {
+            'api': 'API',
+            'documentupdater': 'DOC_UPDATER',
+            'history': 'HISTORY',
+            'lock': 'LOCK',
+            'project_history': 'HISTORY',
+            'realtime': 'REAL_TIME',
+            'web': 'WEB',
+            'websessions': 'WEB_SESSIONS',
+        }
+
         env.update(self._kwargs)
         return env
 
