@@ -175,7 +175,7 @@ class Project:
             argument, value = line[2:].split('=', 1)
 
             if ',' in value:
-                value = value.split(',')
+                value = [item for item in value.split(',') if item]
 
             if value == 'None':
                 value = None
