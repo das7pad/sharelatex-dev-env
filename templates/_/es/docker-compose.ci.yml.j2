@@ -22,10 +22,8 @@ services:
     build: .
     image: {{ ci_image }}
     environment:
-      ELASTIC_SEARCH_DSN: es:9200
       REDIS_HOST: redis
       MONGO_HOST: mongo
-      POSTGRES_HOST: postgres
 {% if acceptance_creds == 'aws' %}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
