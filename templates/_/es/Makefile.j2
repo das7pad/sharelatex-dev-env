@@ -53,6 +53,11 @@ test_clean:
 
 test_acceptance_pre_run:
 	@[ ! -f test/acceptance/scripts/pre-run ] && echo "{{ name }} has no pre acceptance tests task" || $(DOCKER_COMPOSE) run --rm test_acceptance test/acceptance/scripts/pre-run
+
+{% block build_app %}
+build_app:
+{% endblock %}
+
 build:
 	docker pull node:{{ node_version }}
 	docker build --tag ci/{{ label_docker_image }}-build \

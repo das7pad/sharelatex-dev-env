@@ -14,3 +14,8 @@
 {% block test %}
 test: test_unit test_acceptance
 {% endblock %}
+
+{% block build_app %}
+build_app:
+	npm run compile:all
+{% endblock %}

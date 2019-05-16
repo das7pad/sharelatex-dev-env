@@ -1,6 +1,0 @@
-{% extends '_/es/Dockerfile.j2' %}
-
-{% block app %}
-{{ super() -}}
-RUN npm run compile:all
-{% endblock %}
