@@ -27,6 +27,9 @@ services:
       - .:/app
 {% if name == 'clsi' %}
       - /var/run/docker.sock:/var/run/docker.sock:rw
+      - ./compiles:/app/compiles
+      - ./cache:/app/cache
+      - ./bin/synctex:/app/bin/synctex
 {% endif %}
     working_dir: /app
     environment:
