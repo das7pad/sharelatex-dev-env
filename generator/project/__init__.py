@@ -10,8 +10,14 @@ from generator.version import __version__
 REPO = pathlib.Path(__file__).parent.parent.parent
 TEMPLATES = REPO / 'templates'  # type: pathlib.Path
 
+Cfg = typing.Dict[str, typing.Union[str, typing.List[str]]]
+
 
 logger = logging.getLogger(__name__)
+
+
+class InvalidConfig(Exception):
+    """check the log for an explanation"""
 
 
 class Project:
@@ -113,6 +119,9 @@ class Project:
     ) -> 'Project':
         raw = cls.get_cfg_path(path).read_text()
         kwargs = cls._parse_cfg(raw)
+        code = cls._validate_cfg(kwargs)
+        if code:
+            raise InvalidConfig(code)
 
         target = cls._get_subclass(kwargs['language'])
         del kwargs['language']
@@ -164,7 +173,7 @@ class Project:
     @staticmethod
     def _parse_cfg(
         raw: str,
-    ) -> typing.Dict[str, typing.Union[str, typing.List[str]]]:
+    ) -> Cfg:
         kwargs = {}
 
         for line in raw.splitlines():
@@ -183,6 +192,21 @@ class Project:
             kwargs[argument.replace('-', '_')] = value
 
         return kwargs
+
+    @staticmethod
+    def _validate_cfg(
+        cfg: Cfg,
+    ) -> int:
+        for argument, value in cfg.items():
+            if argument == 'dependencies':
+                if not isinstance(value, list):
+                    logger.warning(
+                        '%s is a list, add a trailing comma.',
+                        argument,
+                    )
+                    return 1
+
+        return 0
 
     def _get_cfg_fields(
         self,

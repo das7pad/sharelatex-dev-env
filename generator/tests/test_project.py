@@ -3,7 +3,7 @@ import shutil
 import tempfile
 import unittest
 
-from generator.project import Project
+from generator.project import Project, InvalidConfig
 
 
 def strip_indent(raw):
@@ -161,6 +161,34 @@ class TestProject(unittest.TestCase):
         }
 
         self.assertDictEqual(actual, expected)
+
+    def test_validate_cfg_single_dep(self):
+        actual = Project._validate_cfg(
+            {
+                'name': 'NAME',
+                'dependencies': 'single',
+            }
+        )
+
+        self.assertEqual(actual, 1)
+
+    def test_parser_invalid_cfg(self):
+        project_in = strip_indent(
+            """
+            NAME
+            --dependencies=single
+            """
+        )
+
+        Project.get_cfg_path(self.project_path).write_text(project_in)
+
+        with self.assertRaises(InvalidConfig) as context:
+            Project.from_path(self.project_path)
+
+        actual = context.exception.args
+        expected = InvalidConfig(1).args
+
+        self.assertEqual(actual, expected)
 
     def test_keep_scrambled(self):
         project_in = strip_indent(
