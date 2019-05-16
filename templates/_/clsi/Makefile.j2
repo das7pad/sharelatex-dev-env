@@ -1,0 +1,10 @@
+{% extends '_/coffeescript/Makefile.j2' %}
+
+{% block clean_test_acceptance %}
+clean_test_acceptance:
+	$(DOCKER_COMPOSE) run --rm test_acceptance \
+		bash -c 'rm -rf \
+			/app/cache/* \
+			/app/compiles/* \
+		'
+{% endblock %}
