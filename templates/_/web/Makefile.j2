@@ -181,9 +181,12 @@ clean_modules:
 clean_css:
 	rm -f public/stylesheets/*.css*
 
+clean_test_acceptance: clean_test_acceptance_app
+clean_test_acceptance: clean_test_acceptance_modules
+clean_test_acceptance: clean_test_frontend
+
 clean_ci: clean_build
-clean_ci: clean_test_acceptance_modules
-clean_ci: clean_test_frontend
+clean_ci: clean_test_acceptance
 	rm -f $(MODULE_MAKEFILES)
 
 test: test_unit test_frontend test_acceptance
@@ -212,6 +215,9 @@ test_acceptance_run: test_acceptance_app_run test_acceptance_modules_run
 test_acceptance_app_run:
 	COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 	COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_acceptance npm -q run test:acceptance:run_dir test/acceptance/js
+	COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+
+clean_test_acceptance_app:
 	COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 
 TEST_ACCEPTANCE_MODULES = $(addsuffix /test_acceptance,$(MODULE_DIRS))
