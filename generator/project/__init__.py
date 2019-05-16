@@ -216,6 +216,8 @@ class Project:
         for field, value in sorted(cfg.items(), key=get_pos):
             if isinstance(value, list):
                 value = ','.join(value)
+                if ',' not in value:
+                    value += ','
             lines.append(
                 '--{field}={value}'.format(
                     field=field.replace('_', '-'),
