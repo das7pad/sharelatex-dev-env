@@ -3,7 +3,6 @@
 {% block app %}
 WORKDIR /app
 
-#wildcard as some files may not be in all repos
 COPY package.json npm-shrinkwrap.json /app/
 
 RUN npm install --quiet
