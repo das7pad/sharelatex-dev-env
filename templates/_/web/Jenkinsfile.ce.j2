@@ -39,6 +39,29 @@
         }
 {% endblock %}
 
+{% block archive %}
+        stage('archive public') {
+          steps {
+            sh '''docker run \
+              --rm \
+              --entrypoint tar \
+              $IMAGE_CI \
+                --create \
+                --xz \
+                -C /app/public \
+                . \
+              > public.tar.xz
+            '''
+            archiveArtifacts artifacts: 'public.tar.xz', fingerprint: true
+          }
+          post {
+            cleanup {
+              sh 'rm -f public.tar.xz'
+            }
+          }
+        }
+{% endblock %}
+
 {% block post %}
   post {
     cleanup {
