@@ -96,9 +96,8 @@ pipeline {
           }
         }
 
-{% block acceptance_tests %}
+        stage('Acceptance Tests') {
 {% if acceptance_creds == 'aws' %}
-        stage('Acceptance Tests S3') {
           when {
             allOf {
               expression {
@@ -115,28 +114,18 @@ pipeline {
             AWS_ACCESS_KEY_ID = "$AWS_ACCESS_USR"
             AWS_SECRET_ACCESS_KEY = "$AWS_ACCESS_PSW"
           }
-          steps {
-            sh 'make test_acceptance'
-          }
-          post {
-            cleanup {
-              sh 'make clean_test_acceptance'
-            }
-          }
-        }
-{% else %}
-        stage('Acceptance Tests') {
-          steps {
-            sh 'make test_acceptance'
-          }
-          post {
-            cleanup {
-              sh 'make clean_test_acceptance'
-            }
-          }
-        }
 {% endif %}
+{% block acceptance_tests %}
+          steps {
+            sh 'make test_acceptance'
+          }
 {% endblock %}
+          post {
+            cleanup {
+              sh 'make clean_test_acceptance'
+            }
+          }
+        }
       }
     }
 

@@ -19,7 +19,6 @@
 {% endblock %}
 
 {% block acceptance_tests %}
-        stage('Acceptance Tests') {
           parallel {
             stage('Module Acceptance Tests') {
               steps {
@@ -39,7 +38,6 @@
               }
             }
           }
-        }
 {% endblock %}
 
 {% block archive %}
