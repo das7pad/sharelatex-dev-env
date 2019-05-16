@@ -1,6 +1,6 @@
 {% extends '_/coffeescript/Jenkinsfile.ce.j2' %}
 
-{% block acceptance_tests %}
+{% block lint %}
         stage('Code Style') {
           parallel {
             stage('Lint') {
@@ -16,6 +16,9 @@
             }
           }
         }
+{% endblock %}
+
+{% block acceptance_tests %}
         stage('Acceptance Tests') {
           parallel {
             stage('Module Acceptance Tests') {
