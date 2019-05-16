@@ -205,6 +205,13 @@ class Project:
                         argument,
                     )
                     return 1
+                for dep in value:
+                    if dep == 'redis':
+                        logger.warning(
+                            'specify which redis instance is required: '
+                            'e.g. "redis_api"'
+                        )
+                        return 2
 
         return 0
 

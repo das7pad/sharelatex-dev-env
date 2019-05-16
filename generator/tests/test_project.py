@@ -172,6 +172,18 @@ class TestProject(unittest.TestCase):
 
         self.assertEqual(actual, 1)
 
+    def test_validate_cfg_single_redis(self):
+        actual = Project._validate_cfg(
+            {
+                'name': 'NAME',
+                'dependencies': [
+                    'redis',
+                ],
+            }
+        )
+
+        self.assertEqual(actual, 2)
+
     def test_parser_invalid_cfg(self):
         project_in = strip_indent(
             """
@@ -217,7 +229,7 @@ class TestProject(unittest.TestCase):
             --language=LANGUAGE
             --node-version=1.2.3
             --acceptance-creds=None
-            --dependencies=mongo,redis
+            --dependencies=mongo,redis_api
             --docker-repos=example.com/images
             --unknown-arg=VALUE
             """
@@ -232,7 +244,7 @@ class TestProject(unittest.TestCase):
             acceptance_creds=None,
             dependencies=[
                 'mongo',
-                'redis',
+                'redis_api',
             ],
             docker_repos='example.com/images',
             unknown_arg='VALUE',
