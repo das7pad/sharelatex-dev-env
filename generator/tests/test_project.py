@@ -164,6 +164,19 @@ class TestProject(unittest.TestCase):
         self.assertDictEqual(actual, expected)
 
     @mock.patch('generator.project.logger.warning')
+    def test_validate_cfg_no_dep(self, warning):
+        actual = Project._validate_cfg(
+            {
+                'name': 'NAME',
+                'dependencies': '',
+            }
+        )
+
+        self.assertEqual(actual, 0)
+
+        warning.assert_not_called()
+
+    @mock.patch('generator.project.logger.warning')
     def test_validate_cfg_single_dep(self, warning):
         actual = Project._validate_cfg(
             {

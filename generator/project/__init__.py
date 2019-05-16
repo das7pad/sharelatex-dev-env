@@ -199,6 +199,8 @@ class Project:
     ) -> int:
         for argument, value in cfg.items():
             if argument == 'dependencies':
+                if not value:
+                    continue
                 if not isinstance(value, list):
                     logger.warning(
                         '%s is a list, add a trailing comma.',
