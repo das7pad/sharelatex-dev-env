@@ -2,6 +2,7 @@ import pathlib
 import shutil
 import tempfile
 import unittest
+from unittest import mock
 
 from generator.project import Project, InvalidConfig
 
@@ -162,7 +163,8 @@ class TestProject(unittest.TestCase):
 
         self.assertDictEqual(actual, expected)
 
-    def test_validate_cfg_single_dep(self):
+    @mock.patch('generator.project.logger.warning')
+    def test_validate_cfg_single_dep(self, warning):
         actual = Project._validate_cfg(
             {
                 'name': 'NAME',
@@ -172,7 +174,10 @@ class TestProject(unittest.TestCase):
 
         self.assertEqual(actual, 1)
 
-    def test_validate_cfg_single_redis(self):
+        warning.assert_called()
+
+    @mock.patch('generator.project.logger.warning')
+    def test_validate_cfg_single_redis(self, warning):
         actual = Project._validate_cfg(
             {
                 'name': 'NAME',
@@ -184,7 +189,10 @@ class TestProject(unittest.TestCase):
 
         self.assertEqual(actual, 2)
 
-    def test_parser_invalid_cfg(self):
+        warning.assert_called()
+
+    @mock.patch('generator.project.logger.warning')
+    def test_parser_invalid_cfg(self, warning):
         project_in = strip_indent(
             """
             NAME
@@ -201,6 +209,8 @@ class TestProject(unittest.TestCase):
         expected = InvalidConfig(1).args
 
         self.assertEqual(actual, expected)
+
+        warning.assert_called()
 
     def test_keep_scrambled(self):
         project_in = strip_indent(
