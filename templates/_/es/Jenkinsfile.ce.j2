@@ -1,15 +1,6 @@
 {% from 'macros/header.j2' import header with context %}
 {{ header('//') }}
 
-{% set url_texlive_docker_image = (
-    'https://github.com/das7pad/sharelatex-docker-images.git#:texlive'
-  ) %}
-{% set docker_image_texlive_origin = (
-    '$SHARELATEX_DOCKER_REPOS/texlive:full-2017'
-  ) %}
-{% set docker_image_texlive_upstream = (
-    'quay.io/sharelatex/texlive-full:2017.1'
-  ) %}
 {% set docker_image_app = (
     name + ':$BRANCH_NAME-$BUILD_NUMBER'
   ) %}

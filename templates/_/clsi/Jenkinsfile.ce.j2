@@ -1,5 +1,15 @@
 {% extends '_/coffeescript/Jenkinsfile.ce.j2' %}
 
+{% set docker_image_texlive_origin = (
+    '$SHARELATEX_DOCKER_REPOS/texlive:full-2017'
+  ) %}
+{% set url_texlive_docker_image = (
+    'https://github.com/das7pad/sharelatex-docker-images.git#:texlive'
+  ) %}
+{% set docker_image_texlive_upstream = (
+    'quay.io/sharelatex/texlive-full:2017.1'
+  ) %}
+
 {% block pull_external %}
         stage('Pull Texlive') {
           when {
