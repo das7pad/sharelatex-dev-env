@@ -246,7 +246,7 @@ class TestProject(unittest.TestCase):
         self.assertFalse(project._dump_cfg())
         self.assertEqual(actual, project_in)
 
-    def test_silent_version_bump_with_no_changes(self):
+    def test_drop_script_version_(self):
         project_in = strip_indent(
             """
             NAME
@@ -254,41 +254,21 @@ class TestProject(unittest.TestCase):
             --script-version=0.0.1
             """
         )
-
-        Project.get_cfg_path(self.project_path).write_text(project_in)
-
-        project = Project.from_path(
-            path=self.project_path,
-        )
-        self.assertFalse(project._dump_cfg())
-        actual = Project.get_cfg_path(self.project_path).read_text()
-        self.assertEqual(actual, project_in)
-
-    def test_noisy_version_bump_upon_changes(self):
-        base_project = strip_indent(
+        project_out = strip_indent(
             """
             NAME
             --language=LANGUAGE
-            --script-version=%s
             """
         )
 
-        def get_cfg(version):
-            return base_project % version
-
-        project_in = get_cfg('0.0.1')
         Project.get_cfg_path(self.project_path).write_text(project_in)
 
         project = Project.from_path(
             path=self.project_path,
         )
-
-        # some deployed file changed
-        project._changed = True
-
         self.assertTrue(project._dump_cfg())
         actual = Project.get_cfg_path(self.project_path).read_text()
-        self.assertEqual(actual, get_cfg(__version__))
+        self.assertEqual(actual, project_out)
 
     def test_init(self):
         project_in = strip_indent(
@@ -379,22 +359,19 @@ class TestProject(unittest.TestCase):
             --language=LANGUAGE
             --other-arg=1
             --unknown-arg=VALUE
-            --script-version=%s
             """
-        ) % __version__
+        )
         project_1 = GenericProject(
             name='NAME',
             path=self.project_path,
-            script_version=__version__,
             unknown_arg='VALUE',
             other_arg='1',
         )
         project_2 = GenericProject(
             name='NAME',
             path=self.project_path,
-            unknown_arg='VALUE',
             other_arg='1',
-            script_version=__version__,
+            unknown_arg='VALUE',
         )
         actual_1 = project_1._serialize_cfg()
         actual_2 = project_2._serialize_cfg()
@@ -417,13 +394,11 @@ class TestProject(unittest.TestCase):
     def test_get_template_path_preference(self):
         templates = self.templates_path
         file = 'dummy.j2'
-        script_version = '1.2.3'
         name = 'NAME'
         project = GenericProject(
             name=name,
             path=self.project_path,
             templates=templates,
-            script_version=script_version,
         )
         language = project.language
 

@@ -24,5 +24,4 @@ class ESProject(Project):
             'kube',
             'build_target',
             self.insert_marker,
-            'script_version',
         ]

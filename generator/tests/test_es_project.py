@@ -47,13 +47,11 @@ class TestESProject(unittest.TestCase):
             --docker-repos=example.com/images
             --other-arg=1
             --unknown-arg=VALUE
-            --script-version=%s
             """
-        ) % __version__
+        )
         project_1 = ESProject(
             name='NAME',
             path=self.project_path,
-            script_version=__version__,
             node_version='1.2.3',
             dependencies=[
                 'mongo',
@@ -74,7 +72,6 @@ class TestESProject(unittest.TestCase):
                 'mongo',
                 'redis',
             ],
-            script_version=__version__,
             acceptance_creds=None,
             other_arg='1',
         )

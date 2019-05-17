@@ -45,6 +45,9 @@ class Project:
         self._templates = templates
         self._changed = False
 
+        if 'script_version' in self:
+            del self['script_version']
+
         search_path = self._get_search_path(
             templates=templates,
             project_name=name,
@@ -212,7 +215,6 @@ class Project:
         return [
             'language',
             self.insert_marker,
-            'script_version',
         ]
 
     def _serialize_cfg(
