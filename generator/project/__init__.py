@@ -79,6 +79,11 @@ class Project:
     def __contains__(self, item):
         return item in self._kwargs
 
+    def __delitem__(self, key):
+        if key in self:
+            self._changed = True
+        del self._kwargs[key]
+
     def __getitem__(self, item):
         return self._kwargs[item]
 
