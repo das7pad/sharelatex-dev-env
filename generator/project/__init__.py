@@ -34,21 +34,22 @@ class Project:
         templates: pathlib.Path = TEMPLATES,
         **kwargs
     ):
+        self._org_kwargs = copy.deepcopy(kwargs)
+
+        if update:
+            kwargs['script_version'] = script_version = __version__
+        elif 'script_version' in kwargs:
+            script_version = kwargs['script_version']
+        else:
+            script_version = None
+
         self._name = name
         self._path = path
         self._dry_run = dry_run
         self._kwargs = kwargs
-        self._org_kwargs = copy.deepcopy(kwargs)
         self._templates = templates
         self._update = update
         self._changed = False
-
-        if update:
-            self['script_version'] = script_version = __version__
-        elif 'script_version' in self:
-            script_version = self['script_version']
-        else:
-            script_version = None
 
         search_path = self._get_search_path(
             templates=templates,

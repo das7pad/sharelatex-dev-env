@@ -5,6 +5,7 @@ import unittest
 from unittest import mock
 
 from generator.project import Project, InvalidConfig
+from generator.version import __version__
 
 
 def strip_indent(raw):
@@ -244,6 +245,52 @@ class TestProject(unittest.TestCase):
         actual = Project.get_cfg_path(self.project_path).read_text()
         self.assertFalse(project._dump_cfg())
         self.assertEqual(actual, project_in)
+
+    def test_silent_version_bump_with_no_changes(self):
+        project_in = strip_indent(
+            """
+            NAME
+            --language=LANGUAGE
+            --script-version=0.0.1
+            """
+        )
+
+        Project.get_cfg_path(self.project_path).write_text(project_in)
+
+        project = Project.from_path(
+            path=self.project_path,
+            update=True,
+        )
+        self.assertFalse(project._dump_cfg())
+        actual = Project.get_cfg_path(self.project_path).read_text()
+        self.assertEqual(actual, project_in)
+
+    def test_noisy_version_bump_upon_changes(self):
+        base_project = strip_indent(
+            """
+            NAME
+            --language=LANGUAGE
+            --script-version=%s
+            """
+        )
+
+        def get_cfg(version):
+            return base_project % version
+
+        project_in = get_cfg('0.0.1')
+        Project.get_cfg_path(self.project_path).write_text(project_in)
+
+        project = Project.from_path(
+            path=self.project_path,
+            update=True,
+        )
+
+        # some deployed file changed
+        project._changed = True
+
+        self.assertTrue(project._dump_cfg())
+        actual = Project.get_cfg_path(self.project_path).read_text()
+        self.assertEqual(actual, get_cfg(__version__))
 
     def test_init(self):
         project_in = strip_indent(
