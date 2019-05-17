@@ -1,3 +1,6 @@
+{% from 'macros/header.j2' import header with context %}
+{{ header('#') }}
+
 {% set label_docker_image = '$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)' -%}
 
 DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
