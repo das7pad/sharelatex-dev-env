@@ -436,18 +436,10 @@ class TestProject(unittest.TestCase):
             return merged
 
         preference = [
-            ('VERSION_NAME_COMMON',
-             merge_path(script_version, name) / 'common'),
-            ('VERSION_NAME', merge_path(script_version, name)),
             ('NAME_COMMON', merge_path(name) / 'common'),
             ('NAME', merge_path(name)),
-            ('VERSION_LANG_COMMON',
-             merge_path(script_version, language) / 'common'),
-            ('VERSION_LANG', merge_path(script_version, language)),
             ('LANG_COMMON', merge_path(language) / 'common'),
             ('LANG', merge_path(language)),
-            ('VERSION_COMMON', merge_path(script_version) / 'common'),
-            ('VERSION', merge_path(script_version)),
             ('GLOBAL_COMMON', templates / 'common'),
             ('GLOBAL', templates),
         ]

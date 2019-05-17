@@ -54,7 +54,6 @@ class Project:
         search_path = self._get_search_path(
             templates=templates,
             project_name=name,
-            script_version=script_version,
         )
 
         self._template_env = jinja2.Environment(
@@ -139,7 +138,6 @@ class Project:
         cls,
         templates: pathlib.Path,
         project_name: str,
-        script_version: str = None,
     ):
         search_path = []
         categories = [
@@ -156,13 +154,6 @@ class Project:
             else:
                 postfix = ''
 
-            if script_version:
-                search_path.append(
-                    templates / '_' / script_version / postfix / 'common'
-                )
-                search_path.append(
-                    templates / '_' / script_version / postfix
-                )
             search_path.append(templates / postfix / 'common')
             search_path.append(templates / postfix)
         return search_path
