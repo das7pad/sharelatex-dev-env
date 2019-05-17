@@ -4,6 +4,14 @@ from generator.project import Project
 class ESProject(Project):
     language = 'es'
 
+    @classmethod
+    def _get_deleted_templates(cls):
+        return super()._get_deleted_templates().union(
+            {
+                'docker-compose-config.yml',
+            }
+        )
+
     def _get_cfg_fields(
         self,
     ):

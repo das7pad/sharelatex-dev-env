@@ -391,36 +391,22 @@ class Project:
 
         return list(sorted(files))
 
+    @staticmethod
+    def _get_deleted_templates() -> typing.Set[str]:
+        return set()
+
     def _delete_orphan_files(
         self,
     ) -> int:
-        if 'script_version' in self._org_kwargs:
-            old_version = self._org_kwargs['script_version']
-        else:
-            old_version = None
-        old_files = set(
-            self._get_files_to_update(
-                search_path=self._get_search_path(
-                    templates=self._templates,
-                    project_name=self._name,
-                    script_version=old_version,
-                )
-            )
-        )
-
-        new_files = set(self._get_files_to_update())
-
-        diff = old_files - new_files
-        if not diff:
-            return 0
-
-        self._changed = True
-        for file in diff:
+        deleted = 0
+        for file in self._get_deleted_templates():
             path = self._path / file
             if path.exists():
+                self._changed = True
+                deleted += 1
                 path.unlink()
 
-        return len(diff)
+        return deleted
 
     def process(
         self,

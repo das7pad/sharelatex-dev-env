@@ -483,24 +483,26 @@ class TestProject(unittest.TestCase):
         self.assertEqual(target.read_text(), 'THE CONTENT')
 
     def test_delete_orphan(self):
-        templates = self.templates_path
-        old_version = '0.0.0'
-        old_path = templates / '_' / old_version / 'old.j2'
-        old_path.parent.mkdir(parents=True)
-        old_path.touch()
-        (templates / 'new.j2').touch()
+        class DemoProject(GenericProject):
+            @staticmethod
+            def _get_deleted_templates():
+                return {'old'}
 
-        project = GenericProject(
+        project = DemoProject(
             name='NAME',
             path=self.project_path,
-            templates=templates,
-            script_version=old_version,
+            templates=self.templates_path,
             update=True,
         )
+
+        # nothing there yet to delete
+        self.assertEqual(project._delete_orphan_files(), 0)
+
         (self.project_path / 'old').touch()
 
-        self.assertTrue((self.project_path / 'old').exists())
-        project._delete_orphan_files()
+        self.assertEqual(project._delete_orphan_files(), 1)
+        self.assertTrue(project._changed)
+
         self.assertFalse((self.project_path / 'old').exists())
 
     def test_process(self):
