@@ -1,9 +1,1 @@
-#!/usr/bin/env bash
-
-pushd "$(dirname `readlink -f ${BASH_SOURCE[0]}`)" > /dev/null
-
-GENERATE=$(realpath ./generate)
-
-popd > /dev/null
-
-exec ${GENERATE} --update $@
+generate

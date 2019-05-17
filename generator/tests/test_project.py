@@ -259,7 +259,6 @@ class TestProject(unittest.TestCase):
 
         project = Project.from_path(
             path=self.project_path,
-            update=True,
         )
         self.assertFalse(project._dump_cfg())
         actual = Project.get_cfg_path(self.project_path).read_text()
@@ -282,7 +281,6 @@ class TestProject(unittest.TestCase):
 
         project = Project.from_path(
             path=self.project_path,
-            update=True,
         )
 
         # some deployed file changed
@@ -381,13 +379,13 @@ class TestProject(unittest.TestCase):
             --language=LANGUAGE
             --other-arg=1
             --unknown-arg=VALUE
-            --script-version=3.2.1
+            --script-version=%s
             """
-        )
+        ) % __version__
         project_1 = GenericProject(
             name='NAME',
             path=self.project_path,
-            script_version='3.2.1',
+            script_version=__version__,
             unknown_arg='VALUE',
             other_arg='1',
         )
@@ -396,7 +394,7 @@ class TestProject(unittest.TestCase):
             path=self.project_path,
             unknown_arg='VALUE',
             other_arg='1',
-            script_version='3.2.1',
+            script_version=__version__,
         )
         actual_1 = project_1._serialize_cfg()
         actual_2 = project_2._serialize_cfg()

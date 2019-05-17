@@ -30,25 +30,19 @@ class Project:
         name: str,
         path: pathlib.Path,
         dry_run: bool = False,
-        update: bool = False,
         templates: pathlib.Path = TEMPLATES,
         **kwargs
     ):
         self._org_kwargs = copy.deepcopy(kwargs)
 
-        if update:
-            kwargs['script_version'] = script_version = __version__
-        elif 'script_version' in kwargs:
-            script_version = kwargs['script_version']
-        else:
-            script_version = None
+        if 'script_version' in kwargs:
+            kwargs['script_version'] = __version__
 
         self._name = name
         self._path = path
         self._dry_run = dry_run
         self._kwargs = kwargs
         self._templates = templates
-        self._update = update
         self._changed = False
 
         search_path = self._get_search_path(
@@ -115,7 +109,6 @@ class Project:
         cls,
         path: pathlib.Path,
         dry_run: bool = False,
-        update: bool = False,
     ) -> 'Project':
         raw = cls.get_cfg_path(path).read_text()
         kwargs = cls._parse_cfg(raw)
@@ -129,7 +122,6 @@ class Project:
         return target(
             path=path,
             dry_run=dry_run,
-            update=update,
             **kwargs
         )
 
