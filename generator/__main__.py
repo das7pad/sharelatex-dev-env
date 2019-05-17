@@ -40,13 +40,17 @@ def main(args: argparse.Namespace = None) -> int:
     if not args:
         args = get_args()
 
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s %(levelname)s %(name)s: %(message)s',
-    )
-
     for raw_path in args.path:
         path = pathlib.Path(raw_path)
+        logging.root.handlers.clear()
+        logging.basicConfig(
+            level=logging.INFO,
+            format=(
+                '{name}: %(levelname)s %(name)s: %(message)s'
+            ).format(
+                name=path.resolve().name,
+            ),
+        )
 
         try:
             project = Project.from_path(
