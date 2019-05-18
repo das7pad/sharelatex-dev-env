@@ -1,0 +1,14 @@
+{% extends '_/coffeescript/.dockerignore.j2' %}
+
+{% block config %}
+{{ super() }}
+
+!/seccomp/clsi-profile.json
+!/synctex.profile
+{% endblock %}
+
+{% block executables %}
+{{ super() }}
+
+!/bin/synctex
+{% endblock %}

@@ -1,0 +1,73 @@
+{% from 'macros/header.j2' import header with context %}
+{{ header('#') }}
+
+# ignore everything but our whitelist
+*
+
+!/LICENSE
+
+########
+# core #
+!/npm-shrinkwrap.json
+!/package.json
+# core #
+########
+
+########
+# make #
+{% block makefile %}
+!/Makefile
+{% endblock %}
+# make #
+########
+
+###########
+# scripts #
+{% block executables %}
+{% if has_install_deps %}
+!/install_deps.sh
+{% endif %}
+{% if has_entrypoint %}
+!/entrypoint.sh
+{% endif %}
+{% if has_setup_env %}
+!/setup_env.sh
+{% endif %}
+{% endblock %}
+# scripts #
+###########
+
+###############
+# tool config #
+{% block tool_config %}
+.eslintrc
+
+.prettierrc
+{% endblock %}
+# tool config #
+###############
+
+##############
+# app config #
+{% block config %}
+!/config/settings.defaults.js
+{% endblock %}
+# app config #
+##############
+
+#######
+# app #
+{% block app %}
+!/app.js
+!/app
+
+!/test/acceptance/config
+!/test/acceptance/fixtures
+!/test/acceptance/js
+!/test/acceptance/libs
+!/test/fixtures
+!/test/smoke/js
+!/test/unit/js
+{% endblock %}
+# app #
+#######

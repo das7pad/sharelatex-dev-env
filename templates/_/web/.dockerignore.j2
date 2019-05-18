@@ -1,0 +1,68 @@
+{% extends '_/coffeescript/.dockerignore.j2' %}
+
+{% block makefile %}
+{{ super() }}
+!/Makefile.module
+{% endblock %}
+
+{% block tool_config %}
+{{ super() }}
+!/.babelrc
+
+!/.eslintignore
+
+!/.prettierignore
+
+!/Gruntfile.coffee
+
+!/karma.conf.js
+
+!/webpack.config.js
+!/webpack.config.prod.js
+{% endblock %}
+
+{% block executables %}
+{{ super() }}
+!/bin/unit_test
+!/bin/unit_test_app
+{% endblock %}
+
+{% block app %}
+{{ super() }}
+!/app/templates
+!/app/views
+
+!/modules
+/modules/*/Makefile
+/modules/*/index.js
+/modules/*/app/js
+/modules/*/test/unit/js
+/modules/*/test/acceptance/js
+
+!/public/*.ico
+!/public/*.png
+!/public/*.svg
+!/public/*.txt
+
+!/public/brand
+!/public/font
+!/public/img
+
+!/public/js/ace-1.2.9
+!/public/js/libs
+/public/js/libs/angular-1.3.15.min.js
+/public/js/libs/pdfjs-1.8.188
+/public/js/libs/pdfjs-1.7.225
+
+!/public/recurly
+!/public/src
+!/public/static
+
+!/public/stylesheets/
+public/stylesheets/*.css
+public/stylesheets/*.map
+
+!/test/acceptance/files
+!/test/unit_frontend/es
+!/test/unit_frontend/src
+{% endblock %}
