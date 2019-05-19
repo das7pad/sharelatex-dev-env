@@ -5,7 +5,6 @@ import unittest
 from unittest import mock
 
 from generator.project import Project, InvalidConfig
-from generator.version import __version__
 
 
 def strip_indent(raw):

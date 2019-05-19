@@ -5,7 +5,6 @@ import unittest
 
 from generator.project import Project
 from generator.project.es import ESProject
-from generator.version import __version__
 
 
 def strip_indent(raw):
