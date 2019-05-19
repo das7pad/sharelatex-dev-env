@@ -370,13 +370,14 @@ class Project:
                     continue
 
                 if file.is_dir():
-                    intermediate.extend(file.glob('*'))
+                    intermediate.extend(file.glob('**/*'))
                 else:
                     intermediate.append(file)
 
             files.update(
                 str(file.relative_to(directory).with_suffix(''))
                 for file in intermediate
+                if file.is_file()
             )
 
         return list(sorted(files))

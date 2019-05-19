@@ -428,6 +428,35 @@ class TestProject(unittest.TestCase):
             self.assertEqual(path.read_text(), content)
             path.unlink()
 
+    def test_get_files_to_update(self):
+        templates = self.templates_path
+        project = GenericProject(
+            name='NAME',
+            path=self.project_path,
+            templates=templates,
+        )
+
+        def touch(path: pathlib.Path):
+            path.parent.mkdir(exist_ok=True)
+            path.write_text('')
+            return path
+
+        touch(templates / 'macros' / 'macro_one.j2')
+
+        touch(templates / 'level_one.j2')
+        touch(templates / 'one' / 'level_two.j2')
+        touch(templates / 'one' / 'two' / 'level_three.j2')
+        touch(templates / 'one' / 'two' / 'three' / 'level_four.j2')
+
+        expected = [
+            'level_one',
+            'one/level_two',
+            'one/two/level_three',
+            'one/two/three/level_four',
+        ]
+        actual = project._get_files_to_update()
+        self.assertEqual(actual, expected)
+
     def test_update_file(self):
         templates = self.templates_path
         target = self.project_path / 'dummy'
