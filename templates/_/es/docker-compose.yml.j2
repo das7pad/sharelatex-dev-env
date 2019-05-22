@@ -33,6 +33,7 @@ services:
 {% endif %}
     working_dir: /app
     environment:
+      LOG_LEVEL: fatal
 {% for dependency in dependencies %}
 {% if dependency.startswith('redis') %}
       {{ env_prefix[dependency[6:]] }}_REDIS_HOST: {{ dependency }}
