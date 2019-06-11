@@ -4,7 +4,11 @@ import pathlib
 import sys
 import typing
 
-from generator.project import Project, InvalidConfig
+from generator.project import (
+    Project,
+    InvalidConfig,
+    INHERIT,
+)
 
 
 def get_args(args: typing.Optional[typing.List[str]] = None):
@@ -33,6 +37,12 @@ def get_args(args: typing.Optional[typing.List[str]] = None):
         help='DEPRECATED',
     )
 
+    parser.add_argument(
+        '--node-version',
+        default=INHERIT,
+        help='Set the node version for a project',
+    )
+
     return parser.parse_args(args)
 
 
@@ -56,6 +66,7 @@ def main(args: argparse.Namespace = None) -> int:
             project = Project.from_path(
                 path=path,
                 dry_run=args.dry_run,
+                node_version=args.node_version,
             )
         except InvalidConfig as err:
             return err.args[0]

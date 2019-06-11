@@ -10,6 +10,8 @@ from generator.version import __version__
 REPO = pathlib.Path(__file__).parent.parent.parent
 TEMPLATES = REPO / 'templates'  # type: pathlib.Path
 
+INHERIT = object()
+
 Cfg = typing.Dict[str, typing.Union[str, typing.List[str]]]
 
 
@@ -117,6 +119,7 @@ class Project:
         cls,
         path: pathlib.Path,
         dry_run: bool = False,
+        **override
     ) -> 'Project':
         raw = cls.get_cfg_path(path).read_text()
         kwargs = cls._parse_cfg(raw)
@@ -127,11 +130,17 @@ class Project:
         target = cls._get_subclass(kwargs['language'])
         del kwargs['language']
 
-        return target(
+        instance = target(
             path=path,
             dry_run=dry_run,
             **kwargs
         )
+        for key, value in override.items():
+            if value is INHERIT:
+                continue
+            instance[key] = value
+
+        return instance
 
     @classmethod
     def _get_search_path(
