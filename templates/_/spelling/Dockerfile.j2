@@ -1,0 +1,9 @@
+{% extends '_/es/Dockerfile.j2' %}
+
+{% block runtime %}
+{{ super() }}
+VOLUME \
+    {{ [
+        '/app/cache',
+    ]|join(' \\\n    ') }}
+{% endblock %}
