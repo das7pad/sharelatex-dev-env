@@ -33,7 +33,7 @@ clean:
 
 {% block lint %}
 lint:
-	$(DOCKER_COMPOSE) run --rm test_unit npm run lint
+	$(DOCKER_COMPOSE) run --rm test_unit npx eslint .
 
 {% endblock %}
 {% block test %}
