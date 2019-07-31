@@ -138,7 +138,7 @@ services:
     command:
       - -c
       - >
-        sleep 1
+        sleep 2
         && mc config host add minio http://minio:9000 ${AWS_KEY} ${AWS_SECRET}
         && mc mb --ignore-existing minio/${AWS_BUCKET_USER}
         && mc mb --ignore-existing minio/${AWS_BUCKET_TEMPLATE}
