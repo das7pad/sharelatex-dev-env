@@ -1,0 +1,8 @@
+{% extends '_/coffeescript/Jenkinsfile.ce.j2' %}
+
+{% block acceptance_tests %}
+          steps {
+            sh 'make test_acceptance BACKEND=fs'
+            sh 'make test_acceptance BACKEND=s3'
+          }
+{% endblock %}

@@ -7,6 +7,17 @@ BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
 COMMIT ?= $(shell git rev-parse HEAD)
 RELEASE ?= $(shell git describe --tags | sed 's/-g/+/;s/^v//')
 PROJECT_NAME = {{ name }}
+{% if name == 'filestore' %}
+BACKEND ?= fs
+S3_BACKEND ?= aws-sdk
+S3_ENDPOINT ?= http://minio:9000
+S3_FORCE_PATH_STYLE ?= true
+AWS_KEY ?= $(shell openssl rand -hex 20)
+AWS_SECRET ?= $(shell openssl rand -hex 20)
+AWS_BUCKET_USER ?= user
+AWS_BUCKET_TEMPLATE ?= template
+AWS_BUCKET_PUBLIC ?= public
+{% endif %}
 DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
 DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 	BRANCH_NAME=$(BRANCH_NAME) \
@@ -16,6 +27,17 @@ DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 	AWS_BUCKET=${AWS_BUCKET} \
 	AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
 	AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
+{% endif %}
+{% if name == 'filestore' %}
+	BACKEND=$(BACKEND) \
+	S3_BACKEND=$(S3_BACKEND) \
+	S3_ENDPOINT=$(S3_ENDPOINT) \
+	S3_FORCE_PATH_STYLE=$(S3_FORCE_PATH_STYLE) \
+	AWS_KEY=$(AWS_KEY) \
+	AWS_SECRET=$(AWS_SECRET) \
+	AWS_BUCKET_USER=$(AWS_BUCKET_USER) \
+	AWS_BUCKET_TEMPLATE=$(AWS_BUCKET_TEMPLATE) \
+	AWS_BUCKET_PUBLIC=$(AWS_BUCKET_PUBLIC) \
 {% endif %}
 	docker-compose ${DOCKER_COMPOSE_FLAGS}
 
