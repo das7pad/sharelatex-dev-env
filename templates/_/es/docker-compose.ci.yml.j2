@@ -129,6 +129,7 @@ services:
     image: minio/minio
     command: server /data
     environment:
+      MINIO_BROWSER: 'off'
       MINIO_ACCESS_KEY: ${AWS_KEY}
       MINIO_SECRET_KEY: ${AWS_SECRET}
 
