@@ -46,6 +46,7 @@
             sh '''docker run \
               --rm \
               --volume $PWD/compress.sh:/compress.sh \
+              --user root \
               --workdir /app/public \
               --entrypoint sh \
               $IMAGE_CI \
