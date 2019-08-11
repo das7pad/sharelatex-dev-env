@@ -45,12 +45,12 @@
           steps {
             sh '''docker run \
               --rm \
-              --entrypoint tar \
+              --volume $PWD/compress.sh:/compress.sh \
+              --workdir /app/public \
+              --entrypoint sh \
               $IMAGE_CI \
-                --create \
-                --xz \
-                -C /app/public \
-                . \
+                -c '/compress.sh && tar --create .' \
+              | xz -9e \
               > public.tar.xz
             '''
             archiveArtifacts artifacts: 'public.tar.xz', fingerprint: true
