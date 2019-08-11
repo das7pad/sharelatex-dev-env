@@ -292,7 +292,12 @@ class Project:
             return 0
 
         path.parent.mkdir(parents=True, exist_ok=True)
-        return path.write_text(content)
+        written = path.write_text(content)
+
+        if path.suffix == '.sh':
+            path.chmod(0o755)
+
+        return written
 
     def _get_possible_project_files(
         self,
