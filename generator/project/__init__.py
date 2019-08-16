@@ -360,6 +360,9 @@ class Project:
         # allow at max two empty lines in a row
         new = re.sub(r'\n{3,}', '\n\n', new)
 
+        # strip all but the final trailing new line
+        new = new.strip('\n') + '\n'
+
         if current == new:
             return False
 

@@ -466,14 +466,14 @@ class TestProject(unittest.TestCase):
             templates=templates,
         )
         (templates / 'dummy.j2').write_text(
-            'THE {{ var }}'
+            'THE {{ var }}\n'
         )
 
         project._update_file(
             name='dummy',
             env={'var': 'CONTENT'},
         )
-        self.assertEqual(target.read_text(), 'THE CONTENT')
+        self.assertEqual(target.read_text(), 'THE CONTENT\n')
 
     def test_whitespace_cleanup(self):
         templates = self.templates_path
@@ -496,6 +496,10 @@ class TestProject(unittest.TestCase):
             {% endif %}
 
             INCLUDE ME
+
+            {% if false %}
+            SKIP THIS AS WELL
+            {% endif %}
             """
         )
         (templates / 'verbose.j2').write_text(template)
@@ -551,7 +555,7 @@ class TestProject(unittest.TestCase):
             templates=templates,
         )
         (templates / 'dummy.j2').write_text(
-            '{{ name }}'
+            '{{ name }}\n'
         )
 
         project.process()
@@ -559,4 +563,4 @@ class TestProject(unittest.TestCase):
         cfg_actual = project.get_cfg_path(self.project_path).read_text()
 
         self.assertEqual(cfg_actual, cfg_expected)
-        self.assertEqual(target.read_text(), 'NAME')
+        self.assertEqual(target.read_text(), 'NAME\n')
