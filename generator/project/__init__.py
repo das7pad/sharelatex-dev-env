@@ -1,6 +1,7 @@
 import copy
 import logging
 import pathlib
+import re
 import typing
 
 import jinja2
@@ -355,6 +356,10 @@ class Project:
         )
 
         new = template.render(**env)
+
+        # allow at max two empty lines in a row
+        new = re.sub(r'\n{3,}', '\n\n', new)
+
         if current == new:
             return False
 

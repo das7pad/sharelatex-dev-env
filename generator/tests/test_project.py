@@ -475,6 +475,44 @@ class TestProject(unittest.TestCase):
         )
         self.assertEqual(target.read_text(), 'THE CONTENT')
 
+    def test_whitespace_cleanup(self):
+        templates = self.templates_path
+        target = self.project_path / 'verbose'
+        project = GenericProject(
+            name='NAME',
+            path=self.project_path,
+            templates=templates,
+        )
+        template = strip_indent(
+            """
+            THE {{ var }}
+
+            {% if false %}
+            SKIP
+            {% endif %}
+
+            {% if false %}
+            SKIP THIS TOO
+            {% endif %}
+
+            INCLUDE ME
+            """
+        )
+        (templates / 'verbose.j2').write_text(template)
+
+        project._update_file(
+            name='verbose',
+            env={'var': 'CONTENT'},
+        )
+        expected = strip_indent(
+            """
+            THE CONTENT
+
+            INCLUDE ME
+            """
+        )
+        self.assertEqual(expected, target.read_text())
+
     def test_delete_orphan(self):
         class DemoProject(GenericProject):
             @staticmethod
