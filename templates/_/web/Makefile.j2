@@ -40,7 +40,7 @@ SRC_FILES := $(FRONT_END_SRC_FILES) $(TEST_SRC_FILES)
 JS_FILES := $(subst coffee,js,$(COFFEE_FILES))
 OUTPUT_SRC_FILES := $(subst src,js,$(SRC_FILES))
 LESS_FILES := $(shell find public/stylesheets -name '*.less')
-LESSC_COMMON_FLAGS := --source-map --autoprefix="last 2 versions, ie >= 10"
+LESSC_COMMON_FLAGS := --source-map --autoprefix="last 2 versions, ie >= 10" --relative-urls
 CLEANCSS_FLAGS := --s0 --source-map
 
 LESS_SL_FILE := public/stylesheets/sl-style.less
