@@ -178,6 +178,7 @@ pipeline {
     cleanup {
       sh 'make test_clean'
       sh 'make clean'
+      sh 'docker rmi --force $IMAGE_NODE'
     }
   }
 {% endblock %}
