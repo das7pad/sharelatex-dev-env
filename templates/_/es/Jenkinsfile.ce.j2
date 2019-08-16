@@ -22,6 +22,7 @@ pipeline {
   environment {
     DOCKER_COMPOSE_FLAGS = "-f docker-compose.ci.yml"
     IMAGE_CI = "ci/{{ docker_image_app }}"
+    IMAGE_NODE = 'node:{{ node_version }}'
   }
 
   stages {
@@ -34,6 +35,22 @@ pipeline {
         }
 {% block pull_external %}
 {% endblock %}
+        stage('Pull node image') {
+            when {
+                expression {
+                    env.DOCKER_REGISTRY != null
+                }
+            }
+            steps {
+                sh 'docker pull $DOCKER_REGISTRY/$IMAGE_NODE'
+                sh 'docker tag $DOCKER_REGISTRY/$IMAGE_NODE $IMAGE_NODE'
+            }
+            post {
+                cleanup {
+                    sh 'docker rmi --force $DOCKER_REGISTRY/$IMAGE_NODE'
+                }
+            }
+        }
         stage('Pull Cache') {
           when {
             expression {

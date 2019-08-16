@@ -250,7 +250,6 @@ lint:
 	npm -q run lint
 
 build:
-	docker pull node:{{ node_version }}
 	docker build --tag ci/{{ label_docker_image }}-build \
 		--cache-from ci/{{ label_docker_image }}-build-cache \
 		--target app \
