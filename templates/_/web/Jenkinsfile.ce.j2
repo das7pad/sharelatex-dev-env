@@ -63,12 +63,3 @@
           }
         }
 {% endblock %}
-
-{% block post %}
-  post {
-    cleanup {
-      sh 'make clean_ci'
-      sh 'docker rmi --force $IMAGE_NODE'
-    }
-  }
-{% endblock %}

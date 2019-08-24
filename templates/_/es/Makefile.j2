@@ -41,8 +41,11 @@ DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 {% endif %}
 	docker-compose ${DOCKER_COMPOSE_FLAGS}
 
-clean:
-{% block clean %}
+clean_ci: clean
+clean_ci: clean_build
+clean_ci: test_clean
+
+clean_build:
 	docker rmi \
 		ci/{{ label_docker_image }} \
 		ci/{{ label_docker_image }}-cache \
@@ -50,7 +53,10 @@ clean:
 		ci/{{ label_docker_image }}-build-cache \
 		{{ docker_repos }}/{{ label_docker_image }} \
 		--force
-{%- endblock %}
+
+clean:
+{% block clean %}
+{% endblock %}
 
 {% block lint %}
 lint:

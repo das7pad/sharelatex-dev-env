@@ -192,8 +192,7 @@ pipeline {
 {% block post %}
   post {
     cleanup {
-      sh 'make test_clean'
-      sh 'make clean'
+      sh 'make clean_ci'
       sh 'docker rmi --force $IMAGE_NODE'
     }
   }
