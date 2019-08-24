@@ -1,48 +1,44 @@
 {% from 'macros/header.j2' import header with context %}
 {{ header('#') }}
 
-FROM node:{{ node_version }} as app
-
-{% block app %}
-WORKDIR /app
-
-COPY package.json npm-shrinkwrap.json /app/
-
-RUN npm install --quiet
-
-COPY . /app
-
-RUN make build_app
-
-{% endblock %}
-
 FROM node:{{ node_version }}
 
-{% block runtime %}
 CMD ["node", "--expose-gc", "app.js"]
-
-WORKDIR /app
 
 {% if has_entrypoint %}
 ENTRYPOINT ["/bin/sh", "entrypoint.sh"]
 {% endif %}
 
+WORKDIR /app
+
+COPY docker_cleanup.sh /
+
 {% if has_install_deps %}
-COPY install_deps.sh /app
+COPY install_deps.sh /app/
 RUN /app/install_deps.sh
 {% endif %}
 
-COPY --from=app /app /app
+COPY package.json npm-shrinkwrap.json /app/
+
+RUN /docker_cleanup.sh npm ci
+
+{% block pre_copy %}
+{% endblock %}
+
+COPY . /app
+
+RUN /docker_cleanup.sh make build_app
 
 {% if has_setup_env %}
 RUN /app/setup_env.sh
-
 {% endif -%}
+
+{% block volumes %}
+{% endblock %}
 
 {% if not has_entrypoint %}
 USER node
 {% endif %}
-{% endblock %}
 
 ARG RELEASE
 ARG COMMIT

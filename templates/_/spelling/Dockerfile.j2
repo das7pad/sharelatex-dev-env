@@ -1,7 +1,6 @@
 {% extends '_/es/Dockerfile.j2' %}
 
-{% block runtime %}
-{{ super() }}
+{% block volumes %}
 VOLUME \
     {{ [
         '/app/cache',

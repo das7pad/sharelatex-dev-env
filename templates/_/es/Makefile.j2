@@ -49,8 +49,6 @@ clean_build:
 	docker rmi \
 		ci/{{ label_docker_image }} \
 		ci/{{ label_docker_image }}-cache \
-		ci/{{ label_docker_image }}-build \
-		ci/{{ label_docker_image }}-build-cache \
 		--force
 
 clean:
@@ -89,13 +87,8 @@ build_app:
 {% endblock %}
 
 build:
-	docker build --tag ci/{{ label_docker_image }}-build \
-		--cache-from ci/{{ label_docker_image }}-build-cache \
-		--target app \
-		.
 	docker build --tag ci/{{ label_docker_image }} \
 		--cache-from ci/{{ label_docker_image }}-cache \
-		--cache-from ci/{{ label_docker_image }}-build \
 		--build-arg RELEASE=$(RELEASE) \
 		--build-arg COMMIT=$(COMMIT) \
 		.
