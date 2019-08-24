@@ -255,7 +255,6 @@ build:
 		--target app \
 		.
 	docker build --tag ci/{{ label_docker_image }} \
-		--tag {{ docker_repos }}/{{ label_docker_image }} \
 		--cache-from ci/{{ label_docker_image }}-cache \
 		--cache-from ci/{{ label_docker_image }}-build \
 		--build-arg RELEASE=$(RELEASE) \
@@ -268,7 +267,6 @@ clean_build:
 		ci/{{ label_docker_image }}-cache \
 		ci/{{ label_docker_image }}-build \
 		ci/{{ label_docker_image }}-build-cache \
-		{{ docker_repos }}/{{ label_docker_image }} \
 
 build_test_frontend:
 	COMPOSE_PROJECT_NAME=frontend_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) build test_frontend

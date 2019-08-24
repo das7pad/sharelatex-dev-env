@@ -51,7 +51,6 @@ clean_build:
 		ci/{{ label_docker_image }}-cache \
 		ci/{{ label_docker_image }}-build \
 		ci/{{ label_docker_image }}-build-cache \
-		{{ docker_repos }}/{{ label_docker_image }} \
 		--force
 
 clean:
@@ -95,7 +94,6 @@ build:
 		--target app \
 		.
 	docker build --tag ci/{{ label_docker_image }} \
-		--tag {{ docker_repos }}/{{ label_docker_image }} \
 		--cache-from ci/{{ label_docker_image }}-cache \
 		--cache-from ci/{{ label_docker_image }}-build \
 		--build-arg RELEASE=$(RELEASE) \
