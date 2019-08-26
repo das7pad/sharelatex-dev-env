@@ -101,11 +101,13 @@ pipeline {
         }
 {% endblock %}
 
+{% block unit_test %}
         stage('Unit Tests') {
           steps {
             sh 'make test_unit'
           }
         }
+{% endblock %}
 
         stage('Acceptance Tests') {
 {% if acceptance_creds == 'aws' %}
