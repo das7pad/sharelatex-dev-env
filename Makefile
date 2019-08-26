@@ -19,7 +19,7 @@ $(venv)/bin/pip: $(venv)/bin/python
 $(venv)/bin/generate: $(venv)/bin/pip
 $(venv)/bin/generate: requirements.txt
 $(venv)/bin/generate: setup.py
-$(venv)/bin/generate: $(shell find generator -name '*.py')
+$(venv)/bin/generate: $(shell find generator -name '*.py' -not -name version.py)
 	$(venv)/bin/pip install --upgrade --editable .
 
 $(venv)/.deps: $(venv)/bin/pip
