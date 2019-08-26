@@ -22,7 +22,12 @@
           parallel {
             stage('Module Acceptance Tests') {
               steps {
-                sh 'make test_acceptance_modules_run'
+                sh 'make test_acceptance_modules_run_ci'
+              }
+              post {
+                always {
+                  xunit (tools: [JUnit(pattern: 'output/module_*.xml')])
+                }
               }
             }
 
@@ -30,11 +35,21 @@
               steps {
                 sh 'make test_frontend_build_run'
               }
+              post {
+                always {
+                  xunit (tools: [JUnit(pattern: 'output/frontend.xml')])
+                }
+              }
             }
 
             stage('App Acceptance Tests') {
               steps {
                 sh 'make test_acceptance_app_run'
+              }
+              post {
+                always {
+                  xunit (tools: [JUnit(pattern: 'output/acceptance.xml')])
+                }
               }
             }
           }

@@ -220,7 +220,7 @@ test_acceptance_run: test_acceptance_app_run test_acceptance_modules_run
 
 test_acceptance_app_run:
 	COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
-	COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_acceptance npm -q run test:acceptance:run_dir test/acceptance/js
+	COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_acceptance
 	COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
 
 clean_test_acceptance_app:
@@ -228,6 +228,9 @@ clean_test_acceptance_app:
 
 TEST_ACCEPTANCE_MODULES = $(addsuffix /test_acceptance,$(MODULE_DIRS))
 test_acceptance_modules_run: $(TEST_ACCEPTANCE_MODULES)
+
+TEST_ACCEPTANCE_CI_MODULES = $(addsuffix /test_acceptance_ci,$(MODULE_DIRS))
+test_acceptance_modules_run_ci: $(TEST_ACCEPTANCE_CI_MODULES)
 
 CLEAN_TEST_ACCEPTANCE_MODULES = $(addsuffix /clean_test_acceptance,$(MODULE_DIRS))
 clean_test_acceptance_modules: $(CLEAN_TEST_ACCEPTANCE_MODULES)
@@ -281,6 +284,7 @@ MODULE_TARGETS = \
 	$(COMPILE_MODULES) \
 	$(COMPILE_FULL_MODULES) \
 	$(TEST_ACCEPTANCE_MODULES) \
+	$(TEST_ACCEPTANCE_CI_MODULES) \
 	$(CLEAN_TEST_ACCEPTANCE_MODULES) \
 
 $(MODULE_TARGETS): $(MODULE_MAKEFILES)

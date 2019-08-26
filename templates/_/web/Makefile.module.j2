@@ -73,11 +73,17 @@ compile_full:
 
 ifeq (,$(wildcard test/acceptance))
 test_acceptance:
+test_acceptance_ci:
 clean_test_acceptance:
 
 else
 test_acceptance:
 	${DOCKER_COMPOSE} run --rm test_acceptance npm -q run test:acceptance:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/acceptance/js
+
+test_acceptance_ci:
+	${DOCKER_COMPOSE} run --rm test_acceptance \
+		output=/home/node/module_$(MODULE_NAME).xml,suiteName='Module $(MODULE_NAME) Acceptance Tests' \
+		$(MODULE_DIR)/test/acceptance/js
 
 clean_test_acceptance:
 	${DOCKER_COMPOSE} down -v -t 0

@@ -10,12 +10,21 @@ services:
 {% if not has_entrypoint %}
     user: node
 {% endif %}
+    command:
+      - npx
+      - mocha
+      - --exit
+      - --recursive
+      - --reporter
+      - xunit
+      - --reporter-options
+      - output=/home/node/unit.xml,suiteName='Unit Tests'
+      - test/unit/js
 {% if name == 'web' %}
-{# run unit tests for app and all modules #}
-    command: npm run test:unit:ci
-{%- else %}
-    command: npm run test:unit:_run
+      - modules/*/test/unit/js/**.js
 {% endif %}
+    volumes:
+      - ./output:/home/node:z
 
 
   test_acceptance:
@@ -76,12 +85,19 @@ services:
 {% if not has_entrypoint %}
     user: node
 {% endif %}
-    command: npm run test:acceptance:_run
-{% if name in [
-  'clsi',
-] %}
+    entrypoint:
+      - npx
+      - mocha
+      - --exit
+      - --recursive
+      - --reporter
+      - xunit
+      - --reporter-options
+    command:
+      - output=/home/node/acceptance.xml,suiteName='App Acceptance Tests'
+      - test/acceptance/js
     volumes:
-{% endif %}
+      - ./output:/home/node:z
 {% if name == 'clsi' %}
       - /var/run/docker.sock:/var/run/docker.sock:rw,z
       - ./compiles:/app/compiles:z
@@ -101,6 +117,8 @@ services:
     working_dir: /app
     command: npm run test:frontend -- --single-run
     user: node
+    volumes:
+      - ./output:/home/node:z
 {%- endif %}
 
 
