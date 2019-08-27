@@ -153,9 +153,11 @@ pipeline {
           }
 {% endblock %}
           post {
+{% if not has_submitted_acceptance_test_results %}
             always {
               xunit (tools: [JUnit(pattern: 'output/acceptance.xml')])
             }
+{% endif %}
             cleanup {
               sh 'make clean_test_acceptance'
             }
