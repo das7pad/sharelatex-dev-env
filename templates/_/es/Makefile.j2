@@ -85,7 +85,7 @@ test_clean:
 
 test_acceptance_pre_run:
 {% if has_pre_test_acceptance %}
-	$(DOCKER_COMPOSE) run --rm test_acceptance test/acceptance/scripts/pre-run
+	$(DOCKER_COMPOSE) run --rm --entrypoint bash test_acceptance test/acceptance/scripts/pre-run
 {% endif %}
 
 {% block build_app %}
