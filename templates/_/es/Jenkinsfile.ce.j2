@@ -90,6 +90,7 @@ pipeline {
         stage('Clean Previous artifacts') {
           steps {
             sh 'git clean -xdf'
+            sh 'mkdir --parents --mode=777 output'
           }
         }
       }
