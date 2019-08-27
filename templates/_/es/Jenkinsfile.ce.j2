@@ -114,7 +114,7 @@ pipeline {
         }
 {% endblock %}
 
-{% block unit_test %}
+{% if has_unit_tests %}
         stage('Unit Tests') {
           steps {
             sh 'make test_unit'
@@ -125,8 +125,9 @@ pipeline {
             }
           }
         }
-{% endblock %}
+{% endif %}
 
+{% if has_acceptance_tests %}
         stage('Acceptance Tests') {
 {% if acceptance_creds == 'aws' %}
           when {
@@ -160,6 +161,7 @@ pipeline {
             }
           }
         }
+{% endif %}
       }
     }
 

@@ -307,6 +307,8 @@ class Project:
             'has_install_deps': 'install_deps.sh',
             'has_entrypoint': 'entrypoint.sh',
             'has_setup_env': 'setup_env.sh',
+            'has_acceptance_tests': 'test/acceptance',
+            'has_unit_tests': 'test/unit',
         }
 
     def _get_env(self):
