@@ -308,6 +308,7 @@ class Project:
             'has_entrypoint': 'entrypoint.sh',
             'has_setup_env': 'setup_env.sh',
             'has_acceptance_tests': 'test/acceptance',
+            'has_pre_test_acceptance': 'test/acceptance/scripts/pre-run',
             'has_unit_tests': 'test/unit',
         }
 
