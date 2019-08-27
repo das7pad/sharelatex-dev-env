@@ -86,6 +86,10 @@ services:
     user: node
 {% endif %}
     entrypoint:
+{% if has_entrypoint %}
+      - /bin/sh
+      - entrypoint.sh
+{% endif %}
       - npx
       - mocha
       - --exit
