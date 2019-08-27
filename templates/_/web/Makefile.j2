@@ -198,7 +198,7 @@ clean_Makefiles:
 test: test_unit test_frontend test_acceptance
 
 test_unit:
-	@[ ! -d test/unit ] && echo "web has no unit tests" || COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --name unit_test_$(BUILD_DIR_NAME) --rm test_unit
+	COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_unit
 
 test_unit_app:
 	npm -q run test:unit:app -- ${MOCHA_ARGS}
