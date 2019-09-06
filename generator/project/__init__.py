@@ -327,6 +327,7 @@ class Project:
             'history': 'HISTORY',
             'lock': 'LOCK',
             'project_history': 'HISTORY',
+            'pubsub': 'PUBSUB',
             'realtime': 'REAL_TIME',
             'web': 'WEB',
             'websessions': 'WEB_SESSIONS',
