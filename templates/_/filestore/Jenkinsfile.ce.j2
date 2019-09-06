@@ -1,8 +1,27 @@
 {% extends '_/coffeescript/Jenkinsfile.ce.j2' %}
 
 {% block acceptance_tests %}
-          steps {
-            sh 'make test_acceptance BACKEND=fs'
-            sh 'make test_acceptance BACKEND=s3'
+          stages {
+            stage('FS Acceptance Tests') {
+              steps {
+                sh 'make test_acceptance_fs'
+              }
+              post {
+                always {
+                  xunit (tools: [JUnit(pattern: 'output/acceptance_fs.xml')])
+                }
+              }
+            }
+            stage('S3 Acceptance Tests') {
+              steps {
+                sh 'make test_acceptance_s3'
+              }
+              post {
+                always {
+                  xunit (tools: [JUnit(pattern: 'output/acceptance_s3.xml')])
+                }
+              }
+            }
           }
 {% endblock %}
+{% set has_submitted_acceptance_test_results = true %}

@@ -1,0 +1,19 @@
+{% extends '_/coffeescript/Makefile.j2' %}
+
+
+{% block test %}
+{{ super() }}
+
+test_acceptance_fs: test_clean test_acceptance_fs_run
+test_acceptance_s3: test_clean test_acceptance_s3_run
+
+test_acceptance_fs_run:
+	BACKEND=fs $(DOCKER_COMPOSE) run --rm test_acceptance \
+		output=/home/node/acceptance_fs.xml,suiteName='FS Acceptance Tests' \
+		test/acceptance/js
+
+test_acceptance_s3_run:
+	BACKEND=s3 $(DOCKER_COMPOSE) run --rm test_acceptance \
+		output=/home/node/acceptance_s3.xml,suiteName='S3 Acceptance Tests' \
+		test/acceptance/js
+{% endblock %}
