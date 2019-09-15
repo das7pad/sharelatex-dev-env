@@ -93,15 +93,15 @@ services:
       - npx
       - mocha
       - --exit
-{% if has_acceptance_test_init %}
-      - test/acceptance/js/Init.js
-{% endif %}
       - --recursive
       - --reporter
       - xunit
       - --reporter-options
     command:
       - output=/home/node/acceptance.xml,suiteName='App Acceptance Tests'
+{% if has_acceptance_test_init %}
+      - test/acceptance/js/Init.js
+{% endif %}
       - test/acceptance/js
     volumes:
       - ./output:/home/node:z

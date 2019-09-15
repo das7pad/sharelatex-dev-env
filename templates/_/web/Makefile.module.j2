@@ -83,6 +83,7 @@ test_acceptance:
 test_acceptance_ci:
 	${DOCKER_COMPOSE} run --rm test_acceptance \
 		output=/home/node/module_$(MODULE_NAME).xml,suiteName='Module $(MODULE_NAME) Acceptance Tests' \
+		$(MODULE_DIR)/test/acceptance/js/Init.js \
 		$(MODULE_DIR)/test/acceptance/js
 
 clean_test_acceptance:
