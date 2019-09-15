@@ -93,6 +93,9 @@ services:
       - npx
       - mocha
       - --exit
+{% if has_acceptance_test_init %}
+      - test/acceptance/js/Init.js
+{% endif %}
       - --recursive
       - --reporter
       - xunit

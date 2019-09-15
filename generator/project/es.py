@@ -25,3 +25,12 @@ class ESProject(Project):
             'build_target',
             self.insert_marker,
         ]
+
+    def _get_possible_project_files(
+        self,
+    ):
+        files = super()._get_possible_project_files()
+        files.update({
+            'has_acceptance_test_init': 'test/acceptance/js/Init.js',
+        })
+        return files
