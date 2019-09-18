@@ -1,0 +1,14 @@
+{% extends '_/es/.dockerignore.j2' %}
+
+{% block app %}
+{{ super() }}
+
+!/test/mocha-init.js
+{% endblock %}
+
+{% block tool_config %}
+{{ super() }}
+
+!/.mocharc.json
+!/test/.eslintrc.json
+{% endblock %}
