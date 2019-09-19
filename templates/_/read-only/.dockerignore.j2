@@ -1,5 +1,10 @@
 {% extends '_/es/.dockerignore.j2' %}
 
+{% block config %}
+{{ super() }}
+!/config/settings.test.js
+{% endblock %}
+
 {% block app %}
 {{ super() }}
 
