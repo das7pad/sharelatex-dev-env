@@ -74,6 +74,9 @@ services:
       SHARELATEX_CONFIG: /app/test/acceptance/config/settings.test.coffee
       NODE_ENV: production
 {% endif %}
+{% if name == 'read-only' %}
+      SHARELATEX_CONFIG: /app/config/settings.test.js
+{% endif %}
 {% if not has_entrypoint %}
     user: node
 {% endif %}
