@@ -6,9 +6,12 @@
 {% block clean %}
 {{ super() }}
 	rm -f app.js
+	rm -f app.map
 	rm -rf app/js
-	rm -rf test/unit/js
 	rm -rf test/acceptance/js
+	rm -rf test/load/js
+	rm -rf test/smoke/js
+	rm -rf test/unit/js
 {% endblock %}
 
 {% block test %}
