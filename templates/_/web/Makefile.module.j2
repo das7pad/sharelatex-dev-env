@@ -4,8 +4,8 @@
 MODULE_NAME := $(notdir $(shell pwd))
 MODULE_DIR := modules/$(MODULE_NAME)
 PROJECT_NAME = web
-COFFEE := ../../node_modules/.bin/coffee
-BABEL := ../../node_modules/.bin/babel
+COFFEE := ../../node_modules/.bin/coffee --map
+BABEL := ../../node_modules/.bin/babel --source-maps true
 
 APP_COFFEE_FILES := $(shell [ -e app/coffee ] && find app/coffee -name '*.coffee') \
 	$(shell [ -e test/unit/coffee ] && find test/unit/coffee -name '*.coffee') \
@@ -34,15 +34,15 @@ DOCKER_COMPOSE := cd ../../ && \
 
 app/js/%.js: app/coffee/%.coffee
 	@mkdir -p $(dir $@)
-	$(COFFEE) --compile --print $< > $@
+	$(COFFEE) --output $(dir $@) --compile $<
 
 test/unit/js/%.js: test/unit/coffee/%.coffee
 	@mkdir -p $(dir $@)
-	$(COFFEE) --compile --print $< > $@
+	$(COFFEE) --output $(dir $@) --compile $<
 
 test/acceptance/js/%.js: test/acceptance/coffee/%.coffee
 	@mkdir -p $(dir $@)
-	$(COFFEE) --compile --print $< > $@
+	$(COFFEE) --output $(dir $@) --compile $<
 
 ../../test/unit_frontend/js/ide/$(MODULE_NAME)/%.js: test/unit_frontend/src/ide/%.js
 	@mkdir -p $(dir $@)
@@ -57,10 +57,9 @@ test/acceptance/js/%.js: test/acceptance/coffee/%.coffee
 	$(BABEL) $< --out-file $@
 
 index.js: index.coffee
-	$(COFFEE) --compile --print $< > $@
+	$(COFFEE) --compile $<
 
 compile: $(APP_JS_FILES) $(IDE_OUTPUT_FILES) $(MAIN_OUTPUT_FILES) $(IDE_TEST_OUTPUT_FILES) index.js
-	@echo > /dev/null
 
 compile_full:
 	if [ -e app/coffee ]; then $(COFFEE) -o app/js -c app/coffee; fi
