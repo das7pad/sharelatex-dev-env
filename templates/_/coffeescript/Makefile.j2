@@ -16,6 +16,21 @@ test: test_unit test_acceptance
 {% endblock %}
 
 {% block build_app %}
-build_app:
-	npm run compile:all
+build_app: compile_app
+build_app: compile_tests
+
+compile_app: compile/app.coffee compile/app/coffee
+
+TEST_COFFEE_SOURCES := $(addprefix compile/,$(wildcard test/*/coffee))
+compile_tests: $(TEST_COFFEE_SOURCES)
+
+COMPILE_COFFEE_DIRS := \
+	compile/app/coffee \
+	$(TEST_COFFEE_SOURCES)
+
+$(COMPILE_COFFEE_DIRS): compile/%coffee:
+	npx coffee --map --output $*js --compile $*coffee
+
+compile/app.coffee:
+	npx coffee --map --compile app.coffee
 {% endblock %}
