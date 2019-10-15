@@ -18,7 +18,7 @@ COPY install_deps.sh /app/
 RUN /app/install_deps.sh
 {% endif %}
 
-COPY package.json npm-shrinkwrap.json /app/
+COPY package.json package-lock.json /app/
 
 RUN /docker_cleanup.sh npm ci
 
