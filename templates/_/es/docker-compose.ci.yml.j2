@@ -19,9 +19,9 @@ services:
       - xunit
       - --reporter-options
       - output=/home/node/unit.xml,suiteName='Unit Tests'
-      - test/unit/js
+      - test/unit/{{ src_dir }}
 {% if name == 'web' %}
-      - modules/*/test/unit/js/**.js
+      - modules/*/test/unit/{{ src_dir }}/**.js
 {% endif %}
     volumes:
       - ./output:/home/node:z
@@ -103,9 +103,9 @@ services:
     command:
       - output=/home/node/acceptance.xml,suiteName='App Acceptance Tests'
 {% if has_acceptance_test_init %}
-      - test/acceptance/js/Init.js
+      - test/acceptance/{{ src_dir }}/Init.js
 {% endif %}
-      - test/acceptance/js
+      - test/acceptance/{{ src_dir }}
     volumes:
       - ./output:/home/node:z
 {% if name == 'clsi' %}

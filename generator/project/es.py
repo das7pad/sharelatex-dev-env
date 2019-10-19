@@ -12,11 +12,20 @@ class ESProject(Project):
             }
         )
 
+    def _get_src_dir(self):
+        return self['src_dir'] if 'src_dir' in self else 'js'
+
+    def _get_env(self):
+        env = super()._get_env()
+        env['src_dir'] = self._get_src_dir()
+        return env
+
     def _get_cfg_fields(
         self,
     ):
         return [
             'language',
+            'src_dir',
             'node_version',
             'acceptance_creds',
             'dependencies',
@@ -29,8 +38,9 @@ class ESProject(Project):
     def _get_possible_project_files(
         self,
     ):
+        src_dir = self._get_src_dir()
         files = super()._get_possible_project_files()
         files.update({
-            'has_acceptance_test_init': 'test/acceptance/js/Init.js',
+            'has_acceptance_test_init': 'test/acceptance/%s/Init.js' % src_dir,
         })
         return files

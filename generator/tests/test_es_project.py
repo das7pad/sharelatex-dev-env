@@ -79,3 +79,32 @@ class TestESProject(unittest.TestCase):
 
         self.assertEqual(actual_1, expected)
         self.assertEqual(actual_2, expected)
+
+    def test_env_src_dir_default(self):
+        project = ESProject(
+            name='NAME',
+            path=self.project_path,
+        )
+        env = project._get_env()
+        self.assertEqual(env['src_dir'], 'js')
+
+    def test_env_src_dir_custom(self):
+        project = ESProject(
+            name='NAME',
+            path=self.project_path,
+            src_dir='src',
+        )
+        env = project._get_env()
+        self.assertEqual(env['src_dir'], 'src')
+
+    def test_acceptance_init_with_custom_src_dir(self):
+        project = ESProject(
+            name='NAME',
+            path=self.project_path,
+            src_dir='some_custom_src',
+        )
+        files = project._get_possible_project_files()
+        self.assertEqual(
+            files['has_acceptance_test_init'],
+            'test/acceptance/some_custom_src/Init.js'
+        )

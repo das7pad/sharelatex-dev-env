@@ -87,7 +87,7 @@ services:
       - {{ dependency }}
 {% endfor %}
 {% if name == 'web' %}
-    command: npm run test:acceptance:run_dir test/acceptance/js
+    command: npm run test:acceptance:run_dir test/acceptance/{{ src_dir }}
 {% else %}
     command: npm run test:acceptance
 {% endif %}
