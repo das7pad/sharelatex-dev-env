@@ -19,9 +19,13 @@ services:
       - xunit
       - --reporter-options
       - output=/home/node/unit.xml,suiteName='Unit Tests'
-      - test/unit/{{ src_dir }}
 {% if name == 'web' %}
+      - --require
+      - test/unit/bootstrap.js
+      - test/unit/{{ src_dir }}
       - modules/*/test/unit/{{ src_dir }}/**.js
+{% else %}
+      - test/unit/{{ src_dir }}
 {% endif %}
     volumes:
       - ./output:/home/node:z

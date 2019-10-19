@@ -22,21 +22,16 @@ DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 MODULE_DIRS := $(shell find modules -mindepth 1 -maxdepth 1 -type d -not -name '.git' )
 MODULE_MAKEFILES := $(MODULE_DIRS:=/Makefile)
 
-COFFEE := node_modules/.bin/coffee --map $(COFFEE_OPTIONS)
 BABEL := node_modules/.bin/babel --source-maps true
 GRUNT := node_modules/.bin/grunt
 LESSC := node_modules/.bin/lessc
 CLEANCSS := node_modules/.bin/cleancss
 
-APP_COFFEE_FILES := $(shell find app/coffee -name '*.coffee')
 FRONT_END_SRC_FILES := $(shell find public/src -name '*.js')
-TEST_COFFEE_FILES := $(shell find test/*/coffee -name '*.coffee')
-TEST_SRC_FILES := $(shell find test/*/src -name '*.js')
+TEST_SRC_FILES := $(shell find test/unit_frontend/src -name '*.js')
 MODULE_MAIN_SRC_FILES := $(shell find modules -type f -wholename '*main/index.js')
 MODULE_IDE_SRC_FILES := $(shell find modules -type f -wholename '*ide/index.js')
-COFFEE_FILES := app.coffee $(APP_COFFEE_FILES) $(FRONT_END_COFFEE_FILES) $(TEST_COFFEE_FILES)
 SRC_FILES := $(FRONT_END_SRC_FILES) $(TEST_SRC_FILES)
-JS_FILES := $(subst coffee,js,$(COFFEE_FILES))
 OUTPUT_SRC_FILES := $(subst src,js,$(SRC_FILES))
 LESS_FILES := $(shell find public/stylesheets -name '*.less')
 LESSC_COMMON_FLAGS := --source-map --autoprefix="last 2 versions, ie >= 10" --relative-urls
@@ -54,33 +49,13 @@ CSS_OL_IEEE_FILE := public/stylesheets/ieee-style.css
 CSS_FILES := $(CSS_SL_FILE) $(CSS_OL_FILE) $(CSS_OL_LIGHT_FILE) $(CSS_OL_IEEE_FILE)
 
 # The automatic variable $(@D) is the target directory name
-app.js: app.coffee
-	$(COFFEE) --compile -o $(@D) $<
-
-app/js/%.js: app/coffee/%.coffee
-	@mkdir -p $(@D)
-	$(COFFEE) --compile -o $(@D) $<
-
 public/js/%.js: public/src/%.js
 	@mkdir -p $(@D)
 	$(BABEL) $< --out-file $@
 
-test/unit/js/%.js: test/unit/coffee/%.coffee
-	@mkdir -p $(@D)
-	$(COFFEE) --compile -o $(@D) $<
-
-test/acceptance/js/%.js: test/acceptance/coffee/%.coffee
-	@mkdir -p $(@D)
-	$(COFFEE) --compile -o $(@D) $<
-
 test/unit_frontend/js/%.js: test/unit_frontend/src/%.js
 	@mkdir -p $(@D)
 	$(BABEL) $< --out-file $@
-
-test/smoke/js/%.js: test/smoke/coffee/%.coffee
-	@mkdir -p $(@D)
-	$(COFFEE) --compile -o $(@D) $<
-
 
 INJECTED_MARKER := INJECTED BY MAKEFILE
 MODULE_INCLUDES_MARKER = OPTIONAL MODULE INCLUDES
@@ -106,14 +81,14 @@ css_full: $(CSS_FILES)
 
 css: $(CSS_OL_FILE)
 
-minify: $(CSS_FILES) $(JS_FILES) $(OUTPUT_SRC_FILES)
+minify: $(CSS_FILES) $(OUTPUT_SRC_FILES)
 	$(GRUNT) compile:minify
 	$(MAKE) minify_css
 	$(MAKE) minify_es
 	$(MAKE) hash_static_files
 
-hash_static_files: app/js/infrastructure/HashedFiles.js
-	MINIFIED_JS='true' node $<
+hash_static_files:
+	MINIFIED_JS='true' node app/{{ src_dir }}/infrastructure/HashedFiles.js
 
 minify_css: $(CSS_FILES)
 	$(CLEANCSS) $(CLEANCSS_FLAGS) -o $(CSS_SL_FILE) $(CSS_SL_FILE)
@@ -126,16 +101,10 @@ minify_es:
 
 compile: compile_app $(OUTPUT_SRC_FILES) css public/js/main.js public/js/ide.js
 
-compile_app: $(JS_FILES)
-	@$(MAKE) compile_modules
+compile_app: compile_modules
 
 compile_full:
-	$(COFFEE) -c app.coffee
-	$(COFFEE) -o app/js -c app/coffee
 	$(BABEL) public/src --out-dir public/js
-	$(COFFEE) -o test/acceptance/js -c test/acceptance/coffee
-	$(COFFEE) -o test/smoke/js -c test/smoke/coffee
-	$(COFFEE) -o test/unit/js -c test/unit/coffee
 	$(BABEL) test/unit_frontend/src --out-dir test/unit_frontend/js
 	$(MAKE) css_full
 	$(MAKE) compile_modules_full
@@ -152,29 +121,16 @@ compile_modules_full: $(COMPILE_FULL_MODULES)
 $(MODULE_MAKEFILES): Makefile.module
 	cp Makefile.module $@
 
-clean: clean_app clean_frontend clean_css clean_tests clean_modules
-
-clean_app:
-	rm -f app.js app.js.map
-	rm -rf app/js
+clean: clean_frontend clean_css clean_tests clean_modules
 
 clean_frontend:
 	rm -rf public/js/{analytics,directives,es,filters,ide,main,modules,services,utils}
 	rm -f public/js/*.{js,map}
 
 clean_tests:
-	rm -rf test/unit/js
 	rm -rf test/unit_frontend/js
-	rm -rf test/acceptance/js
 
 clean_modules:
-	for dir in modules/*; \
-	do \
-		rm -f $$dir/index.js; \
-		rm -rf $$dir/app/js; \
-		rm -rf $$dir/test/unit/js; \
-		rm -rf $$dir/test/acceptance/js; \
-	done
 	rm -f $(MODULE_MAKEFILES)
 
 clean_css:
@@ -208,9 +164,9 @@ test_frontend_run:
 
 test_frontend_build_run: build_test_frontend test_frontend_run
 
-test_acceptance: compile test_acceptance_app_run test_acceptance_modules_run
+test_acceptance: test_acceptance_app_run test_acceptance_modules_run
 
-test_acceptance_app: compile test_acceptance_app_run
+test_acceptance_app: test_acceptance_app_run
 
 test_acceptance_run: test_acceptance_app_run test_acceptance_modules_run
 

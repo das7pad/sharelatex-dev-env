@@ -1,4 +1,4 @@
-{% extends '_/coffeescript/.dockerignore.j2' %}
+{% extends '_/es/.dockerignore.j2' %}
 
 {% block makefile %}
 {{ super() }}
@@ -13,12 +13,16 @@
 
 !/.prettierignore
 
-!/Gruntfile.coffee
+!/Gruntfile.js
 
 !/karma.conf.js
 
 !/webpack.config.js
 !/webpack.config.prod.js
+{% endblock %}
+
+{% block config %}
+!/config/settings.defaults.coffee
 {% endblock %}
 
 {% block executables %}
@@ -28,16 +32,11 @@
 {% endblock %}
 
 {% block app %}
-{{ super() }}
-!/app/templates
-!/app/views
+!/app.js
+!/app
 
 !/modules
 /modules/*/Makefile
-/modules/*/index.js
-/modules/*/app/js
-/modules/*/test/unit/js
-/modules/*/test/acceptance/js
 
 !/public/*.ico
 !/public/*.png
@@ -63,7 +62,12 @@
 public/stylesheets/*.css
 public/stylesheets/*.map
 
+!/test/acceptance/config
 !/test/acceptance/files
+!/test/acceptance/{{ src_dir }}
+!/test/smoke/{{ src_dir }}
+!/test/unit/{{ src_dir }}
+!/test/unit/bootstrap.js
 !/test/unit_frontend/es
 !/test/unit_frontend/src
 {% endblock %}
