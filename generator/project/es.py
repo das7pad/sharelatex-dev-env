@@ -41,6 +41,8 @@ class ESProject(Project):
         src_dir = self._get_src_dir()
         files = super()._get_possible_project_files()
         files.update({
+            'has_acceptance_test_bootstrap': 'test/acceptance/bootstrap.js',
             'has_acceptance_test_init': 'test/acceptance/%s/Init.js' % src_dir,
+            'has_unit_test_bootstrap': 'test/unit/bootstrap.js',
         })
         return files

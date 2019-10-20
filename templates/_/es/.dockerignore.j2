@@ -62,12 +62,18 @@
 !/app.js
 !/app
 
+{% if has_acceptance_test_bootstrap %}
+!/test/acceptance/bootstrap.js
+{% endif %}
 !/test/acceptance/config
 !/test/acceptance/fixtures
 !/test/acceptance/js
 !/test/acceptance/libs
 !/test/fixtures
 !/test/smoke/js
+{% if has_unit_test_bootstrap %}
+!/test/unit/bootstrap.js
+{% endif %}
 !/test/unit/js
 {% endblock %}
 # app #

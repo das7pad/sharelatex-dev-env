@@ -15,17 +15,17 @@ services:
       - mocha
       - --exit
       - --recursive
+{% if has_unit_test_bootstrap %}
+      - --require
+      - test/unit/bootstrap.js
+{% endif %}
       - --reporter
       - xunit
       - --reporter-options
       - output=/home/node/unit.xml,suiteName='Unit Tests'
+      - test/unit/{{ src_dir }}
 {% if name == 'web' %}
-      - --require
-      - test/unit/bootstrap.js
-      - test/unit/{{ src_dir }}
       - modules/*/test/unit/{{ src_dir }}/**.js
-{% else %}
-      - test/unit/{{ src_dir }}
 {% endif %}
     volumes:
       - ./output:/home/node:z
@@ -101,6 +101,10 @@ services:
       - mocha
       - --exit
       - --recursive
+{% if has_acceptance_test_bootstrap %}
+      - --require
+      - test/acceptance/bootstrap.js
+{% endif %}
       - --reporter
       - xunit
       - --reporter-options
