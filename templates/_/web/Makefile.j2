@@ -18,8 +18,6 @@ DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 
 MODULE_DIRS := $(shell find modules -mindepth 1 -maxdepth 1 -type d -not -name '.git' )
 MODULE_MAKEFILES := $(MODULE_DIRS:=/Makefile)
-MODULE_MAIN_SRC_FILES := $(shell find modules -type f -wholename '*main/index.js')
-MODULE_IDE_SRC_FILES := $(shell find modules -type f -wholename '*ide/index.js')
 
 LESSC := node_modules/.bin/lessc
 CLEANCSS := node_modules/.bin/cleancss
@@ -34,23 +32,6 @@ CSS_OL_LIGHT_FILE := public/stylesheets/light-style.css
 CSS_OL_IEEE_FILE := public/stylesheets/ieee-style.css
 
 CSS_FILES := $(CSS_SL_FILE) $(CSS_OL_FILE) $(CSS_OL_LIGHT_FILE) $(CSS_OL_IEEE_FILE)
-
-INJECTED_MARKER := INJECTED BY MAKEFILE
-MODULE_INCLUDES_MARKER = OPTIONAL MODULE INCLUDES
-public/src/ide.js: $(MODULE_IDE_SRC_FILES)
-public/src/main.js: $(MODULE_MAIN_SRC_FILES)
-public/src/ide.js public/src/main.js:
-	sed -i '/$(INJECTED_MARKER)/d' $@
-	IDE_OR_MAIN=$(notdir $(basename $@)); \
-	for MODULE in $$(echo $^ | sort | sed -E 's=modules/([^/]+)/\S+=\1=g'); do \
-		LABEL=""; \
-		sed -i \
-			"/$(MODULE_INCLUDES_MARKER)/a \
-			\ \ \/* $(INJECTED_MARKER) *\/ '$$IDE_OR_MAIN\/$$MODULE\/index'," \
-		$@; \
-	done
-	npx prettier-eslint $@ --write
-	touch --reference $(firstword $?) $@
 
 public/stylesheets/%.css: $(LESS_FILES)
 	$(LESSC) $(LESSC_COMMON_FLAGS) $(@D)/$*.less $(@D)/$*.css
