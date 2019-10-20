@@ -19,6 +19,7 @@
 
 !/webpack.config.js
 !/webpack.config.prod.js
+!/webpack.config.test.js
 {% endblock %}
 
 {% block config %}
@@ -27,8 +28,8 @@
 
 {% block executables %}
 {{ super() }}
-!/bin/unit_test
-!/bin/unit_test_app
+!/bin/east
+!/bin/run
 {% endblock %}
 
 {% block app %}
@@ -47,12 +48,8 @@
 !/public/font
 !/public/img
 
-!/public/js/ace
-!/public/js/ace-1.4.4
+!/public/js/ace-1.4.5
 !/public/js/libs
-/public/js/libs/angular-1.3.15.min.js
-/public/js/libs/pdfjs-1.8.188
-/public/js/libs/pdfjs-1.7.225
 
 !/public/recurly
 !/public/src
@@ -62,6 +59,8 @@
 public/stylesheets/*.css
 public/stylesheets/*.map
 
+!/migrations
+
 !/test/*/bootstrap.js
 !/test/acceptance/config
 !/test/acceptance/files
@@ -70,5 +69,6 @@ public/stylesheets/*.map
 !/test/unit/{{ src_dir }}
 !/test/unit/bootstrap.js
 !/test/unit_frontend/es
+!/test/unit_frontend/import_tests.js
 !/test/unit_frontend/src
 {% endblock %}
