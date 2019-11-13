@@ -19,6 +19,7 @@ DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 MODULE_DIRS := $(shell find modules -mindepth 1 -maxdepth 1 -type d -not -name '.git' )
 MODULE_MAKEFILES := $(MODULE_DIRS:=/Makefile)
 
+{% if has_webpack_css_processing is not defined %}
 LESSC := node_modules/.bin/lessc
 CLEANCSS := node_modules/.bin/cleancss
 
@@ -52,6 +53,7 @@ minify: $(CSS_FILES)
 	$(CLEANCSS) $(CLEANCSS_FLAGS) -o $(CSS_OL_LIGHT_FILE) $(CSS_OL_LIGHT_FILE)
 	$(CLEANCSS) $(CLEANCSS_FLAGS) -o $(CSS_OL_IEEE_FILE) $(CSS_OL_IEEE_FILE)
 
+{% endif %}
 
 $(MODULE_MAKEFILES): Makefile.module
 	cp Makefile.module $@
@@ -115,7 +117,11 @@ CLEAN_TEST_ACCEPTANCE_MODULES = $(addsuffix /clean_test_acceptance,$(MODULE_DIRS
 clean_test_acceptance_modules: $(CLEAN_TEST_ACCEPTANCE_MODULES)
 
 
+{% if has_webpack_css_processing is not defined %}
 build_app: compile_full minify clean_Makefiles
+{% else %}
+build_app:
+{% endif %}
 	WEBPACK_ENV=production npm run webpack:production
 
 format:
