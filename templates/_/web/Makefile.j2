@@ -19,41 +19,6 @@ DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 MODULE_DIRS := $(shell find modules -mindepth 1 -maxdepth 1 -type d -not -name '.git' )
 MODULE_MAKEFILES := $(MODULE_DIRS:=/Makefile)
 
-{% if has_webpack_css_processing is not defined %}
-LESSC := node_modules/.bin/lessc
-CLEANCSS := node_modules/.bin/cleancss
-
-LESS_FILES := $(shell find public/stylesheets -name '*.less')
-LESSC_COMMON_FLAGS := --source-map --autoprefix="last 2 versions, ie >= 10" --relative-urls
-CLEANCSS_FLAGS := --s0 --source-map
-
-CSS_SL_FILE := public/stylesheets/sl-style.css
-CSS_OL_FILE := public/stylesheets/style.css
-CSS_OL_LIGHT_FILE := public/stylesheets/light-style.css
-CSS_OL_IEEE_FILE := public/stylesheets/ieee-style.css
-
-CSS_FILES := $(CSS_SL_FILE) $(CSS_OL_FILE) $(CSS_OL_LIGHT_FILE) $(CSS_OL_IEEE_FILE)
-
-public/stylesheets/%.css: $(LESS_FILES)
-	$(LESSC) $(LESSC_COMMON_FLAGS) $(@D)/$*.less $(@D)/$*.css
-
-clean: clean_css
-clean_css:
-	rm -f public/stylesheets/*.css*
-
-compile_full: css_full
-css_full: $(CSS_FILES)
-
-compile: css
-css: $(CSS_OL_FILE)
-
-minify: $(CSS_FILES)
-	$(CLEANCSS) $(CLEANCSS_FLAGS) -o $(CSS_SL_FILE) $(CSS_SL_FILE)
-	$(CLEANCSS) $(CLEANCSS_FLAGS) -o $(CSS_OL_FILE) $(CSS_OL_FILE)
-	$(CLEANCSS) $(CLEANCSS_FLAGS) -o $(CSS_OL_LIGHT_FILE) $(CSS_OL_LIGHT_FILE)
-	$(CLEANCSS) $(CLEANCSS_FLAGS) -o $(CSS_OL_IEEE_FILE) $(CSS_OL_IEEE_FILE)
-
-{% endif %}
 
 $(MODULE_MAKEFILES): Makefile.module
 	cp Makefile.module $@
@@ -117,11 +82,7 @@ CLEAN_TEST_ACCEPTANCE_MODULES = $(addsuffix /clean_test_acceptance,$(MODULE_DIRS
 clean_test_acceptance_modules: $(CLEAN_TEST_ACCEPTANCE_MODULES)
 
 
-{% if has_webpack_css_processing is not defined %}
-build_app: compile_full minify clean_Makefiles
-{% else %}
 build_app:
-{% endif %}
 	WEBPACK_ENV=production npm run webpack:production
 
 format:

@@ -36,6 +36,8 @@
 !/app.js
 !/app
 
+!/frontend/js
+
 !/modules
 /modules/*/Makefile
 
@@ -47,14 +49,7 @@
 !/public/brand
 !/public/font
 !/public/img
-
-{% if uses_ace_builds is not defined %}
-!/public/js/ace-1.4.5
-{% endif %}
-!/public/js/libs
-
 !/public/recurly
-!/public/src
 !/public/static
 
 !/public/stylesheets/
@@ -69,8 +64,5 @@ public/stylesheets/*.map
 !/test/acceptance/{{ src_dir }}
 !/test/smoke/{{ src_dir }}
 !/test/unit/{{ src_dir }}
-!/test/unit/bootstrap.js
-!/test/unit_frontend/es
-!/test/unit_frontend/import_tests.js
-!/test/unit_frontend/src
+!/test/frontend
 {% endblock %}
