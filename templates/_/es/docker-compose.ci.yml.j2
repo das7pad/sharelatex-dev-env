@@ -16,7 +16,11 @@ services:
       - --exit
       - --recursive
 {% if has_unit_test_bootstrap %}
+{%   if mocha_6 is defined %}
+      - --file
+{%   else %}
       - --require
+{%   endif %}
       - test/unit/bootstrap.js
 {% endif %}
       - --reporter
@@ -102,7 +106,11 @@ services:
       - --exit
       - --recursive
 {% if has_acceptance_test_bootstrap %}
+{%   if mocha_6 is defined %}
+      - --file
+{%   else %}
       - --require
+{%   endif %}
       - test/acceptance/bootstrap.js
 {% endif %}
       - --reporter
