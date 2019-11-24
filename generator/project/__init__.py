@@ -324,9 +324,7 @@ class Project:
         env['env_prefix'] = {
             'api': 'API',
             'documentupdater': 'DOC_UPDATER',
-            'history': 'HISTORY',
             'lock': 'LOCK',
-            'project_history': 'HISTORY',
             'pubsub': 'PUBSUB',
             'realtime': 'REAL_TIME',
             'web': 'WEB',
