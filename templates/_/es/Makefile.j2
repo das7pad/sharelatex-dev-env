@@ -95,6 +95,9 @@ test_acceptance_pre_run:
 {% if has_pre_test_acceptance %}
 	$(DOCKER_COMPOSE) run --rm --entrypoint bash test_acceptance test/acceptance/scripts/pre-run
 {% endif %}
+{% if 'minio' in dependencies %}
+	$(DOCKER_COMPOSE) up -d minio_setup minio
+{% endif %}
 
 {% block build_app %}
 build_app:
