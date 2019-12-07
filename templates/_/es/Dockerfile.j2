@@ -22,9 +22,6 @@ COPY package.json package-lock.json /app/
 
 RUN /docker_cleanup.sh npm ci
 
-{% block pre_copy %}
-{% endblock %}
-
 COPY . /app
 
 RUN /docker_cleanup.sh make build_app
