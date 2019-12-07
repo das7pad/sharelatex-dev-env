@@ -141,6 +141,12 @@ build_prod: clean_build_artifacts
 			config \
 {% block build_artifacts %}
 {% endblock %}
+{% if has_entrypoint %}
+			entrypoint.sh \
+{% endif %}
+{% if has_setup_env %}
+			setup_env.sh \
+{% endif %}
 		> build_artifacts.tar.gz
 
 	docker build \
