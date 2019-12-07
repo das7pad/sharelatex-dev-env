@@ -56,6 +56,9 @@ clean_ci: test_clean
 clean_build:
 	docker rmi \
 		ci/{{ label_docker_image }} \
+		ci/{{ label_docker_image }}-base \
+		ci/{{ label_docker_image }}-dev \
+		ci/{{ label_docker_image }}-prod \
 		ci/{{ label_docker_image }}-cache \
 		--force
 
@@ -103,12 +106,56 @@ test_acceptance_pre_run:
 build_app:
 {% endblock %}
 
-build:
-	docker build --tag ci/{{ label_docker_image }} \
+build: clean_build_artifacts
+	docker build \
 		--cache-from ci/{{ label_docker_image }}-cache \
+		--tag ci/{{ label_docker_image }}-base \
+		--target base \
+		.
+
+	docker build \
+		--cache-from ci/{{ label_docker_image }}-base \
+		--tag ci/{{ label_docker_image }} \
+		--tag ci/{{ label_docker_image }}-dev \
+		--target dev \
+		.
+
+build_prod: clean_build_artifacts
+	docker run \
+		--rm \
+		--entrypoint tar \
+		ci/{{ label_docker_image }}-dev \
+			--create \
+			--gzip \
+			app.js \
+			app/{{ src_dir }} \
+{% if has_app_libs %}
+			app/libs \
+{% endif %}
+{% if has_app_templates %}
+			app/templates \
+{% endif %}
+{% if has_app_views %}
+			app/views \
+{% endif %}
+			config \
+{% block build_artifacts %}
+{% endblock %}
+		> build_artifacts.tar.gz
+
+	docker build \
 		--build-arg RELEASE=$(RELEASE) \
 		--build-arg COMMIT=$(COMMIT) \
+		--cache-from ci/{{ label_docker_image }}-base \
+		--cache-from ci/{{ label_docker_image }}-dev \
+		--cache-from ci/{{ label_docker_image }}-cache \
+		--tag ci/{{ label_docker_image }}-prod \
+		--target prod \
 		.
+
+clean_ci: clean_build_artifacts
+clean_build_artifacts:
+	rm -f build_artifacts.tar.gz
 
 tar:
 	$(DOCKER_COMPOSE) up tar

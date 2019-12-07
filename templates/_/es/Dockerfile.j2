@@ -1,7 +1,7 @@
 {% from 'macros/header.j2' import header with context %}
 {{ header('#') }}
 
-FROM node:{{ node_version }}
+FROM node:{{ node_version }} AS base
 
 CMD ["node", "--expose-gc", "app.js"]
 
@@ -20,11 +20,29 @@ RUN /app/install_deps.sh
 
 COPY package.json package-lock.json /app/
 
+
+FROM base AS dev
+
 RUN /docker_cleanup.sh npm ci
 
 COPY . /app
 
 RUN /docker_cleanup.sh make build_app
+
+{% if has_setup_env %}
+RUN /app/setup_env.sh
+{% endif -%}
+
+{% if not has_entrypoint %}
+USER node
+{% endif %}
+
+
+FROM base as prod
+
+RUN /docker_cleanup.sh npm ci --only=prod
+
+ADD build_artifacts.tar.gz /app
 
 {% if has_setup_env %}
 RUN /app/setup_env.sh

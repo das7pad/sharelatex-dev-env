@@ -10,3 +10,8 @@ clean_test_acceptance:
 				/app/compiles/* \
 			'
 {% endblock %}
+
+{% block build_artifacts %}
+		seccomp \
+		bin/synctex \
+{% endblock %}

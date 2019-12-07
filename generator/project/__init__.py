@@ -304,6 +304,9 @@ class Project:
         self,
     ) -> typing.Dict[str, str]:
         return {
+            'has_app_libs': 'app/libs',
+            'has_app_templates': 'app/templates',
+            'has_app_views': 'app/views',
             'has_install_deps': 'install_deps.sh',
             'has_entrypoint': 'entrypoint.sh',
             'has_setup_env': 'setup_env.sh',

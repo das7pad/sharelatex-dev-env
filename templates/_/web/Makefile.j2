@@ -94,17 +94,55 @@ format_fix:
 lint:
 	npm -q run lint
 
-build:
-	docker build --tag ci/{{ label_docker_image }} \
+build: clean_build_artifacts
+	docker build \
 		--cache-from ci/{{ label_docker_image }}-cache \
+		--tag ci/{{ label_docker_image }}-base \
+		--target base \
+		.
+
+	docker build \
+		--cache-from ci/{{ label_docker_image }}-base \
+		--tag ci/{{ label_docker_image }} \
+		--tag ci/{{ label_docker_image }}-dev \
+		--target dev \
+		.
+
+build_prod: clean_build_artifacts
+	docker run \
+		--rm \
+		--entrypoint tar \
+		ci/{{ label_docker_image }}-dev \
+			--create \
+			--gzip \
+			app.js \
+			app/src \
+			app/templates \
+			app/views \
+			public \
+		> build_artifacts.tar.gz
+
+	docker build \
 		--build-arg RELEASE=$(RELEASE) \
 		--build-arg COMMIT=$(COMMIT) \
+		--cache-from ci/{{ label_docker_image }}-base \
+		--cache-from ci/{{ label_docker_image }}-dev \
+		--cache-from ci/{{ label_docker_image }}-cache \
+		--tag ci/{{ label_docker_image }}-prod \
+		--target prod \
 		.
+
+clean_ci: clean_build_artifacts
+clean_build_artifacts:
+	rm -f build_artifacts.tar.gz
 
 clean_ci: clean_build
 clean_build:
 	docker rmi -f \
 		ci/{{ label_docker_image }} \
+		ci/{{ label_docker_image }}-base \
+		ci/{{ label_docker_image }}-dev \
+		ci/{{ label_docker_image }}-prod \
 		ci/{{ label_docker_image }}-cache \
 
 tar:
