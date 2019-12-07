@@ -19,7 +19,7 @@ test: test_unit test_acceptance
 {% endblock %}
 
 {% block build_app %}
-COFFEE := npx coffee --map
+COFFEE := npx coffee
 
 build_app: compile_full
 
