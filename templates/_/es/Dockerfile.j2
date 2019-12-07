@@ -36,29 +36,3 @@ RUN /app/setup_env.sh
 {% if not has_entrypoint %}
 USER node
 {% endif %}
-
-
-FROM base as prod
-
-RUN /docker_cleanup.sh npm ci --only=prod
-
-ADD build_artifacts.tar.gz /app
-
-{% if has_setup_env %}
-RUN /app/setup_env.sh
-{% endif -%}
-
-{% block volumes %}
-{% endblock %}
-
-{% if not has_entrypoint %}
-USER node
-{% endif %}
-
-ARG RELEASE
-ARG COMMIT
-ENV \
-    SERVICE_NAME="{{ name }}" \
-    RELEASE=${RELEASE} \
-    SENTRY_RELEASE=${RELEASE} \
-    COMMIT=${COMMIT}

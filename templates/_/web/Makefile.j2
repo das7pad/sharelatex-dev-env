@@ -126,11 +126,10 @@ build_prod: clean_build_artifacts
 	docker build \
 		--build-arg RELEASE=$(RELEASE) \
 		--build-arg COMMIT=$(COMMIT) \
-		--cache-from ci/{{ label_docker_image }}-base \
-		--cache-from ci/{{ label_docker_image }}-dev \
+		--build-arg BASE=ci/{{ label_docker_image }}-base \
 		--cache-from ci/{{ label_docker_image }}-cache \
 		--tag ci/{{ label_docker_image }}-prod \
-		--target prod \
+		--file=Dockerfile.production \
 		.
 
 clean_ci: clean_build_artifacts
