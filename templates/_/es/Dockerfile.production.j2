@@ -34,3 +34,6 @@ ENV \
     RELEASE=${RELEASE} \
     SENTRY_RELEASE=${RELEASE} \
     COMMIT=${COMMIT}
+
+{# monkey patch for https://github.com/moby/moby/issues/37273 #}
+CMD ["node", "--expose-gc", "app.js"]
