@@ -4,6 +4,14 @@
 ARG BASE
 FROM $BASE
 
+{% if monkey_patch_npm_ci__from %}
+# monkey patch npm ci --only=prod
+# npm tries to update the _from field of dev-only/optional dependencies
+RUN sed -i -E \
+      's/(updateFromField .+)/\1\n    return Promise.resolve()/' \
+      /usr/local/lib/node_modules/npm/node_modules/libcipm/index.js
+{% endif %}
+
 RUN /docker_cleanup.sh npm ci --only=prod
 
 ADD build_artifacts.tar.gz /app
