@@ -129,8 +129,8 @@ build_prod: clean_build_artifacts
 			--gzip \
 			app.js \
 			app/{{ src_dir }} \
-{% if has_app_libs %}
-			app/libs \
+{% if has_app_lib %}
+			app/lib \
 {% endif %}
 {% if has_app_templates %}
 			app/templates \
