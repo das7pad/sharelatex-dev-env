@@ -121,6 +121,7 @@ build_prod: clean_build_artifacts
 			app/views \
 			public/js/manifest.json \
 			setup_env.sh \
+			test/smoke/src \
 		> build_artifacts.tar.gz
 
 	docker build \

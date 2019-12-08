@@ -147,6 +147,9 @@ build_prod: clean_build_artifacts
 {% if has_setup_env %}
 			setup_env.sh \
 {% endif %}
+{% if has_smoke_tests %}
+			test/smoke/{{ src_dir }} \
+{% endif %}
 		> build_artifacts.tar.gz
 
 	docker build \
