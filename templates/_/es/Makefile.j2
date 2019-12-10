@@ -165,11 +165,4 @@ clean_ci: clean_build_artifacts
 clean_build_artifacts:
 	rm -f build_artifacts.tar.gz
 
-tar:
-	$(DOCKER_COMPOSE) up tar
-
-publish:
-
-	docker push $(DOCKER_REPO)/{{ label_docker_image }}
-
-.PHONY: clean test test_unit test_acceptance test_clean build publish
+.PHONY: clean test test_unit test_acceptance test_clean build
