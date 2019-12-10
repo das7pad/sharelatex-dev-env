@@ -66,20 +66,22 @@ clean:
 {% block clean %}
 {% endblock %}
 
-{% block lint %}
+test: lint
 lint:
+{% block lint %}
 	$(DOCKER_COMPOSE) run --rm test_unit npx eslint .
-
 {% endblock %}
+
 {% block test %}
-test: lint test_unit test_acceptance
 {% endblock %}
 
+test: test_unit
 test_unit:
 {% if has_unit_tests %}
 	$(DOCKER_COMPOSE) run --rm test_unit
 {% endif %}
 
+test: test_acceptance
 test_acceptance: test_clean test_acceptance_pre_run test_acceptance_run
 
 test_acceptance_run:

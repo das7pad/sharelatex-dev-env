@@ -14,10 +14,6 @@
 	rm -rf test/unit/js
 {% endblock %}
 
-{% block test %}
-test: test_unit test_acceptance
-{% endblock %}
-
 {% block build_app %}
 COFFEE := npx coffee
 
