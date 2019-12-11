@@ -152,18 +152,15 @@ services:
 {%- endif %}
 
 {% for dependency in dependencies %}
-{% if dependency.startswith('redis') %}
+{%   if dependency.startswith('redis') %}
   {{ dependency }}:
     image: redis
-{% endif %}
-{% endfor %}
 
-{% if 'mongo' in dependencies %}
+{%   elif dependency == 'mongo' %}
   mongo:
     image: mongo
-{% endif %}
 
-{% if 'minio' in dependencies %}
+{%   elif dependency == 'minio' %}
   minio:
     image: minio/minio
     command: server /data
@@ -190,4 +187,6 @@ services:
         && mc admin trace minio
     depends_on:
       - minio
-{% endif %}
+
+{%   endif %}
+{% endfor %}
