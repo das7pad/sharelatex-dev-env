@@ -307,6 +307,7 @@ class Project:
             'has_app_lib': 'app/lib',
             'has_app_templates': 'app/templates',
             'has_app_views': 'app/views',
+            'has_config': 'config',
             'has_install_deps': 'install_deps.sh',
             'has_entrypoint': 'entrypoint.sh',
             'has_setup_env': 'setup_env.sh',

@@ -51,7 +51,9 @@
 ##############
 # app config #
 {% block config %}
+{% if has_config %}
 !/config/settings.defaults.js
+{% endif %}
 {% endblock %}
 # app config #
 ##############
@@ -59,22 +61,38 @@
 #######
 # app #
 {% block app %}
+{% if has_index_js %}
+!/index.js
+{% endif %}
+{% if has_app_js %}
 !/app.js
-!/app
+{% endif %}
+{% if has_app_src %}
+!/app/{{ src_dir }}
+{% endif %}
+{% if has_app_lib %}
+!/app/lib
+{% endif %}
+{% if has_app_templates %}
+!/app/templates
+{% endif %}
+{% if has_app_views %}
+!/app/views
+{% endif %}
 
 {% if has_acceptance_test_bootstrap %}
 !/test/acceptance/bootstrap.js
 {% endif %}
 !/test/acceptance/config
 !/test/acceptance/fixtures
-!/test/acceptance/js
+!/test/acceptance/{{ src_dir }}
 !/test/acceptance/libs
 !/test/fixtures
-!/test/smoke/js
+!/test/smoke/{{ src_dir }}
 {% if has_unit_test_bootstrap %}
 !/test/unit/bootstrap.js
 {% endif %}
-!/test/unit/js
+!/test/unit/{{ src_dir }}
 {% endblock %}
 # app #
 #######

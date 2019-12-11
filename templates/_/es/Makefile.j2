@@ -129,8 +129,15 @@ build_prod: clean_build_artifacts
 		ci/{{ label_docker_image }}-dev \
 			--create \
 			--gzip \
+{% if has_index_js %}
+			index.js \
+{% endif %}
+{% if has_app_js %}
 			app.js \
+{% endif %}
+{% if has_app_src %}
 			app/{{ src_dir }} \
+{% endif %}
 {% if has_app_lib %}
 			app/lib \
 {% endif %}
@@ -140,7 +147,9 @@ build_prod: clean_build_artifacts
 {% if has_app_views %}
 			app/views \
 {% endif %}
+{% if has_config %}
 			config \
+{% endif %}
 {% block build_artifacts %}
 {% endblock %}
 {% if has_entrypoint %}
