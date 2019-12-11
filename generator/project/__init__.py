@@ -358,11 +358,19 @@ class Project:
         else:
             current = None
 
-        template = self._get_template(
-            name=name,
-        )
+        try:
+            template = self._get_template(
+                name=name,
+            )
+        except:
+            logger.error('failed to load template %s', name)
+            raise
 
-        new = template.render(**env)
+        try:
+            new = template.render(**env)
+        except:
+            logger.error('failed to render template %s with %r', name, env)
+            raise
 
         # allow at max two empty lines in a row
         new = re.sub(r'\n{3,}', '\n\n', new)
