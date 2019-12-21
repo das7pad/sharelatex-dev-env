@@ -36,4 +36,4 @@ ENV \
     COMMIT=${COMMIT}
 
 {# monkey patch for https://github.com/moby/moby/issues/37273 #}
-CMD ["node", "--expose-gc", "app.js"]
+CMD ["node", "--expose-gc", "{{ 'index' if has_index_js else 'app' }}.js"]
