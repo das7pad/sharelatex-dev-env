@@ -39,6 +39,9 @@
 !/app
 
 !/frontend/js
+{% if has_frontend_stylesheets %}
+!/frontend/stylesheets
+{% endif %}
 
 !/modules
 /modules/*/Makefile
@@ -54,9 +57,11 @@
 !/public/recurly
 !/public/static
 
+{% if not has_frontend_stylesheets %}
 !/public/stylesheets/
 public/stylesheets/*.css
 public/stylesheets/*.map
+{% endif %}
 
 !/migrations
 
