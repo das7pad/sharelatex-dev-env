@@ -65,7 +65,7 @@
               --user root \
               --workdir /app/public \
               --entrypoint sh \
-              $IMAGE_CI \
+              $IMAGE_CI-webpack \
                 -c '/compress.sh && tar --create .' \
               | xz -9e \
               > public.tar.xz

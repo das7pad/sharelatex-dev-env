@@ -36,3 +36,9 @@ RUN /app/setup_env.sh
 {% if not has_entrypoint %}
 USER node
 {% endif %}
+
+{% if has_webpack_config_js %}
+FROM dev as webpack
+USER root
+RUN /docker_cleanup.sh npm run webpack:production
+{% endif %}

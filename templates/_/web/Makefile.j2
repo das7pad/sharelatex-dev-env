@@ -107,14 +107,16 @@ build: clean_build_artifacts
 		.
 
 build_prod: clean_build_artifacts
+	docker build \
+		--cache-from ci/{{ label_docker_image }}-dev \
+		--tag ci/{{ label_docker_image }}-webpack \
+		--target webpack \
+		.
+
 	docker run \
 		--rm \
-		--entrypoint sh \
-		--user root \
-		ci/{{ label_docker_image }}-dev \
-		-c '\
-		npm run webpack:production >&2 \
-		&& tar \
+		--entrypoint tar \
+		ci/{{ label_docker_image }}-webpack \
 			--create \
 			--gzip \
 			app.js \
@@ -127,7 +129,6 @@ build_prod: clean_build_artifacts
 			{{ webpack_public_path|default('public/js') }}/manifest.json \
 			setup_env.sh \
 			test/smoke/src \
-		' \
 		> build_artifacts.tar.gz
 
 	docker build \
@@ -150,6 +151,7 @@ clean_build:
 		ci/{{ label_docker_image }}-base \
 		ci/{{ label_docker_image }}-dev \
 		ci/{{ label_docker_image }}-prod \
+		ci/{{ label_docker_image }}-webpack \
 		ci/{{ label_docker_image }}-cache \
 
 MODULE_TARGETS = \
