@@ -18,10 +18,10 @@ services:
 {% endif %}
 
   test_acceptance:
-{% if name == 'web' %}
-    image: node:{{ node_version }}
-{% else %}
+{% if has_install_deps %}
     build: .
+{% else %}
+    image: node:{{ node_version }}
 {% endif %}
     volumes:
       - .:/app
