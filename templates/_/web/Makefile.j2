@@ -34,23 +34,23 @@ test_unit:
 	COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_unit
 
 
-build_test_frontend:
-	COMPOSE_PROJECT_NAME=frontend_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) build test_frontend
+FRONTEND_DOCKER_COMPOSE ?= \
+	COMPOSE_PROJECT_NAME=frontend_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE)
 
-clean_test_acceptance: clean_test_frontend
-clean_test_frontend:
-	COMPOSE_PROJECT_NAME=frontend_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
-	docker rmi -f frontend_$(BUILD_DIR_NAME)_test_frontend
+build_test_frontend:
+	$(FRONTEND_DOCKER_COMPOSE) build test_frontend
 
 test: test_frontend
 test_frontend: test_frontend_build_run
 test_frontend_build_run: build_test_frontend
-	$(MAKE) test_frontend_run
+test_frontend_build_run: test_frontend_run
 
 test_frontend_run:
-	COMPOSE_PROJECT_NAME=frontend_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
-	COMPOSE_PROJECT_NAME=frontend_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_frontend
-	COMPOSE_PROJECT_NAME=frontend_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+	$(FRONTEND_DOCKER_COMPOSE) run --rm test_frontend
+
+clean_test_acceptance: clean_test_frontend
+clean_test_frontend:
+	$(FRONTEND_DOCKER_COMPOSE) down --rmi local
 
 
 test: test_acceptance
