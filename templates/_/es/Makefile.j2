@@ -67,9 +67,63 @@ clean:
 {% endblock %}
 
 test: lint
-lint:
 {% block lint %}
-	$(DOCKER_COMPOSE) run --rm test_unit npm run lint
+{#
+    - scenario 1
+        some eslint dependency changed
+        -> lint_full
+        -> run the linter on all the source code files
+    - scenario 2
+        some source code file changed
+        -> lint_partial
+        -> run the linter on the changed files
+    - scenario 3
+        misc project files changed
+        -> no op
+        -> skip linting
+
+    NOTE: the base line for the changed state is the last successful commit in
+           CI or the dev branch - see below
+#}
+{# set by Jenkins, fall back to dev branch on current remote, then origin #}
+GIT_PREVIOUS_SUCCESSFUL_COMMIT ?= $(shell \
+{# requires a new git version, tested with 2.17.0, failed with 1.8.3 #}
+	git rev-parse --abbrev-ref --symbolic-full-name dev@{u} 2>/dev/null \
+	|| echo origin/dev)
+
+NEED_FULL_LINT ?= \
+	$(shell git diff $(GIT_PREVIOUS_SUCCESSFUL_COMMIT) --name-only \
+			| grep --max-count=1 \
+				-e .eslintignore \
+				-e .eslintrc \
+				-e package-lock.json \
+	)
+
+ifeq (,$(NEED_FULL_LINT))
+lint: lint_partial
+else
+lint: lint_full
+endif
+
+RUN_LINT ?= $(DOCKER_COMPOSE) run --rm test_unit npx eslint
+lint_full:
+	$(RUN_LINT) .
+
+FILES_FOR_LINT ?= \
+	$(shell git diff $(GIT_PREVIOUS_SUCCESSFUL_COMMIT) --name-only \
+			| grep --invert-match \
+				-e vendor \
+			| grep \
+				-e .js \
+{% if has_frontend_stylesheets %}
+				-e .less \
+{% endif %}
+	)
+
+lint_partial:
+ifneq (,$(FILES_FOR_LINT))
+	$(RUN_LINT) $(FILES_FOR_LINT)
+endif
 {% endblock %}
 
 {% block test %}
