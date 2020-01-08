@@ -130,10 +130,19 @@ endif
 {% endblock %}
 
 
+UNIT_TEST_DOCKER_COMPOSE ?= \
+	COMPOSE_PROJECT_NAME=unit_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE)
+
 test: test_unit
 test_unit:
 {% if has_unit_tests %}
-	$(DOCKER_COMPOSE) run --rm test_unit
+	$(UNIT_TEST_DOCKER_COMPOSE) run --rm test_unit
+{% endif %}
+
+clean_ci: clean_test_unit
+clean_test_unit:
+{% if has_unit_tests %}
+	$(UNIT_TEST_DOCKER_COMPOSE) down --timeout 0
 {% endif %}
 
 
