@@ -309,6 +309,7 @@ class Project:
             'has_app_views': 'app/views',
             'has_config': 'config',
             'has_frontend_stylesheets': 'frontend/stylesheets',
+            'has_modules': 'modules/',
             'has_install_deps': 'install_deps.sh',
             'has_entrypoint': 'entrypoint.sh',
             'has_setup_env': 'setup_env.sh',

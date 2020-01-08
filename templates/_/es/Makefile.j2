@@ -243,6 +243,10 @@ build_prod: clean_build_artifacts
 {% if has_config %}
 			config \
 {% endif %}
+{% if has_modules %}
+			modules/*/app/ \
+			modules/*/index.js \
+{% endif %}
 {% if has_webpack_config_js %}
 			{{ webpack_public_path|default('public/js') }}/manifest.json \
 {% endif %}
@@ -271,5 +275,41 @@ build_prod: clean_build_artifacts
 clean_ci: clean_build_artifacts
 clean_build_artifacts:
 	rm -f build_artifacts.tar.gz
+
+
+{% if has_modules %}
+MODULE_DIRS := $(shell find modules -mindepth 1 -maxdepth 1 -type d -not -name '.git' )
+MODULE_MAKEFILES := $(MODULE_DIRS:=/Makefile)
+
+$(MODULE_MAKEFILES): Makefile.module
+	cp Makefile.module $@
+
+clean: clean_Makefiles
+clean_Makefiles:
+	rm -f $(MODULE_MAKEFILES)
+
+test_acceptance: test_acceptance_modules
+test_acceptance_run: test_acceptance_modules_run
+test_acceptance_modules: test_acceptance_modules_run
+TEST_ACCEPTANCE_MODULES = $(addsuffix /test_acceptance,$(MODULE_DIRS))
+test_acceptance_modules_run: $(TEST_ACCEPTANCE_MODULES)
+
+TEST_ACCEPTANCE_CI_MODULES = $(addsuffix /test_acceptance_ci,$(MODULE_DIRS))
+test_acceptance_modules_run_ci: $(TEST_ACCEPTANCE_CI_MODULES)
+
+clean_test_acceptance: clean_test_acceptance_modules
+CLEAN_TEST_ACCEPTANCE_MODULES = $(addsuffix /clean_test_acceptance,$(MODULE_DIRS))
+clean_test_acceptance_modules: $(CLEAN_TEST_ACCEPTANCE_MODULES)
+
+MODULE_TARGETS = \
+	$(TEST_ACCEPTANCE_MODULES) \
+	$(TEST_ACCEPTANCE_CI_MODULES) \
+	$(CLEAN_TEST_ACCEPTANCE_MODULES) \
+
+$(MODULE_TARGETS): $(MODULE_MAKEFILES)
+	$(MAKE) -C $(dir $@) $(notdir $@)
+
+.PHONY: $(MODULE_TARGETS)
+{% endif %}
 
 .PHONY: clean test test_unit test_acceptance test_clean build
