@@ -96,6 +96,9 @@ services:
 {% endif %}
 {% for dependency in dependencies %}
       - {{ dependency }}
+{%   if dependency == 'minio' %}
+      - minio_setup
+{%   endif %}
 {% endfor %}
 {% if not has_entrypoint %}
     user: node

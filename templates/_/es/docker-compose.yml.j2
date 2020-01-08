@@ -89,6 +89,9 @@ services:
 {% endif %}
 {% for dependency in dependencies %}
       - {{ dependency }}
+{%   if dependency == 'minio' %}
+      - minio_setup
+{%   endif %}
 {% endfor %}
 {% if name == 'web' %}
     command: npm run test:acceptance:run_dir test/acceptance/{{ src_dir }}
