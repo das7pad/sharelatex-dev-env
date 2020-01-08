@@ -128,6 +128,38 @@ lint_partial:
 ifneq (,$(FILES_FOR_LINT))
 	$(RUN_LINT) $(FILES_FOR_LINT)
 endif
+
+
+NEED_FULL_FORMAT ?= \
+	$(shell git diff $(GIT_PREVIOUS_SUCCESSFUL_COMMIT) --name-only \
+			| grep --max-count=1 \
+				-e .prettierignore \
+				-e .prettierrc \
+				-e package-lock.json \
+	)
+
+ifeq (,$(NEED_FULL_FORMAT))
+format: format_partial
+format_fix: format_fix_partial
+else
+format: format_full
+format_fix: format_fix_full
+endif
+
+RUN_FORMAT ?= $(DOCKER_COMPOSE) run --rm test_unit npx prettier-eslint
+format_full:
+	$(RUN_FORMAT) '**/*.{js,less}' --list-different
+format_fix_full:
+	$(RUN_FORMAT) '**/*.{js,less}' --write
+
+format_partial:
+ifneq (,$(FILES_FOR_LINT))
+	$(RUN_FORMAT) $(FILES_FOR_LINT) --list-different
+endif
+format_fix_partial:
+ifneq (,$(FILES_FOR_LINT))
+	$(RUN_FORMAT) $(FILES_FOR_LINT) --write
+endif
 {% endblock %}
 
 
