@@ -59,6 +59,9 @@ clean_build:
 		ci/{{ label_docker_image }}-base \
 		ci/{{ label_docker_image }}-dev \
 		ci/{{ label_docker_image }}-prod \
+{% if has_webpack_config_js %}
+		ci/{{ label_docker_image }}-webpack \
+{% endif %}
 		ci/{{ label_docker_image }}-cache \
 		--force
 
@@ -177,10 +180,21 @@ build: clean_build_artifacts
 		.
 
 build_prod: clean_build_artifacts
+{% if has_webpack_config_js %}
+	docker build \
+		--cache-from ci/{{ label_docker_image }}-dev \
+		--tag ci/{{ label_docker_image }}-webpack \
+		--target webpack \
+		.
+{% endif %}
 	docker run \
 		--rm \
 		--entrypoint tar \
+{% if has_webpack_config_js %}
+		ci/{{ label_docker_image }}-webpack \
+{% else %}
 		ci/{{ label_docker_image }}-dev \
+{% endif %}
 			--create \
 			--gzip \
 {% if has_index_js %}
@@ -203,6 +217,9 @@ build_prod: clean_build_artifacts
 {% endif %}
 {% if has_config %}
 			config \
+{% endif %}
+{% if has_webpack_config_js %}
+			{{ webpack_public_path|default('public/js') }}/manifest.json \
 {% endif %}
 {% block build_artifacts %}
 {% endblock %}
