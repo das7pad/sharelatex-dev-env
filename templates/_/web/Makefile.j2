@@ -53,19 +53,21 @@ clean_test_frontend:
 	$(FRONTEND_DOCKER_COMPOSE) down --rmi local
 
 
+ACCEPTANCE_TEST_DOCKER_COMPOSE ?= \
+ COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE)
+
 test: test_acceptance
 test_acceptance: test_acceptance_app
 test_acceptance_run: test_acceptance_app_run
+test_acceptance_app: clean_test_acceptance_app
 test_acceptance_app: test_acceptance_app_run
 test_acceptance_app_run:
-	COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
-	COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) run --rm test_acceptance
-	COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+	$(ACCEPTANCE_TEST_DOCKER_COMPOSE) run --rm test_acceptance
 
 clean_ci: clean_test_acceptance
 clean_test_acceptance: clean_test_acceptance_app
 clean_test_acceptance_app:
-	COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE) down -v -t 0
+	$(ACCEPTANCE_TEST_DOCKER_COMPOSE) down --volumes --timeout 0
 
 test_acceptance: test_acceptance_modules
 test_acceptance_run: test_acceptance_modules_run
