@@ -7,9 +7,7 @@ BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
 COMMIT ?= $(shell git rev-parse HEAD)
 RELEASE ?= $(shell git describe --tags | sed 's/-g/+/;s/^v//')
 PROJECT_NAME = {{ name }}
-{% if has_frontend_tests %}
 BUILD_DIR_NAME = $(shell pwd | xargs basename | tr -cd '[a-zA-Z0-9_.\-]')
-{% endif %}
 {% if 'minio' in dependencies %}
 S3_ENDPOINT ?= http://minio:9000
 S3_FORCE_PATH_STYLE ?= true
@@ -54,7 +52,6 @@ DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 
 clean_ci: clean
 clean_ci: clean_build
-clean_ci: test_clean
 
 clean_build:
 	docker rmi \
@@ -141,28 +138,44 @@ test_unit:
 	$(DOCKER_COMPOSE) run --rm test_unit
 {% endif %}
 
-test: test_acceptance
-test_acceptance: test_clean test_acceptance_pre_run test_acceptance_run
 
-test_acceptance_run:
+ACCEPTANCE_TEST_DOCKER_COMPOSE ?= \
+	COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE)
+
+test: test_acceptance
+test_acceptance: test_acceptance_app
+test_acceptance_run: test_acceptance_app_run
+test_acceptance_app: clean_test_acceptance_app
+test_acceptance_app: test_acceptance_app_run
+
+{% block test_acceptance %}
+test_acceptance_app_run:
 {% if has_acceptance_tests %}
-	$(DOCKER_COMPOSE) run --rm test_acceptance
+	$(ACCEPTANCE_TEST_DOCKER_COMPOSE) run --rm test_acceptance
+{% endif %}
+{% endblock %}
+
+test_acceptance_app_run: test_acceptance_pre_run
+test_acceptance_pre_run:
+{% if has_pre_test_acceptance %}
+	$(ACCEPTANCE_TEST_DOCKER_COMPOSE) run --rm \
+		--entrypoint bash \
+	 	test_acceptance \
+	 		test/acceptance/scripts/pre-run
+{% endif %}
+{% if 'minio' in dependencies %}
+	$(ACCEPTANCE_TEST_DOCKER_COMPOSE) up -d minio_setup minio
+{% endif %}
+
+clean_ci: clean_test_acceptance
+clean_test_acceptance: clean_test_acceptance_app
+clean_test_acceptance_app:
+{% if has_acceptance_tests %}
+	$(ACCEPTANCE_TEST_DOCKER_COMPOSE) down --volumes --timeout 0
 {% endif %}
 
 {% block clean_test_acceptance %}
-clean_test_acceptance:
 {% endblock %}
-
-test_clean:
-	$(DOCKER_COMPOSE) down -v -t 0
-
-test_acceptance_pre_run:
-{% if has_pre_test_acceptance %}
-	$(DOCKER_COMPOSE) run --rm --entrypoint bash test_acceptance test/acceptance/scripts/pre-run
-{% endif %}
-{% if 'minio' in dependencies %}
-	$(DOCKER_COMPOSE) up -d minio_setup minio
-{% endif %}
 
 
 {% if has_frontend_tests %}
