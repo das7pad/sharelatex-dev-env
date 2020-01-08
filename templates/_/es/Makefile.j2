@@ -92,6 +92,7 @@ test: lint
 GIT_PREVIOUS_SUCCESSFUL_COMMIT ?= $(shell \
 {# requires a new git version, tested with 2.17.0, failed with 1.8.3 #}
 	git rev-parse --abbrev-ref --symbolic-full-name dev@{u} 2>/dev/null \
+	| grep -e /dev \
 	|| echo origin/dev)
 
 NEED_FULL_LINT ?= \
