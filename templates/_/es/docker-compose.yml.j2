@@ -61,6 +61,7 @@ services:
       MOCHA_GREP: ${MOCHA_GREP}
 {% if name == 'filestore' %}
       ENABLE_CONVERSIONS: "true"
+      USE_PROM_METRICS: "true"
 {% endif %}
 {% if name == 'clsi' %}
       TEXLIVE_IMAGE: quay.io/sharelatex/texlive-full:2017.1
