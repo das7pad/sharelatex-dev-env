@@ -33,6 +33,12 @@ RUN /docker_cleanup.sh make build_app
 RUN /app/setup_env.sh
 {% endif -%}
 
+{% if data_dirs %}
+RUN DATA_DIRS="{{ data_dirs|join(' ') }}" \
+&&  mkdir -p ${DATA_DIRS} \
+&&  chown node:node ${DATA_DIRS}
+{% endif %}
+
 {% if not has_entrypoint %}
 USER node
 {% endif %}

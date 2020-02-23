@@ -20,6 +20,12 @@ ADD build_artifacts.tar.gz /app
 RUN /app/setup_env.sh
 {% endif -%}
 
+{% if data_dirs %}
+RUN DATA_DIRS="{{ data_dirs|join(' ') }}" \
+&&  mkdir -p ${DATA_DIRS} \
+&&  chown node:node ${DATA_DIRS}
+{% endif %}
+
 {% block volumes %}
 {% endblock %}
 
