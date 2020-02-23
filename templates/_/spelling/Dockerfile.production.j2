@@ -1,8 +1,0 @@
-{% extends '_/es/Dockerfile.production.j2' %}
-
-{% block volumes %}
-VOLUME \
-    {{ [
-        '/app/cache',
-    ]|join(' \\\n    ') }}
-{% endblock %}
