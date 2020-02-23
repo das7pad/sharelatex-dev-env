@@ -39,10 +39,10 @@ services:
 {% endif %}
 {% endfor %}
 {% if 'minio' in dependencies %}
-      S3_ENDPOINT: ${S3_ENDPOINT}
-      S3_FORCE_PATH_STYLE: ${S3_FORCE_PATH_STYLE}
-      AWS_KEY: ${AWS_KEY}
-      AWS_SECRET: ${AWS_SECRET}
+      AWS_S3_ENDPOINT: ${AWS_S3_ENDPOINT}
+      AWS_S3_FORCE_PATH_STYLE: ${AWS_S3_FORCE_PATH_STYLE}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
 {%   if name == 'filestore' %}
       AWS_S3_USER_FILES_BUCKET_NAME: ${AWS_BUCKET_USER}
       AWS_S3_TEMPLATE_FILES_BUCKET_NAME: ${AWS_BUCKET_TEMPLATE}
@@ -124,8 +124,8 @@ services:
     command: server /data
     environment:
       MINIO_BROWSER: 'off'
-      MINIO_ACCESS_KEY: ${AWS_KEY}
-      MINIO_SECRET_KEY: ${AWS_SECRET}
+      MINIO_ACCESS_KEY: ${AWS_ACCESS_KEY_ID}
+      MINIO_SECRET_KEY: ${AWS_SECRET_ACCESS_KEY}
 
   minio_setup:
     image: minio/mc
@@ -134,7 +134,7 @@ services:
       - -c
       - >
         sleep 2
-        && mc config host add minio http://minio:9000 ${AWS_KEY} ${AWS_SECRET}
+        && mc config host add minio http://minio:9000 ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY}
     {% if name == 'filestore' %}
         && mc mb --ignore-existing minio/${AWS_BUCKET_USER}
         && mc mb --ignore-existing minio/${AWS_BUCKET_TEMPLATE}
