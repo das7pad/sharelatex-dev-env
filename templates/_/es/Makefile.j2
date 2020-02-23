@@ -14,8 +14,6 @@ S3_FORCE_PATH_STYLE ?= true
 AWS_KEY ?= $(shell openssl rand -hex 20)
 AWS_SECRET ?= $(shell openssl rand -hex 20)
 {%   if name == 'filestore' %}
-BACKEND ?= fs
-S3_BACKEND ?= aws-sdk
 AWS_BUCKET_USER ?= user
 AWS_BUCKET_TEMPLATE ?= template
 AWS_BUCKET_PUBLIC ?= public
@@ -39,8 +37,6 @@ DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 	AWS_KEY=$(AWS_KEY) \
 	AWS_SECRET=$(AWS_SECRET) \
 {%   if name == 'filestore' %}
-	BACKEND=$(BACKEND) \
-	S3_BACKEND=$(S3_BACKEND) \
 	AWS_BUCKET_USER=$(AWS_BUCKET_USER) \
 	AWS_BUCKET_TEMPLATE=$(AWS_BUCKET_TEMPLATE) \
 	AWS_BUCKET_PUBLIC=$(AWS_BUCKET_PUBLIC) \
