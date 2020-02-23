@@ -200,7 +200,7 @@ test_acceptance_pre_run:
 	 		test/acceptance/scripts/pre-run
 {% endif %}
 {% if 'minio' in dependencies %}
-	$(ACCEPTANCE_TEST_DOCKER_COMPOSE) up -d minio_setup minio
+	$(ACCEPTANCE_TEST_DOCKER_COMPOSE) up minio_setup
 {% endif %}
 
 clean_ci: clean_test_acceptance

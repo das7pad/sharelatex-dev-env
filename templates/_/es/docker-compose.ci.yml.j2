@@ -186,7 +186,6 @@ services:
     {% else %}
         && mc mb --ignore-existing minio/${AWS_BUCKET}
     {% endif %}
-        && mc admin trace minio
     depends_on:
       - minio
 
