@@ -34,6 +34,9 @@
 !/app.js
 !/app
 
+{% if has_frontend_fonts %}
+!/frontend/fonts
+{% endif %}
 !/frontend/js
 {% if has_frontend_stylesheets %}
 !/frontend/stylesheets
@@ -48,7 +51,9 @@
 !/public/*.txt
 
 !/public/brand
+{% if not has_frontend_fonts %}
 !/public/font
+{% endif %}
 !/public/img
 !/public/recurly
 !/public/static

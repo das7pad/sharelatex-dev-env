@@ -308,6 +308,7 @@ class Project:
             'has_app_templates': 'app/templates',
             'has_app_views': 'app/views',
             'has_config': 'config',
+            'has_frontend_fonts': 'frontend/fonts',
             'has_frontend_stylesheets': 'frontend/stylesheets',
             'has_modules': 'modules/',
             'has_install_deps': 'install_deps.sh',
