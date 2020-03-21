@@ -55,27 +55,3 @@
           }
 {% endblock %}
 {% set has_submitted_acceptance_test_results = true %}
-
-{% block archive %}
-        stage('archive public') {
-          steps {
-            sh '''docker run \
-              --rm \
-              --volume $PWD/compress.sh:/compress.sh \
-              --user root \
-              --workdir /app/public \
-              --entrypoint sh \
-              $IMAGE_CI-webpack \
-                -c '/compress.sh && tar --create .' \
-              | xz -9e \
-              > public.tar.xz
-            '''
-            archiveArtifacts artifacts: 'public.tar.xz', fingerprint: true
-          }
-          post {
-            cleanup {
-              sh 'rm -f public.tar.xz'
-            }
-          }
-        }
-{% endblock %}

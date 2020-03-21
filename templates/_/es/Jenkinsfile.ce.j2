@@ -161,50 +161,84 @@ pipeline {
 {% endif %}
       }
     }
+{% if has_webpack_config_js %}
+
+    stage('Build webpack') {
+      steps {
+        sh 'make build_webpack'
+      }
+    }
+{% endif %}
 
     stage('Submit results') {
       options {
         timeout(time: 30, unit: 'MINUTES')
       }
-      stages {
-        stage('Build production') {
-          when {
-            expression {
-              env.SHARELATEX_DOCKER_REPOS != null
+      parallel {
+        stage('docker') {
+          stages {
+            stage('Build production') {
+              when {
+                expression {
+                  env.SHARELATEX_DOCKER_REPOS != null
+                }
+              }
+              steps {
+                sh 'make build_prod'
+              }
             }
-          }
-          steps {
-            sh 'make build_prod'
+            stage('docker push') {
+              when {
+                expression {
+                  env.SHARELATEX_DOCKER_REPOS != null
+                }
+              }
+              environment {
+                IMAGE = "{{ docker_image_app_origin }}"
+                IMAGE_BRANCH = "{{ docker_image_app_origin_branch }}"
+              }
+              steps {
+                sh 'docker tag $IMAGE_CI-prod $IMAGE'
+                sh 'docker push $IMAGE'
+                sh 'docker tag $IMAGE $IMAGE_BRANCH'
+                sh 'docker push $IMAGE_BRANCH'
+              }
+              post {
+                cleanup {
+                  sh '''
+                    docker rmi --force \
+                      $IMAGE \
+                      $IMAGE_BRANCH \
+                  '''
+                }
+              }
+            }
           }
         }
-        stage('docker push') {
-          when {
-            expression {
-              env.SHARELATEX_DOCKER_REPOS != null
-            }
-          }
-          environment {
-            IMAGE = "{{ docker_image_app_origin }}"
-            IMAGE_BRANCH = "{{ docker_image_app_origin_branch }}"
-          }
+{% if has_webpack_config_js %}
+        stage('archive public') {
           steps {
-            sh 'docker tag $IMAGE_CI-prod $IMAGE'
-            sh 'docker push $IMAGE'
-            sh 'docker tag $IMAGE $IMAGE_BRANCH'
-            sh 'docker push $IMAGE_BRANCH'
+            sh '''
+              docker run \
+                --rm \
+                --volume $PWD/compress.sh:/compress.sh \
+                --user root \
+                --workdir /app/public \
+                --entrypoint sh \
+                $IMAGE_CI-webpack \
+                  -c '/compress.sh && tar --create .' \
+              | xz -9e \
+              > public.tar.xz
+            '''
+            archiveArtifacts artifacts: 'public.tar.xz', fingerprint: true
           }
           post {
             cleanup {
-              sh '''
-                docker rmi --force \
-                  $IMAGE \
-                  $IMAGE_BRANCH \
-              '''
+              sh 'rm -f public.tar.xz'
             }
           }
         }
-{% block archive %}
-{% endblock %}
+{% endif %}
       }
     }
   }
