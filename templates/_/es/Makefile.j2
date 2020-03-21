@@ -2,10 +2,17 @@
 {{ header('#') }}
 {% set label_docker_image = '$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)' %}
 
+ifneq (,$(wildcard .git))
+git = git
+else
+# we are in docker, without the .git directory
+git = sh -c 'false'
+endif
+
 BUILD_NUMBER ?= local
-BRANCH_NAME ?= $(shell git rev-parse --abbrev-ref HEAD)
-COMMIT ?= $(shell git rev-parse HEAD)
-RELEASE ?= $(shell git describe --tags | sed 's/-g/+/;s/^v//')
+BRANCH_NAME ?= $(shell $(git) rev-parse --abbrev-ref HEAD || echo master)
+COMMIT ?= $(shell $(git) rev-parse HEAD || echo HEAD)
+RELEASE ?= $(shell $(git) describe --tags || echo v0.0.0 | sed 's/-g/+/;s/^v//')
 PROJECT_NAME = {{ name }}
 BUILD_DIR_NAME = $(shell pwd | xargs basename | tr -cd '[a-zA-Z0-9_.\-]')
 {% if 'minio' in dependencies %}
@@ -87,12 +94,12 @@ test: lint
 {# set by Jenkins, fall back to dev branch on current remote, then origin #}
 GIT_PREVIOUS_SUCCESSFUL_COMMIT ?= $(shell \
 {# requires a new git version, tested with 2.17.0, failed with 1.8.3 #}
-	git rev-parse --abbrev-ref --symbolic-full-name dev@{u} 2>/dev/null \
+	$(git) rev-parse --abbrev-ref --symbolic-full-name dev@{u} 2>/dev/null \
 	| grep -e /dev \
 	|| echo origin/dev)
 
 NEED_FULL_LINT ?= \
-	$(shell git diff $(GIT_PREVIOUS_SUCCESSFUL_COMMIT) --name-only \
+	$(shell $(git) diff $(GIT_PREVIOUS_SUCCESSFUL_COMMIT) --name-only \
 			| grep --max-count=1 \
 				-e .eslintignore \
 				-e .eslintrc \
@@ -112,7 +119,7 @@ lint_full:
 	$(RUN_LINT) .
 
 FILES_FOR_LINT ?= \
-	$(shell git diff $(GIT_PREVIOUS_SUCCESSFUL_COMMIT) --name-only \
+	$(shell $(git) diff $(GIT_PREVIOUS_SUCCESSFUL_COMMIT) --name-only \
 			| grep --invert-match \
 				-e vendor \
 			| grep \
@@ -129,7 +136,7 @@ endif
 
 
 NEED_FULL_FORMAT ?= \
-	$(shell git diff $(GIT_PREVIOUS_SUCCESSFUL_COMMIT) --name-only \
+	$(shell $(git) diff $(GIT_PREVIOUS_SUCCESSFUL_COMMIT) --name-only \
 			| grep --max-count=1 \
 				-e .prettierignore \
 				-e .prettierrc \
