@@ -35,19 +35,37 @@ pipeline {
   stages {
     stage('Prepare environment') {
       stages {
+        stage('Pull node image') {
+          when {
+            expression {
+              env.DOCKER_REGISTRY != null
+            }
+          }
+          steps {
+            sh 'docker pull $DOCKER_REGISTRY/$IMAGE_NODE'
+            sh 'docker tag $DOCKER_REGISTRY/$IMAGE_NODE $IMAGE_NODE'
+          }
+        }
+        stage('Cleanup and Create Output Directory For Test Results') {
+          steps {
+            sh 'mkdir --parents --mode=777 output'
+            sh '''
+              docker run --rm \
+                --volume $PWD/output:/home/node \
+                --user node \
+                $IMAGE_NODE \
+                sh -c 'find /home/node -mindepth 1 | xargs rm -rfv'
+            '''
+          }
+        }
+        stage('Clean Previous artifacts') {
+          steps {
+            sh 'git clean -xdf'
+            sh 'mkdir --parents --mode=777 output'
+          }
+        }
 {% block pull_external %}
 {% endblock %}
-        stage('Pull node image') {
-            when {
-                expression {
-                    env.DOCKER_REGISTRY != null
-                }
-            }
-            steps {
-                sh 'docker pull $DOCKER_REGISTRY/$IMAGE_NODE'
-                sh 'docker tag $DOCKER_REGISTRY/$IMAGE_NODE $IMAGE_NODE'
-            }
-        }
         stage('Pull Cache') {
           environment {
             IMAGE_CACHE_COLD = "$IMAGE_BRANCH_DEV-dev-deps"
@@ -70,24 +88,6 @@ pipeline {
                   $IMAGE_CACHE_COLD \
               '''
             }
-          }
-        }
-        stage('Cleanup and Create Output Directory For Test Results') {
-          steps {
-            sh 'mkdir --parents --mode=777 output'
-            sh '''
-              docker run --rm \
-                --volume $PWD/output:/home/node \
-                --user node \
-                $IMAGE_NODE \
-                sh -c 'find /home/node -mindepth 1 | xargs rm -rfv'
-            '''
-          }
-        }
-        stage('Clean Previous artifacts') {
-          steps {
-            sh 'git clean -xdf'
-            sh 'mkdir --parents --mode=777 output'
           }
         }
       }
