@@ -1,23 +1,5 @@
 {% extends '_/es/Jenkinsfile.ce.j2' %}
 
-{% block lint %}
-        stage('Code Style') {
-          parallel {
-            stage('Lint') {
-              steps {
-                sh 'make lint'
-              }
-            }
-
-            stage('Prettier') {
-              steps {
-                sh 'make format'
-              }
-            }
-          }
-        }
-{% endblock %}
-
 {% block acceptance_tests %}
           parallel {
             stage('Module Acceptance Tests') {

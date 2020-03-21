@@ -103,14 +103,22 @@ pipeline {
             sh 'make build'
           }
         }
-{% block lint %}
 
-        stage('Linting') {
-          steps {
-            sh 'make lint'
+        stage('Static Code Analysis') {
+          parallel {
+            stage('Lint') {
+              steps {
+                sh 'make lint'
+              }
+            }
+
+            stage('Formatting') {
+              steps {
+                sh 'make format'
+              }
+            }
           }
         }
-{% endblock %}
 
 {% if has_unit_tests %}
         stage('Unit Tests') {

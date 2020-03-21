@@ -73,6 +73,10 @@ clean:
 {% endblock %}
 
 test: lint
+lint:
+test: format
+format:
+
 {% block lint %}
 {#
     - scenario 1
