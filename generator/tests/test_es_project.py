@@ -41,7 +41,6 @@ class TestESProject(unittest.TestCase):
             NAME
             --language=es
             --node-version=1.2.3
-            --acceptance-creds=None
             --dependencies=mongo,redis
             --docker-repos=example.com/images
             --other-arg=1
@@ -57,7 +56,6 @@ class TestESProject(unittest.TestCase):
                 'redis',
             ],
             docker_repos='example.com/images',
-            acceptance_creds=None,
             unknown_arg='VALUE',
             other_arg='1',
         )
@@ -71,7 +69,6 @@ class TestESProject(unittest.TestCase):
                 'mongo',
                 'redis',
             ],
-            acceptance_creds=None,
             other_arg='1',
         )
         actual_1 = project_1._serialize_cfg()

@@ -161,24 +161,6 @@ pipeline {
 
 {% if has_acceptance_tests %}
         stage('Acceptance Tests') {
-{% if acceptance_creds == 'aws' %}
-          when {
-            allOf {
-              expression {
-                env.SHARELATEX_S3_DOCSTORE_TEST_AWS_BUCKET != null
-              }
-              expression {
-                env.SHARELATEX_S3_DOCSTORE_TEST_AWS_KEYS != null
-              }
-            }
-          }
-          environment {
-            AWS_BUCKET = "$SHARELATEX_S3_DOCSTORE_TEST_AWS_BUCKET"
-            AWS_ACCESS = credentials('SHARELATEX_S3_DOCSTORE_TEST_AWS_KEYS')
-            AWS_ACCESS_KEY_ID = "$AWS_ACCESS_USR"
-            AWS_SECRET_ACCESS_KEY = "$AWS_ACCESS_PSW"
-          }
-{% endif %}
 {% block acceptance_tests %}
           steps {
             sh 'make test_acceptance'

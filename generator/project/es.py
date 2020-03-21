@@ -27,7 +27,6 @@ class ESProject(Project):
             'language',
             'src_dir',
             'node_version',
-            'acceptance_creds',
             'dependencies',
             'docker_repos',
             'kube',

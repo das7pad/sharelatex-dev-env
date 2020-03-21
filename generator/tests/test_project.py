@@ -275,7 +275,6 @@ class TestProject(unittest.TestCase):
             NAME
             --language=LANGUAGE
             --node-version=1.2.3
-            --acceptance-creds=None
             --dependencies=mongo,redis_api
             --docker-repos=example.com/images
             --unknown-arg=VALUE
@@ -288,7 +287,6 @@ class TestProject(unittest.TestCase):
             name='NAME',
             path=self.project_path,
             node_version='1.2.3',
-            acceptance_creds=None,
             dependencies=[
                 'mongo',
                 'redis_api',
@@ -304,7 +302,6 @@ class TestProject(unittest.TestCase):
             """
             NAME
             --language=LANGUAGE
-            --acceptance-creds=None
             --dependencies=mongo,
             --docker-repos=example.com/images
             --node-version=1.2.3
@@ -314,7 +311,6 @@ class TestProject(unittest.TestCase):
             name='NAME',
             path=self.project_path,
             node_version='1.2.3',
-            acceptance_creds=None,
             dependencies=[
                 'mongo',
             ],
@@ -329,7 +325,6 @@ class TestProject(unittest.TestCase):
             """
             NAME
             --language=LANGUAGE
-            --acceptance-creds=None
             --dependencies=mongo,
             --docker-repos=example.com/images
             --node-version=1.2.3
@@ -340,7 +335,6 @@ class TestProject(unittest.TestCase):
             name='NAME',
             path=self.project_path,
             node_version='1.2.3',
-            acceptance_creds=None,
             dependencies=[
                 'mongo',
             ],
