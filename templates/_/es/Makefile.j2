@@ -60,12 +60,14 @@ clean_build:
 	docker rmi \
 		ci/{{ label_docker_image }} \
 		ci/{{ label_docker_image }}-base \
+		ci/{{ label_docker_image }}-dev-deps \
 		ci/{{ label_docker_image }}-dev \
 		ci/{{ label_docker_image }}-prod \
 {% if has_webpack_config_js %}
 		ci/{{ label_docker_image }}-webpack \
 {% endif %}
-		ci/{{ label_docker_image }}-cache \
+		ci/{{ label_docker_image }}-dev-deps-cache \
+		ci/{{ label_docker_image }}-prod-cache \
 		--force
 
 clean:
@@ -256,13 +258,20 @@ build_app:
 
 build: clean_build_artifacts
 	docker build \
-		--cache-from ci/{{ label_docker_image }}-cache \
+		--cache-from ci/{{ label_docker_image }}-dev-deps-cache \
 		--tag ci/{{ label_docker_image }}-base \
 		--target base \
 		.
 
 	docker build \
 		--cache-from ci/{{ label_docker_image }}-base \
+		--cache-from ci/{{ label_docker_image }}-dev-deps-cache \
+		--tag ci/{{ label_docker_image }}-dev-deps \
+		--target dev-deps \
+		.
+
+	docker build \
+		--cache-from ci/{{ label_docker_image }}-dev-deps \
 		--tag ci/{{ label_docker_image }} \
 		--tag ci/{{ label_docker_image }}-dev \
 		--target dev \
@@ -333,7 +342,8 @@ build_prod: clean_build_artifacts
 		--build-arg RELEASE=$(RELEASE) \
 		--build-arg COMMIT=$(COMMIT) \
 		--build-arg BASE=ci/{{ label_docker_image }}-base \
-		--cache-from ci/{{ label_docker_image }}-cache \
+		--cache-from ci/{{ label_docker_image }}-base \
+		--cache-from ci/{{ label_docker_image }}-prod-cache \
 		--tag ci/{{ label_docker_image }}-prod \
 		--file=Dockerfile.production \
 		.

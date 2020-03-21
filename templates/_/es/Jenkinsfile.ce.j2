@@ -26,6 +26,10 @@ pipeline {
     DOCKER_COMPOSE_FLAGS = "-f docker-compose.ci.yml"
     IMAGE_CI = "ci/{{ docker_image_app }}"
     IMAGE_NODE = 'node:{{ node_version }}'
+    IMAGE = "{{ docker_image_app_origin }}"
+    IMAGE_BRANCH = "{{ docker_image_app_origin_branch }}"
+    IMAGE_BRANCH_DEV = "{{ docker_image_app_origin_branch_dev }}"
+    IMAGE_CACHE_HOT_DEV_DEPS = "$IMAGE_BRANCH-dev-deps"
   }
 
   stages {
@@ -51,24 +55,24 @@ pipeline {
             }
           }
           environment {
-            IMAGE_BRANCH = "{{ docker_image_app_origin_branch }}"
-            IMAGE_BRANCH_DEV = "{{ docker_image_app_origin_branch_dev }}"
+            IMAGE_CACHE_COLD = "$IMAGE_BRANCH_DEV-dev-deps"
+            IMAGE_CACHE_CI_DEV_DEPS = "$IMAGE_CI-dev-deps-cache"
           }
           steps {
             sh '''
-              docker pull $IMAGE_BRANCH \
-              && docker tag $IMAGE_BRANCH $IMAGE_CI-cache \
-              || (docker pull $IMAGE_BRANCH_DEV \
-              && docker tag $IMAGE_BRANCH_DEV $IMAGE_CI-cache) \
-              || echo 'no app layer build cache available'
+              docker pull $IMAGE_CACHE_HOT_DEV_DEPS \
+              && docker tag $IMAGE_CACHE_HOT_DEV_DEPS $IMAGE_CACHE_CI_DEV_DEPS \
+              || (docker pull $IMAGE_CACHE_COLD \
+              && docker tag $IMAGE_CACHE_COLD $IMAGE_CACHE_CI_DEV_DEPS) \
+              || echo 'build cache not available'
             '''
           }
           post {
             cleanup {
               sh '''
                 docker rmi --force \
-                  $IMAGE_BRANCH \
-                  $IMAGE_BRANCH_DEV \
+                  $IMAGE_CACHE_HOT_DEV_DEPS \
+                  $IMAGE_CACHE_COLD \
               '''
             }
           }
@@ -104,17 +108,39 @@ pipeline {
           }
         }
 
-        stage('Static Code Analysis') {
+        stage('Post Build') {
           parallel {
-            stage('Lint') {
+            stage('Push dev-deps') {
+              when {
+                expression {
+                  env.SHARELATEX_DOCKER_REPOS != null
+                }
+              }
               steps {
-                sh 'make lint'
+                sh '''
+                  docker tag $IMAGE_CI-dev-deps $IMAGE_CACHE_HOT_DEV_DEPS
+                '''
+                sh 'docker push $IMAGE_CACHE_HOT_DEV_DEPS'
+              }
+              post {
+                cleanup {
+                  sh 'docker rmi --force $IMAGE_CACHE_HOT_DEV_DEPS'
+                }
               }
             }
+            stage('Static Code Analysis') {
+              parallel {
+                stage('Lint') {
+                  steps {
+                    sh 'make lint'
+                  }
+                }
 
-            stage('Formatting') {
-              steps {
-                sh 'make format'
+                stage('Formatting') {
+                  steps {
+                    sh 'make format'
+                  }
+                }
               }
             }
           }
@@ -188,6 +214,26 @@ pipeline {
       parallel {
         stage('docker') {
           stages {
+            stage('Pull production cache') {
+              steps {
+                sh '''
+                  docker pull $IMAGE_BRANCH \
+                  && docker tag $IMAGE_BRANCH $IMAGE_CI-prod-cache \
+                  || (docker pull $IMAGE_BRANCH_DEV \
+                  && docker tag $IMAGE_BRANCH_DEV $IMAGE_CI-prod-cache) \
+                  || echo 'no prod layer build cache available'
+                '''
+              }
+              post {
+                cleanup {
+                  sh '''
+                    docker rmi --force \
+                      $IMAGE_BRANCH \
+                      $IMAGE_BRANCH_DEV \
+                  '''
+                }
+              }
+            }
             stage('Build production') {
               when {
                 expression {
@@ -203,10 +249,6 @@ pipeline {
                 expression {
                   env.SHARELATEX_DOCKER_REPOS != null
                 }
-              }
-              environment {
-                IMAGE = "{{ docker_image_app_origin }}"
-                IMAGE_BRANCH = "{{ docker_image_app_origin_branch }}"
               }
               steps {
                 sh 'docker tag $IMAGE_CI-prod $IMAGE'
