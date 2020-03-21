@@ -49,11 +49,6 @@ pipeline {
             }
         }
         stage('Pull Cache') {
-          when {
-            expression {
-              env.SHARELATEX_DOCKER_REPOS != null
-            }
-          }
           environment {
             IMAGE_CACHE_COLD = "$IMAGE_BRANCH_DEV-dev-deps"
             IMAGE_CACHE_CI_DEV_DEPS = "$IMAGE_CI-dev-deps-cache"
@@ -111,11 +106,6 @@ pipeline {
         stage('Post Build') {
           parallel {
             stage('Push dev-deps') {
-              when {
-                expression {
-                  env.SHARELATEX_DOCKER_REPOS != null
-                }
-              }
               steps {
                 sh '''
                   docker tag $IMAGE_CI-dev-deps $IMAGE_CACHE_HOT_DEV_DEPS
@@ -246,21 +236,11 @@ pipeline {
               }
             }
             stage('Build production') {
-              when {
-                expression {
-                  env.SHARELATEX_DOCKER_REPOS != null
-                }
-              }
               steps {
                 sh 'make build_prod'
               }
             }
             stage('docker push') {
-              when {
-                expression {
-                  env.SHARELATEX_DOCKER_REPOS != null
-                }
-              }
               steps {
                 sh 'docker tag $IMAGE_CI-prod $IMAGE'
                 sh 'docker push $IMAGE'

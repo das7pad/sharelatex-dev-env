@@ -12,11 +12,6 @@
 
 {% block pull_external %}
         stage('Pull Texlive') {
-          when {
-            expression {
-              env.SHARELATEX_DOCKER_REPOS != null
-            }
-          }
           options {
             timeout(time: 2, unit: 'HOURS')
           }
@@ -29,32 +24,14 @@
                 docker pull $TEXLIVE_IMAGE \
                 || (
                   docker build \
-                    -t $TEXLIVE_IMAGE \
+                    --tag $TEXLIVE_IMAGE \
                     --build-arg TEXLIVE_SCHEME=full \
                     {{ url_texlive_docker_image }} \
                   && \
                   docker push $TEXLIVE_IMAGE
                 )
-                '''
+            '''
             sh 'docker tag $TEXLIVE_IMAGE {{ docker_image_texlive_upstream }}'
-          }
-        }
-        stage('Build Texlive') {
-          when {
-            expression {
-              env.SHARELATEX_DOCKER_REPOS == null
-            }
-          }
-          options {
-            timeout(time: 2, unit: 'HOURS')
-          }
-          steps {
-            sh  '''
-                docker build \
-                  -t {{ docker_image_texlive_upstream }} \
-                  --build-arg TEXLIVE_SCHEME=full \
-                  {{ url_texlive_docker_image }}
-                '''
           }
         }
 {% endblock %}
