@@ -105,7 +105,9 @@ else
 lint: lint_full
 endif
 
-RUN_LINT ?= $(DOCKER_COMPOSE) run --rm test_unit npx eslint
+LINT_DOCKER_COMPOSE ?= \
+	COMPOSE_PROJECT_NAME=lint_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE)
+RUN_LINT ?= $(LINT_DOCKER_COMPOSE) run --rm test_unit npx eslint
 lint_full:
 	$(RUN_LINT) .
 
@@ -142,7 +144,9 @@ format: format_full
 format_fix: format_fix_full
 endif
 
-RUN_FORMAT ?= $(DOCKER_COMPOSE) run --rm test_unit npx prettier-eslint
+FORMAT_DOCKER_COMPOSE ?= \
+	COMPOSE_PROJECT_NAME=format_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE)
+RUN_FORMAT ?= $(FORMAT_DOCKER_COMPOSE) run --rm test_unit npx prettier-eslint
 format_full:
 	$(RUN_FORMAT) '**/*.{js,less}' --list-different
 format_fix_full:
