@@ -13,11 +13,14 @@
 {% set docker_image_app_origin_branch_dev = (
     '$SHARELATEX_DOCKER_REPOS/' + name + ':dev'
   ) %}
+{% set agent_label = (
+    'sharelatex && docker_socket_access'
+    if name == 'clsi' else
+    'sharelatex'
+  ) %}
 pipeline {
   agent {
-{% block agent %}
-    label 'sharelatex'
-{% endblock %}
+    label '{{ agent_label }}'
   }
   environment {
     DOCKER_COMPOSE_FLAGS = "-f docker-compose.ci.yml"

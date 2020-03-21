@@ -10,10 +10,6 @@
     'quay.io/sharelatex/texlive-full:2017.1'
   ) %}
 
-{% block agent %}
-    label 'sharelatex && docker_socket_access'
-{% endblock %}
-
 {% block pull_external %}
         stage('Pull Texlive') {
           when {
