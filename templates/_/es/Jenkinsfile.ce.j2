@@ -146,38 +146,67 @@ pipeline {
           }
         }
 
+        stage('Test') {
+          parallel {
 {% if has_unit_tests %}
-        stage('Unit Tests') {
-          steps {
-            sh 'make test_unit'
-          }
-          post {
-            always {
-              xunit (tools: [JUnit(pattern: 'output/unit.xml')])
+            stage('Unit Tests') {
+              steps {
+                sh 'make test_unit'
+              }
+              post {
+                always {
+                  xunit (tools: [JUnit(pattern: 'output/unit.xml')])
+                }
+              }
             }
-          }
-        }
 {% endif %}
-
 {% if has_acceptance_tests %}
-        stage('Acceptance Tests') {
-{% block acceptance_tests %}
-          steps {
-            sh 'make test_acceptance'
-          }
-{% endblock %}
-          post {
-{% if not has_submitted_acceptance_test_results %}
-            always {
-              xunit (tools: [JUnit(pattern: 'output/acceptance.xml')])
+            stage('App Acceptance Tests') {
+              steps {
+                sh 'make test_acceptance_app'
+              }
+              post {
+                always {
+                  xunit (tools: [JUnit(pattern: 'output/acceptance.xml')])
+                }
+                cleanup {
+                  sh 'make clean_test_acceptance_app'
+                }
+              }
             }
 {% endif %}
-            cleanup {
-              sh 'make clean_test_acceptance'
+{% if has_frontend_tests %}
+            stage('Frontend Tests') {
+              steps {
+                sh 'make test_frontend_build_run'
+              }
+              post {
+                always {
+                  xunit (tools: [JUnit(pattern: 'output/frontend.xml')])
+                }
+                cleanup {
+                  sh 'make clean_test_frontend'
+                }
+              }
             }
+{% endif %}
+{% if has_modules %}
+            stage('Module Acceptance Tests') {
+              steps {
+                sh 'make test_acceptance_modules_run_ci'
+              }
+              post {
+                always {
+                  xunit (tools: [JUnit(pattern: 'output/module_*.xml')])
+                }
+                cleanup {
+                  sh 'make clean_test_acceptance_modules'
+                }
+              }
+            }
+{% endif %}
           }
         }
-{% endif %}
       }
     }
 {% if has_webpack_config_js %}

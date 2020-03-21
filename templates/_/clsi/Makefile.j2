@@ -2,6 +2,7 @@
 
 {% block clean_test_acceptance %}
 clean_test_acceptance: clean_clsi_artifacts
+clean_test_acceptance_app: clean_clsi_artifacts
 clean_clsi_artifacts:
 	$(ACCEPTANCE_TEST_DOCKER_COMPOSE) run --rm \
 		--entrypoint bash \
