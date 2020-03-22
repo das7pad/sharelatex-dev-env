@@ -29,7 +29,8 @@ FROM dev-deps as dev
 
 COPY . /app
 
-RUN /docker_cleanup.sh make build_app
+{% block build_app %}
+{% endblock %}
 
 {% if has_setup_env %}
 RUN /app/setup_env.sh
