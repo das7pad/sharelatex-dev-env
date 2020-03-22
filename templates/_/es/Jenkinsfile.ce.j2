@@ -13,88 +13,87 @@
 {% set docker_image_app_origin_branch_dev = (
     '$SHARELATEX_DOCKER_REPOS/' + name + ':dev'
   ) %}
-{% set agent_label = (
-    'sharelatex && docker_socket_access'
-    if name == 'clsi' else
-    'sharelatex'
-  ) %}
+{% set agent_label_build = 'sharelatex && docker_builder' %}
+{% set agent_label_test = 'sharelatex' %}
 pipeline {
-  agent {
-    label '{{ agent_label }}'
-  }
+  agent none
   environment {
     DOCKER_COMPOSE_FLAGS = "-f docker-compose.ci.yml"
     IMAGE_CI = "ci/{{ docker_image_app }}"
     IMAGE_NODE = 'node:{{ node_version }}'
-    IMAGE = "{{ docker_image_app_origin }}"
-    IMAGE_BRANCH = "{{ docker_image_app_origin_branch }}"
-    IMAGE_BRANCH_DEV = "{{ docker_image_app_origin_branch_dev }}"
-    IMAGE_CACHE_HOT_DEV_DEPS = "$IMAGE_BRANCH-dev-deps"
   }
 
   stages {
-    stage('Prepare environment') {
-      stages {
-        stage('Pull node image') {
-          when {
-            expression {
-              env.DOCKER_REGISTRY != null
-            }
-          }
-          steps {
-            sh 'docker pull $DOCKER_REGISTRY/$IMAGE_NODE'
-            sh 'docker tag $DOCKER_REGISTRY/$IMAGE_NODE $IMAGE_NODE'
-          }
-        }
-        stage('Cleanup and Create Output Directory For Test Results') {
-          steps {
-            sh 'mkdir --parents --mode=777 output'
-            sh '''
-              docker run --rm \
-                --volume $PWD/output:/home/node \
-                --user node \
-                $IMAGE_NODE \
-                sh -c 'find /home/node -mindepth 1 | xargs rm -rfv'
-            '''
-          }
-        }
-        stage('Clean Previous artifacts') {
-          steps {
-            sh 'git clean -xdf'
-            sh 'mkdir --parents --mode=777 output'
-          }
-        }
-        stage('Pull Cache') {
-          environment {
-            IMAGE_CACHE_COLD = "$IMAGE_BRANCH_DEV-dev-deps"
-            IMAGE_CACHE_CI_DEV_DEPS = "$IMAGE_CI-dev-deps-cache"
-          }
-          steps {
-            sh '''
-              docker pull $IMAGE_CACHE_HOT_DEV_DEPS \
-              && docker tag $IMAGE_CACHE_HOT_DEV_DEPS $IMAGE_CACHE_CI_DEV_DEPS \
-              || (docker pull $IMAGE_CACHE_COLD \
-              && docker tag $IMAGE_CACHE_COLD $IMAGE_CACHE_CI_DEV_DEPS) \
-              || echo 'build cache not available'
-            '''
-          }
-          post {
-            cleanup {
-              sh '''
-                docker rmi --force \
-                  $IMAGE_CACHE_HOT_DEV_DEPS \
-                  $IMAGE_CACHE_COLD \
-              '''
-            }
-          }
-        }
-      }
-    }
-    stage('CI') {
-      options {
-        timeout(time: 30, unit: 'MINUTES')
+    stage('Bootstrap') {
+      agent {
+        label '{{ agent_label_build }}'
       }
       stages {
+        stage('Prepare environment') {
+          stages {
+            stage('Pull node image') {
+              when {
+                expression {
+                  env.DOCKER_REGISTRY != null
+                }
+              }
+              steps {
+                sh 'docker pull $DOCKER_REGISTRY/$IMAGE_NODE'
+                sh 'docker tag $DOCKER_REGISTRY/$IMAGE_NODE $IMAGE_NODE'
+              }
+            }
+            stage('Cleanup and Create Output Directory For Test Results') {
+              steps {
+                sh 'mkdir --parents --mode=777 output'
+                sh '''
+                  docker run --rm \
+                    --volume $PWD/output:/home/node \
+                    --user node \
+                    $IMAGE_NODE \
+                    sh -c 'find /home/node -mindepth 1 | xargs rm -rfv'
+                '''
+              }
+            }
+            stage('Clean Previous artifacts') {
+              steps {
+                sh 'git clean -xdf'
+                sh 'mkdir --parents --mode=777 output'
+              }
+            }
+            stage('Pull Cache') {
+              environment {
+                IMAGE_BRANCH = "{{ docker_image_app_origin_branch }}"
+                IMAGE_BRANCH_DEV = "{{ docker_image_app_origin_branch_dev }}"
+                IMAGE_CACHE_HOT_DEV_DEPS = "$IMAGE_BRANCH-dev-deps"
+                IMAGE_CACHE_COLD = "$IMAGE_BRANCH_DEV-dev-deps"
+                IMAGE_CACHE_CI_DEV_DEPS = "$IMAGE_CI-dev-deps-cache"
+              }
+              steps {
+                sh '''
+                  docker pull $IMAGE_CACHE_HOT_DEV_DEPS \
+                  && docker tag \
+                        $IMAGE_CACHE_HOT_DEV_DEPS \
+                        $IMAGE_CACHE_CI_DEV_DEPS \
+                  || (docker pull $IMAGE_CACHE_COLD \
+                  && docker tag \
+                        $IMAGE_CACHE_COLD \
+                        $IMAGE_CACHE_CI_DEV_DEPS) \
+                  || echo 'build cache not available'
+                '''
+              }
+              post {
+                cleanup {
+                  sh '''
+                    docker rmi --force \
+                      $IMAGE_CACHE_HOT_DEV_DEPS \
+                      $IMAGE_CACHE_COLD \
+                  '''
+                }
+              }
+            }
+          }
+        }
+
         stage('Build') {
           steps {
             sh 'make build'
@@ -104,6 +103,10 @@ pipeline {
         stage('Post Build') {
           parallel {
             stage('Push dev-deps') {
+              environment {
+                IMAGE_BRANCH = "{{ docker_image_app_origin_branch }}"
+                IMAGE_CACHE_HOT_DEV_DEPS = "$IMAGE_BRANCH-dev-deps"
+              }
               steps {
                 sh '''
                   docker tag $IMAGE_CI-dev-deps $IMAGE_CACHE_HOT_DEV_DEPS
@@ -116,186 +119,290 @@ pipeline {
                 }
               }
             }
-            stage('Static Code Analysis') {
-              parallel {
-                stage('Lint') {
-                  steps {
-                    sh 'make lint'
-                  }
-                }
 
-                stage('Formatting') {
-                  steps {
-                    sh 'make format'
-                  }
-                }
+            stage('Lint') {
+              steps {
+                sh 'make lint'
+              }
+            }
+
+            stage('Formatting') {
+              steps {
+                sh 'make format'
               }
             }
           }
         }
 
-        stage('Test') {
-          parallel {
-{% if has_unit_tests %}
-            stage('Unit Tests') {
-              steps {
-                sh 'make test_unit'
-              }
-              post {
-                always {
-                  xunit (tools: [JUnit(pattern: 'output/unit.xml')])
-                }
-              }
-            }
-{% endif %}
-{% if has_acceptance_tests %}
-            stage('App Acceptance Tests') {
-{% if name == 'clsi' %}
-              environment {
-                // https://github.com/das7pad/sharelatex-docker-images.git
-                TEXLIVE_IMAGE = "$SHARELATEX_DOCKER_REPOS/texlive:2017.1-full"
-              }
-{% endif %}
-              steps {
-                sh 'make test_acceptance_app'
-              }
-              post {
-                always {
-                  xunit (tools: [JUnit(pattern: 'output/acceptance.xml')])
-                }
-                cleanup {
-                  sh 'make clean_test_acceptance_app'
-                }
-              }
-            }
-{% endif %}
-{% if has_frontend_tests %}
-            stage('Frontend Tests') {
-              steps {
-                sh 'make test_frontend_build_run'
-              }
-              post {
-                always {
-                  xunit (tools: [JUnit(pattern: 'output/frontend.xml')])
-                }
-                cleanup {
-                  sh 'make clean_test_frontend'
-                }
-              }
-            }
-{% endif %}
-{% if has_modules %}
-            stage('Module Acceptance Tests') {
-              steps {
-                sh 'make test_acceptance_modules_run_ci'
-              }
-              post {
-                always {
-                  xunit (tools: [JUnit(pattern: 'output/module_*.xml')])
-                }
-                cleanup {
-                  sh 'make clean_test_acceptance_modules'
-                }
-              }
-            }
-{% endif %}
+        stage('Push dev') {
+          environment {
+            IMAGE = "{{ docker_image_app_origin }}"
           }
-        }
-      }
-    }
-{% if has_webpack_config_js %}
-
-    stage('Build webpack') {
-      steps {
-        sh 'make build_webpack'
-      }
-    }
-{% endif %}
-
-    stage('Submit results') {
-      options {
-        timeout(time: 30, unit: 'MINUTES')
-      }
-      parallel {
-        stage('docker') {
-          stages {
-            stage('Pull production cache') {
-              steps {
-                sh '''
-                  docker pull $IMAGE_BRANCH \
-                  && docker tag $IMAGE_BRANCH $IMAGE_CI-prod-cache \
-                  || (docker pull $IMAGE_BRANCH_DEV \
-                  && docker tag $IMAGE_BRANCH_DEV $IMAGE_CI-prod-cache) \
-                  || echo 'no prod layer build cache available'
-                '''
-              }
-              post {
-                cleanup {
-                  sh '''
-                    docker rmi --force \
-                      $IMAGE_BRANCH \
-                      $IMAGE_BRANCH_DEV \
-                  '''
-                }
-              }
-            }
-            stage('Build production') {
-              steps {
-                sh 'make build_prod'
-              }
-            }
-            stage('docker push') {
-              steps {
-                sh 'docker tag $IMAGE_CI-prod $IMAGE'
-                sh 'docker push $IMAGE'
-                sh 'docker tag $IMAGE $IMAGE_BRANCH'
-                sh 'docker push $IMAGE_BRANCH'
-              }
-              post {
-                cleanup {
-                  sh '''
-                    docker rmi --force \
-                      $IMAGE \
-                      $IMAGE_BRANCH \
-                  '''
-                }
-              }
-            }
-          }
-        }
-{% if has_webpack_config_js %}
-        stage('archive public') {
           steps {
-            sh '''
-              docker run \
-                --rm \
-                --volume $PWD/compress.sh:/compress.sh \
-                --user root \
-                --workdir /app/public \
-                --entrypoint sh \
-                $IMAGE_CI-webpack \
-                  -c '/compress.sh && tar --create .' \
-              | xz -9e \
-              > public.tar.xz
-            '''
-            archiveArtifacts artifacts: 'public.tar.xz', fingerprint: true
+            sh 'docker tag $IMAGE_CI-dev $IMAGE-dev'
+            sh 'docker push $IMAGE-dev'
           }
           post {
             cleanup {
-              sh 'rm -f public.tar.xz'
+              sh 'docker rmi --force $IMAGE-dev'
+            }
+          }
+        }
+      }
+      post {
+        cleanup {
+          sh 'make clean_ci'
+        }
+      }
+    }
+
+    stage('Fan out') {
+      parallel {
+{% if has_unit_tests %}
+        stage('Unit Tests') {
+          agent {
+            label '{{ agent_label_test }}'
+          }
+          environment {
+            SUFFIX = 'test-unit'
+            IMAGE = "{{ docker_image_app_origin }}"
+          }
+          steps {
+            sh 'docker pull $IMAGE-dev'
+            sh 'docker tag $IMAGE-dev $IMAGE_CI-$SUFFIX'
+            sh 'mkdir --parents --mode=777 output'
+            sh 'BUILD_NUMBER="$BUILD_NUMBER-$SUFFIX" make test_unit'
+          }
+          post {
+            always {
+              xunit(tools: [JUnit(pattern: 'output/unit.xml')])
+            }
+            cleanup {
+              sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-$SUFFIX'
             }
           }
         }
 {% endif %}
+
+{% if has_acceptance_tests %}
+        stage('App Acceptance Tests') {
+{% if name == 'clsi' %}
+          agent {
+            label '{{ agent_label_test }} && docker_socket_access'
+          }
+          environment {
+            // https://github.com/das7pad/sharelatex-docker-images.git
+            TEXLIVE_IMAGE = "$SHARELATEX_DOCKER_REPOS/texlive:2017.1-full"
+            PULL_TEXLIVE_BEFORE_RUN = "true"
+            SUFFIX = 'test-acceptance'
+            IMAGE = "{{ docker_image_app_origin }}"
+          }
+{% else %}
+          agent {
+            label '{{ agent_label_test }}'
+          }
+          environment {
+            SUFFIX = 'test-acceptance'
+            IMAGE = "{{ docker_image_app_origin }}"
+          }
+{% endif %}
+          steps {
+            sh 'docker pull $IMAGE-dev'
+            sh 'docker tag $IMAGE-dev $IMAGE_CI-$SUFFIX'
+            sh 'mkdir --parents --mode=777 output'
+            sh 'BUILD_NUMBER="$BUILD_NUMBER-$SUFFIX" make test_acceptance_app'
+          }
+          post {
+            always {
+              xunit(tools: [JUnit(pattern: 'output/acceptance.xml')])
+            }
+            cleanup {
+              sh 'make clean_test_acceptance_app'
+              sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-$SUFFIX'
+            }
+          }
+        }
+{% endif %}
+
+{% if has_frontend_tests %}
+        stage('Frontend Tests') {
+          agent {
+            label '{{ agent_label_test }}'
+          }
+          environment {
+            SUFFIX = 'test-frontend'
+            IMAGE = "{{ docker_image_app_origin }}"
+          }
+          steps {
+            sh 'docker pull $IMAGE-dev'
+            sh 'docker tag $IMAGE-dev $IMAGE_CI-$SUFFIX'
+            sh 'mkdir --parents --mode=777 output'
+            sh '''
+              BUILD_NUMBER="$BUILD_NUMBER-$SUFFIX" make test_frontend_build_run
+            '''
+          }
+          post {
+            always {
+              xunit(tools: [JUnit(pattern: 'output/frontend.xml')])
+            }
+            cleanup {
+              sh 'make clean_test_frontend'
+              sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-$SUFFIX'
+            }
+          }
+        }
+{% endif %}
+
+{% if has_modules %}
+        stage('Module Acceptance Tests') {
+          agent {
+            label '{{ agent_label_test }}'
+          }
+          environment {
+            SUFFIX = 'test-modules'
+            IMAGE = "{{ docker_image_app_origin }}"
+          }
+          steps {
+            sh 'docker pull $IMAGE-dev'
+            sh 'docker tag $IMAGE-dev $IMAGE_CI-$SUFFIX'
+            sh 'mkdir --parents --mode=777 output'
+            sh '''
+              BUILD_NUMBER="$BUILD_NUMBER-$SUFFIX" \
+              make test_acceptance_modules_run_ci
+            '''
+          }
+          post {
+            always {
+              xunit(tools: [JUnit(pattern: 'output/module_*.xml')])
+            }
+            cleanup {
+              sh 'make clean_test_acceptance_modules'
+              sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-$SUFFIX'
+            }
+          }
+        }
+{% endif %}
+
+{% set label = (
+        ('Webpack and ' if has_webpack_config_js else '')
+        + 'Production build'
+      ) %}
+        stage('{{ label }}') {
+          agent {
+            label '{{ agent_label_build }}'
+          }
+          environment {
+            IMAGE = "{{ docker_image_app_origin }}"
+          }
+          stages {
+{% if has_webpack_config_js %}
+
+            stage('Build webpack') {
+              steps {
+                sh 'docker pull $IMAGE-dev'
+                sh 'docker tag $IMAGE-dev $IMAGE_CI-dev'
+                sh 'make build_webpack'
+              }
+              post {
+                cleanup {
+                  sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-dev'
+                }
+              }
+            }
+{% endif %}
+
+            stage('Submit results') {
+              options {
+                timeout(time: 30, unit: 'MINUTES')
+              }
+              environment {
+                IMAGE_BRANCH = "{{ docker_image_app_origin_branch }}"
+                IMAGE_BRANCH_DEV = "{{ docker_image_app_origin_branch_dev }}"
+              }
+              stages {
+                stage('Pull production cache') {
+                  steps {
+                    sh '''
+                      docker pull $IMAGE_BRANCH \
+                      && docker tag $IMAGE_BRANCH $IMAGE_CI-prod-cache \
+                      || (docker pull $IMAGE_BRANCH_DEV \
+                      && docker tag $IMAGE_BRANCH_DEV $IMAGE_CI-prod-cache) \
+                      || echo 'no prod layer build cache available'
+                    '''
+                  }
+                  post {
+                    cleanup {
+                      sh '''
+                        docker rmi --force \
+                          $IMAGE_BRANCH \
+                          $IMAGE_BRANCH_DEV \
+                      '''
+                    }
+                  }
+                }
+                stage('Build production') {
+                  steps {
+                    sh 'docker pull $IMAGE-dev'
+                    sh 'docker tag $IMAGE-dev $IMAGE_CI-dev'
+                    sh 'make build_prod'
+                  }
+                  post {
+                    cleanup {
+                      sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-dev'
+                    }
+                  }
+                }
+                stage('docker push') {
+                  steps {
+                    sh 'docker tag $IMAGE_CI-prod $IMAGE'
+                    sh 'docker push $IMAGE'
+                    sh 'docker tag $IMAGE $IMAGE_BRANCH'
+                    sh 'docker push $IMAGE_BRANCH'
+                  }
+                  post {
+                    cleanup {
+                      sh '''
+                        docker rmi --force \
+                          $IMAGE \
+                          $IMAGE_BRANCH \
+                      '''
+                    }
+                  }
+                }
+{% if has_webpack_config_js %}
+                stage('archive public') {
+                  steps {
+                    sh '''
+                      docker run \
+                        --rm \
+                        --volume $PWD/compress.sh:/compress.sh \
+                        --user root \
+                        --workdir /app/public \
+                        --entrypoint sh \
+                        $IMAGE_CI-webpack \
+                          -c '/compress.sh && tar --create .' \
+                      | xz -9e \
+                      > public.tar.xz
+                    '''
+                    archiveArtifacts artifacts: 'public.tar.xz'
+                  }
+                  post {
+                    cleanup {
+                      sh 'rm -f public.tar.xz'
+                    }
+                  }
+                }
+{% endif %}
+              }
+            }
+          }
+          post {
+            cleanup {
+              sh 'make clean_ci'
+            }
+          }
+        }
       }
     }
   }
-
-{% block post %}
-  post {
-    cleanup {
-      sh 'make clean_ci'
-    }
-  }
-{% endblock %}
 }

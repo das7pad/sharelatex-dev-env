@@ -282,6 +282,12 @@ build_webpack: clean_build_artifacts
 {% endif %}
 
 build_prod: clean_build_artifacts
+	docker build \
+		--cache-from ci/{{ label_docker_image }}-dev \
+		--tag ci/{{ label_docker_image }}-base \
+		--target base \
+		.
+
 	docker run \
 		--rm \
 		--entrypoint tar \
