@@ -25,7 +25,7 @@ RUN DATA_DIRS="{{ data_dirs|join(' ') }}" \
 &&  mkdir -p ${DATA_DIRS} \
 &&  chown node:node ${DATA_DIRS}
 
-VOLUME /app/{{ data_dirs|join(' /app/') }}
+VOLUME /app/{{ volumes|default(data_dirs)|join(' /app/') }}
 {% endif %}
 
 {% if not has_entrypoint %}
