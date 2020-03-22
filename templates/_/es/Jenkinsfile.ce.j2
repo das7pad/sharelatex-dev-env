@@ -64,8 +64,6 @@ pipeline {
             sh 'mkdir --parents --mode=777 output'
           }
         }
-{% block pull_external %}
-{% endblock %}
         stage('Pull Cache') {
           environment {
             IMAGE_CACHE_COLD = "$IMAGE_BRANCH_DEV-dev-deps"
@@ -152,6 +150,12 @@ pipeline {
 {% endif %}
 {% if has_acceptance_tests %}
             stage('App Acceptance Tests') {
+{% if name == 'clsi' %}
+              environment {
+                // https://github.com/das7pad/sharelatex-docker-images.git
+                TEXLIVE_IMAGE = "$SHARELATEX_DOCKER_REPOS/texlive:2017.1-full"
+              }
+{% endif %}
               steps {
                 sh 'make test_acceptance_app'
               }

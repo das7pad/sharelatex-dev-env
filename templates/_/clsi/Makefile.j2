@@ -1,5 +1,15 @@
 {% extends '_/coffeescript/Makefile.j2' %}
 
+{% block test_acceptance %}
+export TEXLIVE_IMAGE ?= quay.io/sharelatex/texlive-full:2017.1
+
+test_acceptance_app: pull_texlive
+pull_texlive:
+	docker pull $(TEXLIVE_IMAGE)
+
+{{ super() }}
+{% endblock %}
+
 {% block clean_test_acceptance %}
 clean_test_acceptance: clean_clsi_artifacts
 clean_test_acceptance_app: clean_clsi_artifacts

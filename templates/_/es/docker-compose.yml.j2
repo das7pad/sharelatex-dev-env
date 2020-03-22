@@ -57,7 +57,7 @@ services:
       USE_PROM_METRICS: "true"
 {% endif %}
 {% if name == 'clsi' %}
-      TEXLIVE_IMAGE: quay.io/sharelatex/texlive-full:2017.1
+      TEXLIVE_IMAGE: "${TEXLIVE_IMAGE:-quay.io/sharelatex/texlive-full:2017.1}"
       TEXLIVE_IMAGE_USER: "tex"
       DOCKER_RUNNER: "true"
       COMPILES_HOST_DIR: $PWD/compiles
