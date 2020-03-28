@@ -17,7 +17,6 @@ for file in ${FILES}; do
     fi
 
     gzip -9 --stdout ${file} > ${dest}
-    touch -m --reference ${file} ${dest}
 done
 
 # normalize in order to get reproducible ETags (based on m-time)
