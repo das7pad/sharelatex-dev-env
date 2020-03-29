@@ -92,6 +92,18 @@ format:
     NOTE: the base line for the changed state is the last successful commit in
            CI or the dev branch - see below
 #}
+SHARELATEX_DOCKER_REPOS ?= local/sharelatex
+LINT_RUNNER_IMAGE ?= \
+	$(SHARELATEX_DOCKER_REPOS)/lint-runner:{{ lint_runner_version }}
+LINT_RUNNER = \
+	docker run \
+		--rm \
+		--tty \
+		--volume $(PWD):$(PWD) \
+		--workdir $(PWD) \
+		--user $(shell id -u):$(shell id -g) \
+		$(LINT_RUNNER_IMAGE)
+
 {# set by Jenkins, fall back to dev branch on current remote, then origin #}
 GIT_PREVIOUS_SUCCESSFUL_COMMIT ?= $(shell \
 {# requires a new git version, tested with 2.17.0, failed with 1.8.3 #}
@@ -104,7 +116,7 @@ NEED_FULL_LINT ?= \
 			| grep --max-count=1 \
 				-e .eslintignore \
 				-e .eslintrc \
-				-e package-lock.json \
+				-e buildscript.txt \
 	)
 
 ifeq (,$(NEED_FULL_LINT))
@@ -113,9 +125,7 @@ else
 lint: lint_full
 endif
 
-LINT_DOCKER_COMPOSE ?= \
-	COMPOSE_PROJECT_NAME=lint_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE)
-RUN_LINT ?= $(LINT_DOCKER_COMPOSE) run --rm test_unit npx eslint
+RUN_LINT ?= $(LINT_RUNNER) eslint
 lint_full:
 	$(RUN_LINT) .
 
@@ -128,7 +138,7 @@ FILES_FOR_LINT ?= \
 {% if has_frontend_stylesheets %}
 				-e .less \
 {% endif %}
-			| sed 's|^|/app/|' \
+			| sed 's|^|$(PWD)/|' \
 	)
 
 lint_partial:
@@ -142,7 +152,7 @@ NEED_FULL_FORMAT ?= \
 			| grep --max-count=1 \
 				-e .prettierignore \
 				-e .prettierrc \
-				-e package-lock.json \
+				-e buildscript.txt \
 	)
 
 ifeq (,$(NEED_FULL_FORMAT))
@@ -153,13 +163,11 @@ format: format_full
 format_fix: format_fix_full
 endif
 
-FORMAT_DOCKER_COMPOSE ?= \
-	COMPOSE_PROJECT_NAME=format_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE)
-RUN_FORMAT ?= $(FORMAT_DOCKER_COMPOSE) run --rm test_unit npx prettier-eslint
+RUN_FORMAT ?= $(LINT_RUNNER) prettier-eslint
 format_full:
-	$(RUN_FORMAT) '/app/**/*.{js,less}' --list-different
+	$(RUN_FORMAT) '$(PWD)/**/*.{js,less}' --list-different
 format_fix_full:
-	$(RUN_FORMAT) '/app/**/*.{js,less}' --write
+	$(RUN_FORMAT) '$(PWD)/**/*.{js,less}' --write
 
 format_partial:
 ifneq (,$(FILES_FOR_LINT))
