@@ -37,22 +37,10 @@ pipeline {
                 sh 'docker tag $DOCKER_REGISTRY/$IMAGE_NODE $IMAGE_NODE'
               }
             }
-            stage('Cleanup and Create Output Directory For Test Results') {
-              steps {
-                sh 'mkdir --parents --mode=777 output'
-                sh '''
-                  docker run --rm \
-                    --volume $PWD/output:/home/node \
-                    --user node \
-                    $IMAGE_NODE \
-                    sh -c 'find /home/node -mindepth 1 | xargs rm -rfv'
-                '''
-              }
-            }
             stage('Clean Previous artifacts') {
               steps {
+                sh 'make clean_output'
                 sh 'git clean -xdf'
-                sh 'mkdir --parents --mode=777 output'
               }
             }
             stage('Pull Cache') {
@@ -173,6 +161,7 @@ pipeline {
               xunit(tools: [JUnit(pattern: 'output/unit.xml')])
             }
             cleanup {
+              sh 'make clean_output'
               sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-$SUFFIX'
             }
           }
@@ -212,6 +201,7 @@ pipeline {
               xunit(tools: [JUnit(pattern: 'output/acceptance.xml')])
             }
             cleanup {
+              sh 'make clean_output'
               sh 'make clean_test_acceptance_app'
               sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-$SUFFIX'
             }
@@ -241,6 +231,7 @@ pipeline {
               xunit(tools: [JUnit(pattern: 'output/frontend.xml')])
             }
             cleanup {
+              sh 'make clean_output'
               sh 'make clean_test_frontend'
               sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-$SUFFIX'
             }
@@ -271,6 +262,7 @@ pipeline {
               xunit(tools: [JUnit(pattern: 'output/module_*.xml')])
             }
             cleanup {
+              sh 'make clean_output'
               sh 'make clean_test_acceptance_modules'
               sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-$SUFFIX'
             }
