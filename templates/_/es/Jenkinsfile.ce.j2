@@ -24,76 +24,92 @@ pipeline {
   }
 
   stages {
-    stage('Bootstrap') {
-      agent {
-        label '{{ agent_label_build }}'
-      }
-      stages {
-        stage('Prepare environment') {
+    stage('Fan Out 1') {
+      parallel {
+        stage('Lint') {
+          agent {
+            label '{{ agent_label_test }}'
+          }
+          steps {
+            sh 'make lint'
+          }
+        }
+
+        stage('Formatting') {
+          agent {
+            label '{{ agent_label_test }}'
+          }
+          steps {
+            sh 'make format'
+          }
+        }
+
+        stage('App Image') {
+          agent {
+            label '{{ agent_label_build }}'
+          }
           stages {
-            stage('Pull node image') {
-              steps {
-                sh 'docker pull $DOCKER_REGISTRY/$IMAGE_NODE'
-                sh 'docker tag $DOCKER_REGISTRY/$IMAGE_NODE $IMAGE_NODE'
-              }
-            }
-            stage('Clean Previous artifacts') {
-              steps {
-                sh 'make clean_output'
-                sh 'git clean -xdf'
-              }
-            }
-            stage('Pull Cache') {
-              environment {
-                IMAGE_BRANCH = "{{ docker_image_app_origin_branch }}"
-                IMAGE_BRANCH_DEV = "{{ docker_image_app_origin_branch_dev }}"
-                IMAGE_CACHE_HOT_DEV_DEPS = "$IMAGE_BRANCH-dev-deps"
-                IMAGE_CACHE_COLD = "$IMAGE_BRANCH_DEV-dev-deps"
-                IMAGE_CACHE_CI_DEV_DEPS = "$IMAGE_CI-dev-deps-cache"
-              }
-              steps {
-                sh '''
-                  docker pull $IMAGE_CACHE_HOT_DEV_DEPS \
-                  && docker tag \
-                        $IMAGE_CACHE_HOT_DEV_DEPS \
-                        $IMAGE_CACHE_CI_DEV_DEPS \
-                  || (docker pull $IMAGE_CACHE_COLD \
-                  && docker tag \
-                        $IMAGE_CACHE_COLD \
-                        $IMAGE_CACHE_CI_DEV_DEPS) \
-                  || echo 'build cache not available'
-                '''
-              }
-              post {
-                cleanup {
-                  sh '''
-                    docker rmi --force \
-                      $IMAGE_CACHE_HOT_DEV_DEPS \
-                      $IMAGE_CACHE_COLD \
-                  '''
+            stage('Prepare environment') {
+              stages {
+                stage('Pull node image') {
+                  steps {
+                    sh 'docker pull $DOCKER_REGISTRY/$IMAGE_NODE'
+                    sh 'docker tag $DOCKER_REGISTRY/$IMAGE_NODE $IMAGE_NODE'
+                  }
+                }
+                stage('Clean Previous artifacts') {
+                  steps {
+                    sh 'make clean_output'
+                    sh 'git clean -xdf'
+                  }
+                }
+                stage('Pull Cache') {
+                  environment {
+                    IMAGE_BRANCH = "{{ docker_image_app_origin_branch }}"
+                    IMAGE_BRANCH_DEV = "{{ docker_image_app_origin_branch_dev }}"
+                    IMAGE_CACHE_HOT_DEV_DEPS = "$IMAGE_BRANCH-dev-deps"
+                    IMAGE_CACHE_COLD = "$IMAGE_BRANCH_DEV-dev-deps"
+                    IMAGE_CACHE_CI_DEV_DEPS = "$IMAGE_CI-dev-deps-cache"
+                  }
+                  steps {
+                    sh '''
+                      docker pull $IMAGE_CACHE_HOT_DEV_DEPS \
+                      && docker tag \
+                            $IMAGE_CACHE_HOT_DEV_DEPS \
+                            $IMAGE_CACHE_CI_DEV_DEPS \
+                      || (docker pull $IMAGE_CACHE_COLD \
+                      && docker tag \
+                            $IMAGE_CACHE_COLD \
+                            $IMAGE_CACHE_CI_DEV_DEPS) \
+                      || echo 'build cache not available'
+                    '''
+                  }
+                  post {
+                    cleanup {
+                      sh '''
+                        docker rmi --force \
+                          $IMAGE_CACHE_HOT_DEV_DEPS \
+                          $IMAGE_CACHE_COLD \
+                      '''
+                    }
+                  }
                 }
               }
             }
-          }
-        }
 
-        stage('Build') {
-          steps {
-            sh 'make build'
-          }
-        }
+            stage('Build') {
+              steps {
+                sh 'make build'
+              }
+            }
 
-        stage('Post Build') {
-          parallel {
             stage('Push dev-deps') {
               environment {
                 IMAGE_BRANCH = "{{ docker_image_app_origin_branch }}"
                 IMAGE_CACHE_HOT_DEV_DEPS = "$IMAGE_BRANCH-dev-deps"
               }
               steps {
-                sh '''
-                  docker tag $IMAGE_CI-dev-deps $IMAGE_CACHE_HOT_DEV_DEPS
-                '''
+                sh 'docker tag $IMAGE_CI-dev-deps $IMAGE_CACHE_HOT_DEV_DEPS'
                 sh 'docker push $IMAGE_CACHE_HOT_DEV_DEPS'
               }
               post {
@@ -103,43 +119,31 @@ pipeline {
               }
             }
 
-            stage('Lint') {
+            stage('Push dev') {
+              environment {
+                IMAGE = "{{ docker_image_app_origin }}"
+              }
               steps {
-                sh 'make lint'
+                sh 'docker tag $IMAGE_CI-dev $IMAGE-dev'
+                sh 'docker push $IMAGE-dev'
+              }
+              post {
+                cleanup {
+                  sh 'docker rmi --force $IMAGE-dev'
+                }
               }
             }
-
-            stage('Formatting') {
-              steps {
-                sh 'make format'
-              }
-            }
-          }
-        }
-
-        stage('Push dev') {
-          environment {
-            IMAGE = "{{ docker_image_app_origin }}"
-          }
-          steps {
-            sh 'docker tag $IMAGE_CI-dev $IMAGE-dev'
-            sh 'docker push $IMAGE-dev'
           }
           post {
             cleanup {
-              sh 'docker rmi --force $IMAGE-dev'
+              sh 'make clean_ci'
             }
           }
-        }
-      }
-      post {
-        cleanup {
-          sh 'make clean_ci'
         }
       }
     }
 
-    stage('Fan out') {
+    stage('Fan out 2') {
       parallel {
 {% if has_unit_tests %}
         stage('Unit Tests') {
