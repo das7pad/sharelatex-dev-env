@@ -394,7 +394,7 @@ class Project:
         search_path: typing.List[pathlib.Path] = None,
     ) -> typing.List[str]:
         files = set()
-        blacklist = (
+        structure_names = (
             '_',
             'common',
             'macros',
@@ -407,7 +407,7 @@ class Project:
                 continue
             intermediate = []
             for file in directory.iterdir():
-                if file.name in blacklist:
+                if file.name in structure_names:
                     continue
 
                 if file.is_dir():
