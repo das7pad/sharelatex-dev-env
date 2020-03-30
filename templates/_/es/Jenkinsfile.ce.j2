@@ -32,11 +32,6 @@ pipeline {
         stage('Prepare environment') {
           stages {
             stage('Pull node image') {
-              when {
-                expression {
-                  env.DOCKER_REGISTRY != null
-                }
-              }
               steps {
                 sh 'docker pull $DOCKER_REGISTRY/$IMAGE_NODE'
                 sh 'docker tag $DOCKER_REGISTRY/$IMAGE_NODE $IMAGE_NODE'
