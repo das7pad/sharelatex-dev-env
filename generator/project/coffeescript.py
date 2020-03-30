@@ -1,3 +1,5 @@
+import typing
+import pathlib
 from generator.project.es import ESProject
 
 
@@ -17,3 +19,18 @@ class CoffeeScriptProject(ESProject):
             'has_unit_test_bootstrap': 'test/unit/bootstrap.coffee',
         })
         return files
+
+    def _get_files_to_update(
+        self,
+        search_path: typing.List[pathlib.Path] = None,
+    ) -> typing.List[str]:
+        upstream_files = super()._get_files_to_update()
+
+        # fix bad inheritance design
+        es_only = {
+            '.eslintignore',
+            '.eslintrc',
+            '.prettierignore',
+            '.prettierrc',
+        }
+        return list(sorted(set(upstream_files) - es_only))

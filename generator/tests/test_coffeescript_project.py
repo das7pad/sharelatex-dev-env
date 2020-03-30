@@ -34,3 +34,8 @@ class TestCoffeeScriptProject(unittest.TestCase):
         )
 
         self.assertEqual(actual, expected)
+
+    def test_eslint_hack(self):
+        project = CoffeeScriptProject(name='NAME', path=self.project_path)
+        files = project._get_files_to_update()
+        self.assertNotIn('.eslintrc', files)
