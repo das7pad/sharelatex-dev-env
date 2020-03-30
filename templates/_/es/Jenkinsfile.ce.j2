@@ -26,6 +26,7 @@ pipeline {
   stages {
     stage('Fan Out 1') {
       parallel {
+{% block lint %}
         stage('Lint') {
           agent {
             label '{{ agent_label_test }}'
@@ -44,6 +45,7 @@ pipeline {
           }
         }
 
+{% endblock %}
         stage('App Image') {
           agent {
             label '{{ agent_label_build }}'
