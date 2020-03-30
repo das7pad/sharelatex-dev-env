@@ -289,25 +289,46 @@ pipeline {
           }
           stages {
 {% if has_webpack_config_js %}
-
-            stage('Build webpack') {
-              steps {
-                sh 'docker pull $IMAGE-dev'
-                sh 'docker tag $IMAGE-dev $IMAGE_CI-dev'
-                sh 'make build_webpack'
-              }
-              post {
-                cleanup {
-                  sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-dev'
+            stage('Webpack'){
+              stages {
+                stage('Build webpack') {
+                  steps {
+                    sh 'docker pull $IMAGE-dev'
+                    sh 'docker tag $IMAGE-dev $IMAGE_CI-dev'
+                    sh 'make build_webpack'
+                  }
+                  post {
+                    cleanup {
+                      sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-dev'
+                    }
+                  }
+                }
+                stage('archive public') {
+                  steps {
+                    sh '''
+                      docker run \
+                        --rm \
+                        --volume $PWD/compress.sh:/compress.sh \
+                        --workdir /app/public \
+                        --entrypoint sh \
+                        $IMAGE_CI-webpack \
+                          -c '/compress.sh && tar --create .' \
+                      | xz -9e \
+                      > public.tar.xz
+                    '''
+                    archiveArtifacts(artifacts: 'public.tar.xz')
+                  }
+                  post {
+                    cleanup {
+                      sh 'rm -f public.tar.xz'
+                    }
+                  }
                 }
               }
             }
-{% endif %}
 
-            stage('Submit results') {
-              options {
-                timeout(time: 30, unit: 'MINUTES')
-              }
+{% endif %}
+            stage('Production build') {
               environment {
                 IMAGE_BRANCH = "{{ docker_image_app_origin_branch }}"
                 IMAGE_BRANCH_DEV = "{{ docker_image_app_origin_branch_dev }}"
@@ -362,30 +383,6 @@ pipeline {
                     }
                   }
                 }
-{% if has_webpack_config_js %}
-                stage('archive public') {
-                  steps {
-                    sh '''
-                      docker run \
-                        --rm \
-                        --volume $PWD/compress.sh:/compress.sh \
-                        --user root \
-                        --workdir /app/public \
-                        --entrypoint sh \
-                        $IMAGE_CI-webpack \
-                          -c '/compress.sh && tar --create .' \
-                      | xz -9e \
-                      > public.tar.xz
-                    '''
-                    archiveArtifacts artifacts: 'public.tar.xz'
-                  }
-                  post {
-                    cleanup {
-                      sh 'rm -f public.tar.xz'
-                    }
-                  }
-                }
-{% endif %}
               }
             }
           }
