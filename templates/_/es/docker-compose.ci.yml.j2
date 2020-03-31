@@ -70,9 +70,6 @@ services:
       TEXLIVE_IMAGE_USER: "tex"
       DOCKER_RUNNER: "true"
       COMPILES_HOST_DIR: $PWD/compiles
-      SYNCTEX_BIN_HOST_PATH: $PWD/bin/synctex
-      SQLITE_PATH: /app/compiles/db.sqlite
-      SHARELATEX_CONFIG: /app/config/settings.defaults.coffee
 {% endif %}
 {% if name == 'web' %}
       SHARELATEX_ALLOW_PUBLIC_ACCESS: 'true'
