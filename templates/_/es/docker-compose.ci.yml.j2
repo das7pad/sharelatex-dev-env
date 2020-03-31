@@ -126,7 +126,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:rw,z
       - ./compiles:/app/compiles:z
       - ./cache:/app/cache:z
-      - ./bin/synctex:/app/bin/synctex:z
 {% endif %}
 
 {% if name == 'web' %}
