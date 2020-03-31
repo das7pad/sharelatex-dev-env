@@ -18,13 +18,12 @@ endif
 clean_test_acceptance: clean_clsi_artifacts
 clean_test_acceptance_app: clean_clsi_artifacts
 clean_clsi_artifacts:
-	$(ACCEPTANCE_TEST_DOCKER_COMPOSE) run --rm \
-		--entrypoint bash \
-		test_acceptance \
-			-c 'rm -rf \
-				/app/cache/* \
-				/app/compiles/* \
-			'
+	docker run --rm \
+		--volume $(PWD)/cache:/app/cache:z \
+		--volume $(PWD)/compiles:/app/compiles:z \
+		--network none \
+		$(IMAGE_NODE) \
+		sh -c 'rm -rf /app/cache/* app/compiles/*'
 {% endblock %}
 
 {% block build_artifacts %}
