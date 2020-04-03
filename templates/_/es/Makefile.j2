@@ -135,20 +135,24 @@ RUN_LINT ?= $(LINT_RUNNER) eslint
 lint_full:
 	$(RUN_LINT) .
 
-FILES_FOR_LINT ?= \
-	$(wildcard \
-		$(shell \
-			$(git) diff $(GIT_PREVIOUS_SUCCESSFUL_COMMIT) --name-only \
-			| grep --invert-match \
-				-e vendor \
-			| grep \
-				-e .js \
+GIT_DIFF_CMD_FORMAT ?= \
+	$(git) diff $(GIT_PREVIOUS_SUCCESSFUL_COMMIT) --name-only \
+	| grep --invert-match \
+		-e vendor \
+	| grep \
+		-e '\.js$$' \
 {% if has_frontend_stylesheets %}
-				-e .less \
+		-e '\.less$$' \
 {% endif %}
-			| sed 's|^|$(PWD)/|' \
-		) \
-	)
+	| sed 's|^|$(PWD)/|'
+
+FILES_FOR_FORMAT ?= $(wildcard $(shell $(GIT_DIFF_CMD_FORMAT)))
+{% if has_frontend_stylesheets %}
+{# eslint can not parse .less files #}
+FILES_FOR_LINT ?= $(wildcard $(shell $(GIT_DIFF_CMD_FORMAT) | grep -e '\.js$$'))
+{% else %}
+FILES_FOR_LINT ?= $(FILES_FOR_FORMAT)
+{% endif %}
 
 lint_partial:
 ifneq (,$(FILES_FOR_LINT))
@@ -180,11 +184,11 @@ format_fix_full:
 
 format_partial:
 ifneq (,$(FILES_FOR_LINT))
-	$(RUN_FORMAT) $(FILES_FOR_LINT) --list-different
+	$(RUN_FORMAT) $(FILES_FOR_FORMAT) --list-different
 endif
 format_fix_partial:
 ifneq (,$(FILES_FOR_LINT))
-	$(RUN_FORMAT) $(FILES_FOR_LINT) --write
+	$(RUN_FORMAT) $(FILES_FOR_FORMAT) --write
 endif
 {% endblock %}
 
