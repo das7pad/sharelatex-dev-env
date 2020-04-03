@@ -136,7 +136,9 @@ lint_full:
 	$(RUN_LINT) .
 
 FILES_FOR_LINT ?= \
-	$(shell $(git) diff $(GIT_PREVIOUS_SUCCESSFUL_COMMIT) --name-only \
+	$(wildcard \
+		$(shell \
+			$(git) diff $(GIT_PREVIOUS_SUCCESSFUL_COMMIT) --name-only \
 			| grep --invert-match \
 				-e vendor \
 			| grep \
@@ -145,6 +147,7 @@ FILES_FOR_LINT ?= \
 				-e .less \
 {% endif %}
 			| sed 's|^|$(PWD)/|' \
+		) \
 	)
 
 lint_partial:
