@@ -5,7 +5,7 @@ version: "3.1"
 
 services:
   test_unit:
-    image: $IMAGE_CI
+    image: ${IMAGE_CI}-dev
 {% if not has_entrypoint %}
     user: node
 {% endif %}
@@ -35,7 +35,7 @@ services:
 
 
   test_acceptance:
-    image: $IMAGE_CI
+    image: ${IMAGE_CI}-dev
     environment:
       LOG_LEVEL: fatal
 {% for dependency in dependencies %}
@@ -132,9 +132,7 @@ services:
       context: .
       dockerfile: Dockerfile.frontend.ci
       args:
-        PROJECT_NAME: $PROJECT_NAME
-        BRANCH_NAME: $BRANCH_NAME
-        BUILD_NUMBER: $BUILD_NUMBER
+        IMAGE_CI
     working_dir: /app
     command: npm run test:frontend:single
     user: node

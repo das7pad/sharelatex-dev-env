@@ -142,9 +142,9 @@ pipeline {
           }
           steps {
             sh 'docker pull $IMAGE-dev'
-            sh 'docker tag $IMAGE-dev $IMAGE_CI-$SUFFIX'
+            sh 'docker tag $IMAGE-dev $IMAGE_CI-$SUFFIX-dev'
             sh 'mkdir --parents --mode=777 output'
-            sh 'BUILD_NUMBER="$BUILD_NUMBER-$SUFFIX" make test_unit'
+            sh 'IMAGE_CI="$IMAGE_CI-$SUFFIX" make test_unit'
           }
           post {
             always {
@@ -152,7 +152,7 @@ pipeline {
             }
             cleanup {
               sh 'make clean_output'
-              sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-$SUFFIX'
+              sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-$SUFFIX-dev'
             }
           }
         }
@@ -180,9 +180,9 @@ pipeline {
 {% endif %}
           steps {
             sh 'docker pull $IMAGE-dev'
-            sh 'docker tag $IMAGE-dev $IMAGE_CI-$SUFFIX'
+            sh 'docker tag $IMAGE-dev $IMAGE_CI-$SUFFIX-dev'
             sh 'mkdir --parents --mode=777 output'
-            sh 'BUILD_NUMBER="$BUILD_NUMBER-$SUFFIX" make test_acceptance_app'
+            sh 'IMAGE_CI="$IMAGE_CI-$SUFFIX" make test_acceptance_app'
           }
           post {
             always {
@@ -191,7 +191,7 @@ pipeline {
             cleanup {
               sh 'make clean_output'
               sh 'make clean_test_acceptance_app'
-              sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-$SUFFIX'
+              sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-$SUFFIX-dev'
             }
           }
         }
@@ -207,11 +207,9 @@ pipeline {
           }
           steps {
             sh 'docker pull $IMAGE-dev'
-            sh 'docker tag $IMAGE-dev $IMAGE_CI-$SUFFIX'
+            sh 'docker tag $IMAGE-dev $IMAGE_CI-$SUFFIX-dev'
             sh 'mkdir --parents --mode=777 output'
-            sh '''
-              BUILD_NUMBER="$BUILD_NUMBER-$SUFFIX" make test_frontend_build_run
-            '''
+            sh 'IMAGE_CI="$IMAGE_CI-$SUFFIX" make test_frontend_build_run'
           }
           post {
             always {
@@ -220,7 +218,7 @@ pipeline {
             cleanup {
               sh 'make clean_output'
               sh 'make clean_test_frontend'
-              sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-$SUFFIX'
+              sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-$SUFFIX-dev'
             }
           }
         }
@@ -236,10 +234,10 @@ pipeline {
           }
           steps {
             sh 'docker pull $IMAGE-dev'
-            sh 'docker tag $IMAGE-dev $IMAGE_CI-$SUFFIX'
+            sh 'docker tag $IMAGE-dev $IMAGE_CI-$SUFFIX-dev'
             sh 'mkdir --parents --mode=777 output'
             sh '''
-              BUILD_NUMBER="$BUILD_NUMBER-$SUFFIX" \
+              IMAGE_CI="$IMAGE_CI-$SUFFIX" \
               make test_acceptance_modules_run_ci
             '''
           }
@@ -250,7 +248,7 @@ pipeline {
             cleanup {
               sh 'make clean_output'
               sh 'make clean_test_acceptance_modules'
-              sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-$SUFFIX'
+              sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-$SUFFIX-dev'
             }
           }
         }

@@ -1,11 +1,9 @@
 {% from 'macros/header.j2' import header with context %}
 {{ header('#') }}
 
-ARG PROJECT_NAME
-ARG BRANCH_NAME
-ARG BUILD_NUMBER
+ARG IMAGE_CI
 
-FROM ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER
+FROM ${IMAGE_CI}-dev
 
 USER root
 
