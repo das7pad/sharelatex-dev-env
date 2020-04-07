@@ -1,12 +1,11 @@
 {% from 'macros/header.j2' import header with context %}
 {{ header('#') }}
-{% set ci_image = 'ci/$PROJECT_NAME:$BRANCH_NAME-$BUILD_NUMBER' %}
 
 version: "3.1"
 
 services:
   test_unit:
-    image: {{ ci_image }}
+    image: $IMAGE_CI
 {% if not has_entrypoint %}
     user: node
 {% endif %}
@@ -36,8 +35,7 @@ services:
 
 
   test_acceptance:
-    build: .
-    image: {{ ci_image }}
+    image: $IMAGE_CI
     environment:
       LOG_LEVEL: fatal
 {% for dependency in dependencies %}

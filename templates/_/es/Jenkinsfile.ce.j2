@@ -1,25 +1,16 @@
 {% from 'macros/header.j2' import header with context %}
 {{ header('//') }}
 
-{% set docker_image_app = (
-    name + ':$BRANCH_NAME-$BUILD_NUMBER'
-  ) %}
-{% set docker_image_app_origin = (
-    '$SHARELATEX_DOCKER_REPOS/' + docker_image_app
-  ) %}
-{% set docker_image_app_origin_branch = (
-    '$SHARELATEX_DOCKER_REPOS/' + name + ':$BRANCH_NAME'
-  ) %}
-{% set docker_image_app_origin_branch_dev = (
-    '$SHARELATEX_DOCKER_REPOS/' + name + ':dev'
-  ) %}
 {% set agent_label_build = 'sharelatex && docker_builder' %}
 {% set agent_label_test = 'sharelatex' %}
 pipeline {
   agent none
   environment {
     DOCKER_COMPOSE_FLAGS = "-f docker-compose.ci.yml"
-    IMAGE_CI = "ci/{{ docker_image_app }}"
+    IMAGE = "$SHARELATEX_DOCKER_REPOS/{{ name }}:$BRANCH_NAME-$BUILD_NUMBER"
+    IMAGE_BRANCH = "$SHARELATEX_DOCKER_REPOS/{{ name }}:$BRANCH_NAME"
+    IMAGE_BRANCH_DEV = "$SHARELATEX_DOCKER_REPOS/{{ name }}:dev"
+    IMAGE_CI = "ci/{{ name }}:$BRANCH_NAME-$BUILD_NUMBER"
     IMAGE_NODE = 'node:{{ node_version }}'
   }
 
@@ -67,8 +58,6 @@ pipeline {
                 }
                 stage('Pull Cache') {
                   environment {
-                    IMAGE_BRANCH = "{{ docker_image_app_origin_branch }}"
-                    IMAGE_BRANCH_DEV = "{{ docker_image_app_origin_branch_dev }}"
                     IMAGE_CACHE_HOT_DEV_DEPS = "$IMAGE_BRANCH-dev-deps"
                     IMAGE_CACHE_COLD = "$IMAGE_BRANCH_DEV-dev-deps"
                     IMAGE_CACHE_CI_DEV_DEPS = "$IMAGE_CI-dev-deps-cache"
@@ -107,7 +96,6 @@ pipeline {
 
             stage('Push dev-deps') {
               environment {
-                IMAGE_BRANCH = "{{ docker_image_app_origin_branch }}"
                 IMAGE_CACHE_HOT_DEV_DEPS = "$IMAGE_BRANCH-dev-deps"
               }
               steps {
@@ -122,9 +110,6 @@ pipeline {
             }
 
             stage('Push dev') {
-              environment {
-                IMAGE = "{{ docker_image_app_origin }}"
-              }
               steps {
                 sh 'docker tag $IMAGE_CI-dev $IMAGE-dev'
                 sh 'docker push $IMAGE-dev'
@@ -154,7 +139,6 @@ pipeline {
           }
           environment {
             SUFFIX = 'test-unit'
-            IMAGE = "{{ docker_image_app_origin }}"
           }
           steps {
             sh 'docker pull $IMAGE-dev'
@@ -185,7 +169,6 @@ pipeline {
             TEXLIVE_IMAGE = "$SHARELATEX_DOCKER_REPOS/texlive:2017.1-full"
             PULL_TEXLIVE_BEFORE_RUN = "true"
             SUFFIX = 'test-acceptance'
-            IMAGE = "{{ docker_image_app_origin }}"
           }
 {% else %}
           agent {
@@ -193,7 +176,6 @@ pipeline {
           }
           environment {
             SUFFIX = 'test-acceptance'
-            IMAGE = "{{ docker_image_app_origin }}"
           }
 {% endif %}
           steps {
@@ -222,7 +204,6 @@ pipeline {
           }
           environment {
             SUFFIX = 'test-frontend'
-            IMAGE = "{{ docker_image_app_origin }}"
           }
           steps {
             sh 'docker pull $IMAGE-dev'
@@ -252,7 +233,6 @@ pipeline {
           }
           environment {
             SUFFIX = 'test-modules'
-            IMAGE = "{{ docker_image_app_origin }}"
           }
           steps {
             sh 'docker pull $IMAGE-dev'
@@ -283,9 +263,6 @@ pipeline {
         stage('{{ label }}') {
           agent {
             label '{{ agent_label_build }}'
-          }
-          environment {
-            IMAGE = "{{ docker_image_app_origin }}"
           }
           stages {
 {% if has_webpack_config_js %}
@@ -329,10 +306,6 @@ pipeline {
 
 {% endif %}
             stage('Production build') {
-              environment {
-                IMAGE_BRANCH = "{{ docker_image_app_origin_branch }}"
-                IMAGE_BRANCH_DEV = "{{ docker_image_app_origin_branch_dev }}"
-              }
               stages {
                 stage('Pull production cache') {
                   steps {
