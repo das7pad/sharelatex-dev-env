@@ -59,7 +59,8 @@ export IMAGE_CI ?= ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
 clean_ci: clean
 clean_ci: clean_build
 
-clean_build:
+clean_build: clean_docker_images
+clean_docker_images:
 	docker rmi \
 		$(IMAGE_CI)-base \
 		$(IMAGE_CI)-dev-deps \
@@ -371,7 +372,7 @@ build_prod: clean_build_artifacts
 		--file=Dockerfile.production \
 		.
 
-clean_ci: clean_build_artifacts
+clean_build: clean_build_artifacts
 clean_build_artifacts:
 	rm -f build_artifacts.tar.gz
 

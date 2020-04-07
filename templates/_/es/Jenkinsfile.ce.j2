@@ -123,7 +123,7 @@ pipeline {
           }
           post {
             cleanup {
-              sh 'make clean_ci'
+              sh 'make clean_docker_images'
             }
           }
         }
@@ -359,7 +359,7 @@ pipeline {
           }
           post {
             cleanup {
-              sh 'make clean_ci'
+              sh 'make clean_build'
             }
           }
         }
