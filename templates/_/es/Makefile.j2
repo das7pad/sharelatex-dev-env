@@ -53,7 +53,13 @@ else
 IMAGE_NODE ?= node:{{ node_version }}
 endif
 
-export IMAGE_CI ?= ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
+export DOCKER_REGISTRY ?= localhost:5000
+export SHARELATEX_DOCKER_REPOS ?= $(DOCKER_REGISTRY)/sharelatex
+export IMAGE ?= \
+	$(SHARELATEX_DOCKER_REPOS)/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
+
+SUFFIX =
+export IMAGE_CI ?= ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)$(SUFFIX)
 
 
 clean_ci: clean
@@ -100,7 +106,6 @@ format:
     NOTE: the base line for the changed state is the last successful commit in
            CI or the dev branch - see below
 #}
-SHARELATEX_DOCKER_REPOS ?= local/sharelatex
 LINT_RUNNER_IMAGE ?= \
 	$(SHARELATEX_DOCKER_REPOS)/lint-runner:{{ lint_runner_version }}
 LINT_RUNNER = \
@@ -275,7 +280,7 @@ clean_test_frontend:
 build_app:
 {% endblock %}
 
-build: clean_build_artifacts
+build_dev_deps: clean_build_artifacts
 	docker build \
 		--cache-from $(IMAGE_CI)-dev-deps-cache \
 		--tag $(IMAGE_CI)-base \
@@ -289,6 +294,7 @@ build: clean_build_artifacts
 		--target dev-deps \
 		.
 
+build_dev: clean_build_artifacts
 	docker build \
 		--cache-from $(IMAGE_CI)-dev-deps \
 		--tag $(IMAGE_CI)-dev \
@@ -306,7 +312,11 @@ build_webpack: clean_build_artifacts
 
 build_prod: clean_build_artifacts
 	docker build \
+{% if has_webpack_config_js %}
+		--cache-from $(IMAGE_CI)-webpack \
+{% else %}
 		--cache-from $(IMAGE_CI)-dev \
+{% endif %}
 		--tag $(IMAGE_CI)-base \
 		--target base \
 		.
@@ -388,6 +398,40 @@ ifneq (,$(wildcard output/*))
 		sh -c 'find /home/node -mindepth 1 | xargs rm -rfv'
 	rm -rfv output
 endif
+
+{# CI helper #}
+prepare_ci_stage: build_dev_with_cache
+build_dev_with_cache:
+	docker pull $(IMAGE)-dev-deps
+	docker tag $(IMAGE)-dev-deps $(IMAGE_CI)-dev-deps
+	$(MAKE) --no-print-directory build_dev
+
+prepare_ci_stage: create_output
+create_output:
+	mkdir --parents --mode=777 output
+
+clean_ci_stage: clean_output
+clean_ci_stage: clean_stage_images
+clean_stage_images:
+	docker rmi --force \
+		$(IMAGE)-dev-deps \
+		$(IMAGE_CI)-dev-deps \
+		$(IMAGE_CI)-dev \
+
+
+compress_public: public.tar.xz
+.PHONY: public.tar.xz
+public.tar.xz:
+	docker run \
+		--rm \
+		--volume $(PWD)/compress.sh:/compress.sh \
+		--workdir /app/public \
+		--entrypoint sh \
+		$(IMAGE_CI)-webpack \
+		-c '/compress.sh && tar --create .' \
+	| xz -9e \
+	> public.tar.xz
+
 
 {% if has_modules %}
 MODULE_DIRS := $(shell find modules -mindepth 1 -maxdepth 1 -type d -not -name '.git' )

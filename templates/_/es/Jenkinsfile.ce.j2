@@ -88,35 +88,39 @@ pipeline {
               }
             }
 
-            stage('Build') {
+            stage('Build dev-deps') {
               steps {
-                sh 'make build'
+                sh 'make build_dev_deps'
               }
             }
 
             stage('Push dev-deps') {
-              environment {
-                IMAGE_CACHE_HOT_DEV_DEPS = "$IMAGE_BRANCH-dev-deps"
-              }
-              steps {
-                sh 'docker tag $IMAGE_CI-dev-deps $IMAGE_CACHE_HOT_DEV_DEPS'
-                sh 'docker push $IMAGE_CACHE_HOT_DEV_DEPS'
-              }
-              post {
-                cleanup {
-                  sh 'docker rmi --force $IMAGE_CACHE_HOT_DEV_DEPS'
+              stages {
+                stage('Push dev-deps as hot cache') {
+                  environment {
+                    IMAGE_CACHE_HOT_DEV_DEPS = "$IMAGE_BRANCH-dev-deps"
+                  }
+                  steps {
+                    sh 'docker tag $IMAGE_CI-dev-deps $IMAGE_CACHE_HOT_DEV_DEPS'
+                    sh 'docker push $IMAGE_CACHE_HOT_DEV_DEPS'
+                  }
+                  post {
+                    cleanup {
+                      sh 'docker rmi --force $IMAGE_CACHE_HOT_DEV_DEPS'
+                    }
+                  }
                 }
-              }
-            }
 
-            stage('Push dev') {
-              steps {
-                sh 'docker tag $IMAGE_CI-dev $IMAGE-dev'
-                sh 'docker push $IMAGE-dev'
-              }
-              post {
-                cleanup {
-                  sh 'docker rmi --force $IMAGE-dev'
+                stage('Push dev-deps for build') {
+                  steps {
+                    sh 'docker tag $IMAGE_CI-dev-deps $IMAGE-dev-deps'
+                    sh 'docker push $IMAGE-dev-deps'
+                  }
+                  post {
+                    cleanup {
+                      sh 'docker rmi --force $IMAGE-dev-deps'
+                    }
+                  }
                 }
               }
             }
@@ -141,18 +145,15 @@ pipeline {
             SUFFIX = 'test-unit'
           }
           steps {
-            sh 'docker pull $IMAGE-dev'
-            sh 'docker tag $IMAGE-dev $IMAGE_CI-$SUFFIX-dev'
-            sh 'mkdir --parents --mode=777 output'
-            sh 'IMAGE_CI="$IMAGE_CI-$SUFFIX" make test_unit'
+            sh 'make prepare_ci_stage'
+            sh 'make test_unit'
           }
           post {
             always {
               xunit(tools: [JUnit(pattern: 'output/unit.xml')])
             }
             cleanup {
-              sh 'make clean_output'
-              sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-$SUFFIX-dev'
+              sh 'make clean_ci_stage'
             }
           }
         }
@@ -179,19 +180,16 @@ pipeline {
           }
 {% endif %}
           steps {
-            sh 'docker pull $IMAGE-dev'
-            sh 'docker tag $IMAGE-dev $IMAGE_CI-$SUFFIX-dev'
-            sh 'mkdir --parents --mode=777 output'
-            sh 'IMAGE_CI="$IMAGE_CI-$SUFFIX" make test_acceptance_app'
+            sh 'make prepare_ci_stage'
+            sh 'make test_acceptance_app'
           }
           post {
             always {
               xunit(tools: [JUnit(pattern: 'output/acceptance.xml')])
             }
             cleanup {
-              sh 'make clean_output'
               sh 'make clean_test_acceptance_app'
-              sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-$SUFFIX-dev'
+              sh 'make clean_ci_stage'
             }
           }
         }
@@ -206,19 +204,16 @@ pipeline {
             SUFFIX = 'test-frontend'
           }
           steps {
-            sh 'docker pull $IMAGE-dev'
-            sh 'docker tag $IMAGE-dev $IMAGE_CI-$SUFFIX-dev'
-            sh 'mkdir --parents --mode=777 output'
-            sh 'IMAGE_CI="$IMAGE_CI-$SUFFIX" make test_frontend_build_run'
+            sh 'make prepare_ci_stage'
+            sh 'make make test_frontend_build_run'
           }
           post {
             always {
               xunit(tools: [JUnit(pattern: 'output/frontend.xml')])
             }
             cleanup {
-              sh 'make clean_output'
               sh 'make clean_test_frontend'
-              sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-$SUFFIX-dev'
+              sh 'make clean_ci_stage'
             }
           }
         }
@@ -233,22 +228,16 @@ pipeline {
             SUFFIX = 'test-modules'
           }
           steps {
-            sh 'docker pull $IMAGE-dev'
-            sh 'docker tag $IMAGE-dev $IMAGE_CI-$SUFFIX-dev'
-            sh 'mkdir --parents --mode=777 output'
-            sh '''
-              IMAGE_CI="$IMAGE_CI-$SUFFIX" \
-              make test_acceptance_modules_run_ci
-            '''
+            sh 'make prepare_ci_stage'
+            sh 'make test_acceptance_modules_run_ci'
           }
           post {
             always {
               xunit(tools: [JUnit(pattern: 'output/module_*.xml')])
             }
             cleanup {
-              sh 'make clean_output'
               sh 'make clean_test_acceptance_modules'
-              sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-$SUFFIX-dev'
+              sh 'make clean_ci_stage'
             }
           }
         }
@@ -268,29 +257,18 @@ pipeline {
               stages {
                 stage('Build webpack') {
                   steps {
-                    sh 'docker pull $IMAGE-dev'
-                    sh 'docker tag $IMAGE-dev $IMAGE_CI-dev'
+                    sh 'make prepare_ci_stage'
                     sh 'make build_webpack'
                   }
                   post {
                     cleanup {
-                      sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-dev'
+                      sh 'make clean_stage_images'
                     }
                   }
                 }
                 stage('archive public') {
                   steps {
-                    sh '''
-                      docker run \
-                        --rm \
-                        --volume $PWD/compress.sh:/compress.sh \
-                        --workdir /app/public \
-                        --entrypoint sh \
-                        $IMAGE_CI-webpack \
-                          -c '/compress.sh && tar --create .' \
-                      | xz -9e \
-                      > public.tar.xz
-                    '''
+                    sh 'make public.tar.xz'
                     archiveArtifacts(artifacts: 'public.tar.xz')
                   }
                   post {
@@ -327,13 +305,14 @@ pipeline {
                 }
                 stage('Build production') {
                   steps {
-                    sh 'docker pull $IMAGE-dev'
-                    sh 'docker tag $IMAGE-dev $IMAGE_CI-dev'
+{% if not has_webpack_config_js %}
+                    sh 'make build_dev_with_cache'
+{% endif %}
                     sh 'make build_prod'
                   }
                   post {
                     cleanup {
-                      sh 'docker rmi --force $IMAGE-dev $IMAGE_CI-dev'
+                      sh 'make clean_stage_images'
                     }
                   }
                 }
