@@ -401,9 +401,6 @@ ifneq (,$(wildcard output/*))
 endif
 
 {# CI helper #}
-{# registry target and actual Dockerfile target may differ: -prod -> '' #}
-export R_TARGET ?= $(TARGET)
-
 pull_node:
 	docker pull $(IMAGE_NODE)
 	docker tag $(IMAGE_NODE) node:{{ node_version }}

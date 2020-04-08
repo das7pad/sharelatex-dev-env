@@ -53,6 +53,7 @@ pipeline {
                 stage('Pull Cache') {
                   environment {
                     TARGET = '-dev-deps'
+                    R_TARGET = '-dev-deps'
                   }
                   steps {
                     sh 'make pull_cache'
@@ -75,6 +76,7 @@ pipeline {
             stage('Push dev-deps') {
               environment {
                 TARGET = '-dev-deps'
+                R_TARGET = '-dev-deps'
               }
               steps {
                 sh 'make push_cache_hot'
