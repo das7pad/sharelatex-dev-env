@@ -47,16 +47,17 @@ DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 {% endif %}
 	docker-compose ${DOCKER_COMPOSE_FLAGS}
 
-ifneq (,$(DOCKER_REGISTRY))
-IMAGE_NODE ?= $(DOCKER_REGISTRY)/node:{{ node_version }}
-else
-IMAGE_NODE ?= node:{{ node_version }}
-endif
-
 export DOCKER_REGISTRY ?= localhost:5000
 export SHARELATEX_DOCKER_REPOS ?= $(DOCKER_REGISTRY)/sharelatex
-export IMAGE ?= \
-	$(SHARELATEX_DOCKER_REPOS)/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)
+
+export IMAGE_NODE ?= $(DOCKER_REGISTRY)/node:{{ node_version }}
+export IMAGE_PROJECT ?= $(SHARELATEX_DOCKER_REPOS)/$(PROJECT_NAME)
+export IMAGE_BRANCH ?= $(IMAGE_PROJECT):$(BRANCH_NAME)
+export IMAGE ?= $(IMAGE_BRANCH)-$(BUILD_NUMBER)
+
+export IMAGE_BRANCH_DEV ?= $(IMAGE_PROJECT):dev
+export IMAGE_CACHE_COLD ?= $(IMAGE_BRANCH_DEV)
+export IMAGE_CACHE_HOT ?= $(IMAGE_BRANCH)
 
 SUFFIX =
 export IMAGE_CI ?= ci/$(PROJECT_NAME):$(BRANCH_NAME)-$(BUILD_NUMBER)$(SUFFIX)
@@ -400,6 +401,44 @@ ifneq (,$(wildcard output/*))
 endif
 
 {# CI helper #}
+{# registry target and actual Dockerfile target may differ: -prod -> '' #}
+export R_TARGET ?= $(TARGET)
+
+pull_node:
+	docker pull $(IMAGE_NODE)
+	docker tag $(IMAGE_NODE) node:{{ node_version }}
+
+pull_cache_cold:
+	docker pull $(IMAGE_CACHE_COLD)$(R_TARGET)
+	docker tag $(IMAGE_CACHE_COLD)$(R_TARGET) $(IMAGE_CI)$(TARGET)-cache
+
+pull_cache_hot:
+	docker pull $(IMAGE_CACHE_HOT)$(R_TARGET)
+	docker tag $(IMAGE_CACHE_HOT)$(R_TARGET) $(IMAGE_CI)$(TARGET)-cache
+
+pull_cache:
+	make pull_cache_hot || make pull_cache_cold || echo 'cache miss'
+
+clean_pull_cache:
+	docker rmi --force \
+		$(IMAGE_CACHE_COLD)$(R_TARGET) \
+		$(IMAGE_CACHE_HOT)$(R_TARGET) \
+
+
+push_cache_hot:
+	docker tag $(IMAGE_CI)$(TARGET) $(IMAGE_CACHE_HOT)$(R_TARGET)
+	docker push $(IMAGE_CACHE_HOT)$(R_TARGET)
+
+push_target:
+	docker tag $(IMAGE_CI)$(TARGET) $(IMAGE)$(R_TARGET)
+	docker push $(IMAGE)$(R_TARGET)
+
+clean_push:
+	docker rmi --force \
+		$(IMAGE)$(R_TARGET) \
+		$(IMAGE_CACHE_HOT)$(R_TARGET) \
+
+
 prepare_ci_stage: build_dev_with_cache
 build_dev_with_cache:
 	docker pull $(IMAGE)-dev-deps
