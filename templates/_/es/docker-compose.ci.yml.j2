@@ -132,7 +132,7 @@ services:
       context: .
       dockerfile: Dockerfile.frontend.ci
       args:
-        IMAGE_CI
+        - IMAGE_CI
     working_dir: /app
     command: npm run test:frontend:single
     user: node
