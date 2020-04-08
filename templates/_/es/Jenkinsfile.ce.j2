@@ -169,7 +169,7 @@ pipeline {
           }
           steps {
             sh 'make prepare_ci_stage'
-            sh 'make make test_frontend_build_run'
+            sh 'make test_frontend_build_run'
           }
           post {
             always {
