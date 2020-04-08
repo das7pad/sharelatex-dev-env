@@ -106,7 +106,7 @@ pipeline {
             label '{{ agent_label_test }}'
           }
           environment {
-            SUFFIX = 'test-unit'
+            SUFFIX = '-test-unit'
           }
           steps {
             sh 'make prepare_ci_stage'
@@ -140,7 +140,7 @@ pipeline {
             label '{{ agent_label_test }}'
           }
           environment {
-            SUFFIX = 'test-acceptance'
+            SUFFIX = '-test-acceptance'
           }
 {% endif %}
           steps {
@@ -165,7 +165,7 @@ pipeline {
             label '{{ agent_label_test }}'
           }
           environment {
-            SUFFIX = 'test-frontend'
+            SUFFIX = '-test-frontend'
           }
           steps {
             sh 'make prepare_ci_stage'
@@ -189,7 +189,7 @@ pipeline {
             label '{{ agent_label_test }}'
           }
           environment {
-            SUFFIX = 'test-modules'
+            SUFFIX = '-test-modules'
           }
           steps {
             sh 'make prepare_ci_stage'
