@@ -390,7 +390,7 @@ clean_build_artifacts:
 
 clean_ci: clean_output
 clean_output:
-ifneq (,$(wildcard output/*))
+ifneq (,$(wildcard output/* output/.*))
 	docker run --rm \
 		--volume $(PWD)/output:/home/node \
 		--user node \
