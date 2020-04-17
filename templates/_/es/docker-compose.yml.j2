@@ -91,9 +91,11 @@ services:
 {% endif %}
 {% if data_dirs %}
     tmpfs:
-{% for data_dir in volumes|default(data_dirs) %}
+{%   for data_dir in volumes|default(data_dirs) %}
+{%     if data_dir != 'compiles' %}
       - /app/{{ data_dir }}:uid=1000,gid=1000
-{% endfor %}
+{%     endif %}
+{%   endfor %}
 {% endif %}
 
 {% if name == 'web' %}
