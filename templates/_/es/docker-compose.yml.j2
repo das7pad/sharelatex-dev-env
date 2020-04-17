@@ -89,6 +89,12 @@ services:
 {% else %}
     command: npm run test:acceptance
 {% endif %}
+{% if data_dirs %}
+    tmpfs:
+{% for data_dir in volumes|default(data_dirs) %}
+      - /app/{{ data_dir }}:uid=1000,gid=1000
+{% endfor %}
+{% endif %}
 
 {% if name == 'web' %}
   test_frontend:
@@ -105,14 +111,18 @@ services:
 {%   if dependency.startswith('redis') %}
   {{ dependency }}:
     image: redis
+    tmpfs: /data
+
 
 {%   elif dependency == 'mongo' %}
   mongo:
     image: mongo
+    tmpfs: /data
 
 {%   elif dependency == 'minio' %}
   minio:
     image: minio/minio
+    tmpfs: /data
     command: server /data
     environment:
       MINIO_BROWSER: 'off'
