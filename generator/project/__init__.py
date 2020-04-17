@@ -334,6 +334,7 @@ class Project:
             'api': 'API',
             'documentupdater': 'DOC_UPDATER',
             'lock': 'LOCK',
+            'new_history': 'NEW_HISTORY',
             'pubsub': 'PUBSUB',
             'realtime': 'REAL_TIME',
             'web': 'WEB',
