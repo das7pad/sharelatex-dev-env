@@ -8,13 +8,23 @@ PROJECT_NAME = web
 DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
 DOCKER_COMPOSE_MODULE_FLAGS := ${DOCKER_COMPOSE_FLAGS} -f $(MODULE_DIR)/docker-compose.yml
 DOCKER_COMPOSE := cd ../../ && \
-	COMPOSE_PROJECT_NAME=acceptance_test_$(BUILD_DIR_NAME)_$(MODULE_NAME) \
 	MODULE_DIR=$(MODULE_DIR) \
 	BUILD_NUMBER=$(BUILD_NUMBER) \
 	BRANCH_NAME=$(BRANCH_NAME) \
 	PROJECT_NAME=$(PROJECT_NAME) \
 	MOCHA_GREP=${MOCHA_GREP} \
 	docker-compose ${DOCKER_COMPOSE_MODULE_FLAGS}
+
+BUILD_DIR_NAME = $(shell pwd | xargs basename | tr -cd '[a-zA-Z0-9_.\-]')
+UNIQUE_SUFFIX = $(BUILD_DIR_NAME)_$(MODULE_NAME)
+
+ACCEPTANCE_TEST_DOCKER_COMPOSE = \
+	export COMPOSE_PROJECT_NAME=acceptance_test_$(UNIQUE_SUFFIX) && \
+	$(DOCKER_COMPOSE)
+
+UNIT_TEST_DOCKER_COMPOSE = \
+	export COMPOSE_PROJECT_NAME=unit_test_$(UNIQUE_SUFFIX) && \
+	$(DOCKER_COMPOSE)
 
 ifeq (,$(wildcard test/acceptance))
 test_acceptance:
@@ -23,15 +33,34 @@ clean_test_acceptance:
 
 else
 test_acceptance:
-	${DOCKER_COMPOSE} run --rm test_acceptance npm -q run test:acceptance:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/acceptance/{{ src_dir }}
+	$(ACCEPTANCE_TEST_DOCKER_COMPOSE) run --rm test_acceptance npm -q run test:acceptance:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/acceptance/{{ src_dir }}
 
 test_acceptance_ci:
-	${DOCKER_COMPOSE} run --rm test_acceptance \
+	$(ACCEPTANCE_TEST_DOCKER_COMPOSE) run --rm test_acceptance \
 		output=/home/node/module_$(MODULE_NAME).xml,suiteName='Module $(MODULE_NAME) Acceptance Tests' \
 		$(MODULE_DIR)/test/acceptance/{{ src_dir }}/Init.js \
 		$(MODULE_DIR)/test/acceptance/{{ src_dir }}
 
 clean_test_acceptance:
-	${DOCKER_COMPOSE} down -v -t 0
+	$(ACCEPTANCE_TEST_DOCKER_COMPOSE) down -v -t 0
+
+endif
+
+ifeq (,$(wildcard test/unit))
+test_unit:
+test_unit_ci:
+clean_test_unit:
+
+else
+test_unit:
+	$(UNIT_TEST_DOCKER_COMPOSE) run --rm test_unit npm -q run test:unit:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/unit/{{ src_dir }}
+
+test_unit_ci:
+	$(UNIT_TEST_DOCKER_COMPOSE) run --rm test_unit \
+		output=/home/node/unit_module_$(MODULE_NAME).xml,suiteName='Module $(MODULE_NAME) Unit Tests' \
+		$(MODULE_DIR)/test/unit/{{ src_dir }}
+
+clean_test_unit:
+	$(UNIT_TEST_DOCKER_COMPOSE) down -v -t 0
 
 endif

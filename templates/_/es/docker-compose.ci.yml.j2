@@ -6,10 +6,8 @@ version: "3.1"
 services:
   test_unit:
     image: ${IMAGE_CI}-dev
-{% if not has_entrypoint %}
     user: node
-{% endif %}
-    command:
+    entrypoint:
       - npx
       - mocha
       - --exit
@@ -25,11 +23,9 @@ services:
       - --reporter
       - xunit
       - --reporter-options
-      - output=/home/node/unit.xml,suiteName='Unit Tests'
+    command:
+      - output=/home/node/unit.xml,suiteName='App Unit Tests'
       - test/unit/{{ src_dir }}
-{% if name == 'web' %}
-      - modules/*/test/unit/{{ src_dir }}/**.js
-{% endif %}
     volumes:
       - ./output:/home/node:z
 
