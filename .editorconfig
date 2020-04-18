@@ -13,7 +13,7 @@ max_line_length = 80
 trim_trailing_whitespace = true
 
 
-[{Makefile,Makefile.j2}]
+[{Makefile,Makefile.j2,Makefile.module.j2}]
 indent_style = tab
 
 [*{.json,.json.j2,.yml,.yml.j2}]
