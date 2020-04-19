@@ -1,0 +1,35 @@
+{% from 'macros/header.j2' import header with context %}
+{{ header('#') }}
+
+ARG NODE_VERSION
+FROM node:${NODE_VERSION}
+
+WORKDIR /runner
+COPY runner/ /runner/
+RUN npm ci
+
+COPY bin /usr/local/bin
+
+{#
+  Reset the entrypoint of the base image.
+  This must be the last step: https://github.com/moby/moby/issues/37273
+#}
+ENTRYPOINT []
+CMD ["bash"]
+
+ARG DATE
+ARG RELEASE
+ARG COMMIT
+LABEL \
+  org.opencontainers.image.created="$DATE" \
+  org.opencontainers.image.authors="Jakob Ackermann <das7pad@outlook.com>" \
+  org.opencontainers.image.url="https://github.com/das7pad/sharelatex-{{ name }}" \
+  org.opencontainers.image.documentation="" \
+  org.opencontainers.image.source="https://github.com/das7pad/sharelatex-{{ name }}" \
+  org.opencontainers.image.version="$RELEASE" \
+  org.opencontainers.image.revision="$COMMIT" \
+  org.opencontainers.image.vendor="Jakob Ackermann" \
+  org.opencontainers.image.licenses="AGPL-3.0" \
+  org.opencontainers.image.ref.name="$RELEASE" \
+  org.opencontainers.image.title="{{ name }}" \
+  org.opencontainers.image.description="{{ name.replace('-runner', '') }} Environment"

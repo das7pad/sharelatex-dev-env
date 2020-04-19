@@ -1,0 +1,53 @@
+{% from 'macros/header.j2' import header with context %}
+{{ header('//') }}
+
+pipeline {
+  agent {
+    label 'sharelatex && docker_builder'
+  }
+  options {
+    timestamps()
+  }
+  stages {
+    stage('Pull Node Image') {
+      steps {
+        sh 'make pull_node'
+      }
+    }
+    stage('Pull Cache') {
+      steps {
+        sh 'make pull_cache'
+      }
+      post {
+        cleanup {
+          sh 'make clean_pull_cache'
+        }
+      }
+    }
+    stage('Build Docker Image') {
+      steps {
+        sh 'make build'
+      }
+    }
+    stage('Test Docker Image') {
+      steps {
+        sh 'make test'
+      }
+    }
+    stage('Push Docker Image') {
+      steps {
+        sh 'make push'
+      }
+      post {
+        cleanup {
+          sh 'make clean_push'
+        }
+      }
+    }
+  }
+  post {
+    cleanup {
+      sh 'make clean'
+    }
+  }
+}
