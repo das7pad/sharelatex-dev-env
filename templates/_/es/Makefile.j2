@@ -47,7 +47,7 @@ DOCKER_COMPOSE := BUILD_NUMBER=$(BUILD_NUMBER) \
 {% endif %}
 	docker-compose ${DOCKER_COMPOSE_FLAGS}
 
-export DOCKER_REGISTRY ?= localhost:5000
+export DOCKER_REGISTRY ?= local
 export SHARELATEX_DOCKER_REPOS ?= $(DOCKER_REGISTRY)/sharelatex
 
 export IMAGE_NODE ?= $(DOCKER_REGISTRY)/node:{{ node_version }}
