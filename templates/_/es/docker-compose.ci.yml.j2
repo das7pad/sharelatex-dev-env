@@ -43,7 +43,7 @@ services:
 {% endfor %}
 {% if 'minio' in dependencies %}
       AWS_S3_ENDPOINT: ${AWS_S3_ENDPOINT}
-      AWS_S3_FORCE_PATH_STYLE: ${AWS_S3_FORCE_PATH_STYLE}
+      AWS_S3_PATH_STYLE: ${AWS_S3_PATH_STYLE}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
 {%   if name == 'filestore' %}
