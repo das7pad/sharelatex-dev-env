@@ -1,26 +1,19 @@
 {% from 'macros/header.j2' import header with context %}
 {{ header('#') }}
 
-MODULE_NAME := $(notdir $(shell pwd))
-MODULE_DIR := modules/$(MODULE_NAME)
-PROJECT_NAME = web
+export MODULE_NAME := $(notdir $(shell pwd))
+export MODULE_DIR := modules/$(MODULE_NAME)
+export PROJECT_NAME = web
 
 DOCKER_COMPOSE_FLAGS ?= -f docker-compose.yml
-ifeq (,$(wildcard docker-compose.yml))
-DOCKER_COMPOSE_MODULE_FLAGS := $(DOCKER_COMPOSE_FLAGS)
-else
-DOCKER_COMPOSE_MODULE_FLAGS := ${DOCKER_COMPOSE_FLAGS} -f $(MODULE_DIR)/docker-compose.yml
+ifneq (,$(wildcard docker-compose.yml))
+DOCKER_COMPOSE_FLAGS += -f $(MODULE_DIR)/docker-compose.yml
 endif
 
-DOCKER_COMPOSE := cd ../../ && \
-	MODULE_DIR=$(MODULE_DIR) \
-	BUILD_NUMBER=$(BUILD_NUMBER) \
-	BRANCH_NAME=$(BRANCH_NAME) \
-	PROJECT_NAME=$(PROJECT_NAME) \
-	MOCHA_GREP=${MOCHA_GREP} \
-	docker-compose ${DOCKER_COMPOSE_MODULE_FLAGS}
+DOCKER_COMPOSE := cd ../../ && docker-compose $(DOCKER_COMPOSE_FLAGS)
 
-BUILD_DIR_NAME = $(shell pwd | xargs basename | tr -cd '[a-zA-Z0-9_.\-]')
+BUILD_DIR_NAME ?= \
+	$(shell cd ../../ && pwd | xargs basename | tr -cd '[a-zA-Z0-9_.\-]')
 UNIQUE_SUFFIX = $(BUILD_DIR_NAME)_$(MODULE_NAME)
 
 ACCEPTANCE_TEST_DOCKER_COMPOSE = \
