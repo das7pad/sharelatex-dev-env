@@ -1,8 +1,21 @@
 {% from 'macros/header.j2' import header with context %}
 {{ header('//') }}
 {
-  "extends": ["standard", "prettier", "prettier/standard"],
-  "plugins": ["mocha", "chai-expect", "chai-friendly"],
+  "extends": [
+    "standard",
+    "standard-jsx",
+    "standard-react",
+    "prettier",
+    "prettier/react",
+    "prettier/standard",
+    "plugin:jsx-a11y/recommended"
+  ],
+  "plugins": [
+    "jsx-a11y",
+    "mocha",
+    "chai-expect",
+    "chai-friendly"
+  ],
   "parser": "babel-eslint",
   "env": {
     "browser": true,
@@ -49,7 +62,6 @@
       "files": ["**/test/frontend/**/*.js", "**/test/frontend/import_tests.js"],
       "globals": {
         "expect": true,
-        "define": true,
         "$": true
       }
     },
@@ -65,16 +77,33 @@
       // Frontend specific rules
       "files": ["**/frontend/js/**/*.js"],
       "globals": {
-        "define": true,
         "$": true,
         "angular": true,
-        "_": true,
         "ace": true,
         "ga": true,
+        "Raven": true, // Backwards compat for Sentry reporting
+        "Sentry": true,
         "sl_console": true,
-        "sl_debugging": true,
-        // Injected in layout.pug
-        "user_id": true
+        "sl_debugging": true
+      },
+      "rules": {
+        // Fix conflict between prettier & standard by overriding to prefer
+        // double quotes
+        "jsx-quotes": ["error", "prefer-double"],
+
+        // Override weird behaviour of jsx-a11y label-has-for (says labels must be
+        // nested *and* have for/id attributes)
+        "jsx-a11y/label-has-for": [
+          "error",
+          {
+            "required": {
+              "some": [
+                "nesting",
+                "id"
+              ]
+            }
+          }
+        ]
       }
     }
   ]

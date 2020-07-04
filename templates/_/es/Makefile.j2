@@ -348,6 +348,9 @@ build_prod: clean_build_artifacts
 {% if has_config %}
 			config \
 {% endif %}
+{% if has_app_views %}
+			generated/views/ \
+{% endif %}
 {% if has_modules %}
 			modules/*/app/ \
 			modules/*/index.js \
