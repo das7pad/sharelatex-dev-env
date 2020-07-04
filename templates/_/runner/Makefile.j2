@@ -20,7 +20,7 @@ IMAGE_BRANCH = $(IMAGE_BARE):$(BRANCH_NAME)
 IMAGE = $(IMAGE_BRANCH)-$(BUILD_NUMBER)
 IMAGE_FINAL = $(IMAGE_BARE):$(RELEASE)
 
-NODE_VERSION ?= {{ node_version }}
+export NODE_VERSION ?= {{ node_version }}
 IMAGE_NODE ?= $(DOCKER_REGISTRY)/node:$(NODE_VERSION)
 
 pull_node:
