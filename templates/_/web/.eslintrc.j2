@@ -8,6 +8,7 @@
     "prettier",
     "prettier/react",
     "prettier/standard",
+    "plugin:react-hooks/recommended",
     "plugin:jsx-a11y/recommended"
   ],
   "plugins": [
@@ -88,6 +89,9 @@
         "sl_debugging": true
       },
       "rules": {
+        // Prevent usage of legacy string refs
+        "react/no-string-refs": "error",
+
         // Fix conflict between prettier & standard by overriding to prefer
         // double quotes
         "jsx-quotes": ["error", "prefer-double"],
