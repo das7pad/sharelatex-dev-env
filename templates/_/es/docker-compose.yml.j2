@@ -11,6 +11,7 @@ services:
     working_dir: /app
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
+      NODE_OPTIONS: "--unhandled-rejections=strict"
     command: npm run test:unit
 {% if not has_entrypoint %}
     user: node
@@ -68,6 +69,7 @@ services:
       LINKED_URL_PROXY: 'http://localhost:6543'
       SHARELATEX_CONFIG: /app/test/acceptance/config/settings.test.coffee
       NODE_ENV: test
+      NODE_OPTIONS: "--unhandled-rejections=strict"
 {% endif %}
 {% if name == 'read-only' %}
       SHARELATEX_CONFIG: /app/config/settings.test.js
@@ -107,6 +109,8 @@ services:
       - .:/app
     working_dir: /app
     command: npm run test:frontend:single
+    environment:
+      NODE_OPTIONS: "--unhandled-rejections=strict"
 {%- endif %}
 {% if has_frontend_tests and has_karma_tests %}
 
@@ -125,6 +129,7 @@ services:
     command: npm run test:frontend
     environment:
       MOCHA_GREP: ${MOCHA_GREP}
+      NODE_OPTIONS: "--unhandled-rejections=strict"
 
   test_karma:
     build:
@@ -134,6 +139,8 @@ services:
       - .:/app
     working_dir: /app
     command: npm run test:karma:single
+    environment:
+      NODE_OPTIONS: "--unhandled-rejections=strict"
 {%- endif %}
 
 {% for dependency in dependencies %}
