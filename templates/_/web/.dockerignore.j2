@@ -74,4 +74,7 @@ public/stylesheets/*.map
 !/test/smoke/{{ src_dir }}
 !/test/unit/{{ src_dir }}
 !/test/frontend
+{% if has_karma_tests %}
+!/test/karma
+{% endif %}
 {% endblock %}

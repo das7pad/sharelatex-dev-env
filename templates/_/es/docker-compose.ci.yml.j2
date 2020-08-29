@@ -129,7 +129,7 @@ services:
 {%   endfor %}
 {% endif %}
 
-{% if name == 'web' %}
+{% if has_frontend_tests and not has_karma_tests %}
   test_frontend:
     build:
       context: .
@@ -138,6 +138,45 @@ services:
         - IMAGE_CI
     working_dir: /app
     command: npm run test:frontend:single
+    user: node
+    volumes:
+      - ./output:/home/node:z
+{%- endif %}
+{% if has_frontend_tests and has_karma_tests %}
+
+  test_frontend:
+    image: ${IMAGE_CI}-dev
+    user: node
+    entrypoint:
+      - npx
+      - mocha
+      - --exit
+      - --recursive
+{%   if has_frontend_test_bootstrap %}
+{%     if mocha_6 is defined %}
+      - --file
+{%     else %}
+      - --require
+{%     endif %}
+      - test/frontend/bootstrap.js
+{%   endif %}
+      - --reporter
+      - xunit
+      - --reporter-options
+    command:
+      - output=/home/node/jsdom.xml,suiteName='JSDOM Tests'
+      - test/frontend
+    volumes:
+      - ./output:/home/node:z
+
+  test_karma:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend.ci
+      args:
+        - IMAGE_CI
+    working_dir: /app
+    command: npm run test:karma:single
     user: node
     volumes:
       - ./output:/home/node:z

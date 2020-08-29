@@ -59,7 +59,8 @@
     },
     {
       // Frontend test specific rules
-      "files": ["**/test/frontend/**/*.js", "**/test/frontend/import_tests.js"],
+{% set path_karma_tests = 'karma' if has_karma_tests else 'frontend' %}
+      "files": ["**/test/{{ path_karma_tests }}/**/*.js", "**/test/{{ path_karma_tests }}/import_tests.js"],
       "globals": {
         "expect": true,
         "$": true

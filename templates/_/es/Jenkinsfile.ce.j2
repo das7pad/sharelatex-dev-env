@@ -183,7 +183,7 @@ pipeline {
         }
 {% endif %}
 
-{% if has_frontend_tests %}
+{% if has_frontend_tests and not has_karma_tests %}
         stage('Frontend Tests') {
           agent {
             label '{{ agent_label_test }}'
@@ -201,6 +201,52 @@ pipeline {
             }
             cleanup {
               sh 'make clean_test_frontend'
+              sh 'make clean_ci_stage'
+            }
+          }
+        }
+{% endif %}
+
+{% if has_frontend_tests and has_karma_tests %}
+        stage('JSDOM Tests') {
+          agent {
+            label '{{ agent_label_test }}'
+          }
+          environment {
+            SUFFIX = '-test-jsdom'
+          }
+          steps {
+            sh 'make prepare_ci_stage'
+            sh 'make test_frontend_build_run'
+          }
+          post {
+            always {
+              xunit(tools: [JUnit(pattern: 'output/jsdom.xml')])
+            }
+            cleanup {
+              sh 'make clean_test_frontend'
+              sh 'make clean_ci_stage'
+            }
+          }
+        }
+
+        stage('Karma Tests') {
+          agent {
+            label '{{ agent_label_test }}'
+          }
+          environment {
+            SUFFIX = '-test-karma'
+          }
+          steps {
+            sh 'make prepare_ci_stage'
+            sh 'make test_karma_build_run'
+          }
+          post {
+            always {
+              xunit(tools: [JUnit(pattern: 'output/karma.xml')])
+            }
+            cleanup {
+              sh 'make clean_test_karma'
               sh 'make clean_ci_stage'
             }
           }

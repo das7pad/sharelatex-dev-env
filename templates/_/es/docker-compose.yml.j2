@@ -98,7 +98,7 @@ services:
 {%   endfor %}
 {% endif %}
 
-{% if name == 'web' %}
+{% if has_frontend_tests and not has_karma_tests %}
   test_frontend:
     build:
       context: .
@@ -107,6 +107,33 @@ services:
       - .:/app
     working_dir: /app
     command: npm run test:frontend:single
+{%- endif %}
+{% if has_frontend_tests and has_karma_tests %}
+
+  test_frontend:
+{%   if has_install_deps %}
+    build: .
+{%   else %}
+    image: node:{{ node_version }}
+{%   endif %}
+{%   if not has_entrypoint %}
+    user: node
+{%   endif %}
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: npm run test:frontend
+    environment:
+      MOCHA_GREP: ${MOCHA_GREP}
+
+  test_karma:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: npm run test:karma:single
 {%- endif %}
 
 {% for dependency in dependencies %}
