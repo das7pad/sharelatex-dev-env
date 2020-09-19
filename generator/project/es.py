@@ -46,6 +46,7 @@ class ESProject(Project):
             'has_acceptance_test_init': 'test/acceptance/%s/Init.js' % src_dir,
             'has_frontend_test_bootstrap': 'test/frontend/bootstrap.js',
             'has_index_js': 'index.js',
+            'has_locales': 'locales/',
             'has_unit_test_bootstrap': 'test/unit/bootstrap.js',
             'has_webpack_config_js': 'webpack.config.js',
         })

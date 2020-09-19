@@ -51,6 +51,12 @@ USER node
 {% if has_webpack_config_js %}
 FROM dev as webpack
 USER root
+
+{% if has_locales %}
+# generate the translations modules -- used by backend and frontend
+RUN /docker_cleanup.sh make build_lngs_full
+{% endif %}
+
 RUN /docker_cleanup.sh npm run webpack:production
 
 {%   if has_app_views %}
