@@ -346,12 +346,12 @@ pipeline {
 
             stage('archive public') {
               steps {
-                sh 'make public.tar.xz'
-                archiveArtifacts(artifacts: 'public.tar.xz')
+                sh 'make public.tar.gz'
+                archiveArtifacts(artifacts: 'public.tar.gz')
               }
               post {
                 cleanup {
-                  sh 'rm -f public.tar.xz'
+                  sh 'rm -f public.tar.gz'
                 }
               }
             }
