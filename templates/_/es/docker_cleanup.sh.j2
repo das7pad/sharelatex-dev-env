@@ -16,6 +16,7 @@ if [[ -d /app/node_modules ]]; then
     find /app/node_modules -type f \
         \( \
         -name '.*' \
+        -or -name '*.d.ts' \
         -or -name index.html \
         -or -name bower.json \
         -or -name karma.conf.js \
