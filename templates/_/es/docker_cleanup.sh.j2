@@ -12,6 +12,9 @@ if [[ -d /app/node_modules ]]; then
 {% if name == 'web' %}
     rm -rf /app/node_modules/.cache
 {% endif %}
+{% if 'minio' in dependencies %}
+    rm -rf /app/node_modules/aws-sdk/dist
+{% endif %}
 
     find /app/node_modules -type f \
         \( \
