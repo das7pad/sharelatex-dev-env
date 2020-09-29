@@ -516,7 +516,7 @@ clean_stage_images:
 		$(IMAGE_CI)-dev-deps \
 		$(IMAGE_CI)-dev \
 
-
+{% if has_webpack_config_js %}
 compress_public: public.tar.gz
 .PHONY: public.tar.gz
 public.tar.gz:
@@ -529,7 +529,7 @@ public.tar.gz:
 		-c '/compress.sh && tar --create .' \
 	| gzip -9 \
 	> public.tar.gz
-
+{% endif %}
 
 {% if has_modules %}
 MODULE_DIRS := $(shell find modules -mindepth 1 -maxdepth 1 -type d -not -name '.git' )
