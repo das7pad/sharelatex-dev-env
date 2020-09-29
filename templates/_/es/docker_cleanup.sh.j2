@@ -14,6 +14,7 @@ if [[ -d /app/node_modules ]]; then
 {% endif %}
 
     find /app/node_modules -type f \
+        \( \
         -name '.*' \
         -or -name index.html \
         -or -name bower.json \
@@ -23,6 +24,7 @@ if [[ -d /app/node_modules ]]; then
         -or -iname 'HISTORY*' \
         -or -iname 'CONTRIBUTING*' \
         -or -name Makefile \
+        \) \
         -delete
 fi
 
