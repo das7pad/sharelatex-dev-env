@@ -537,6 +537,22 @@ public.tar.gz:
 	> public.tar.gz
 {% endif %}
 
+{% if name == 'real-time' %}
+socket.io-client: public.tar.gz
+.PHONY: public.tar.gz
+public.tar.gz:
+	docker run \
+		--rm \
+		--volume $(PWD)/compress.sh:/compress.sh \
+		--workdir /app/node_modules/socket.io-client/dist/ \
+		--user root \
+		--entrypoint sh \
+		$(IMAGE_CI)-prod \
+		-c 'rm *.swf && /compress.sh && tar --create .' \
+	| gzip -9 \
+	> public.tar.gz
+{% endif %}
+
 {% if has_modules %}
 MODULE_DIRS := $(shell find modules -mindepth 1 -maxdepth 1 -type d -not -name '.git' )
 MODULE_MAKEFILES := $(MODULE_DIRS:=/Makefile)

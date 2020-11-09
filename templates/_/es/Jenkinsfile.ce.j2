@@ -356,6 +356,20 @@ pipeline {
               }
             }
 {% endif %}
+{% if name == 'real-time' %}
+
+            stage('archive socket.io-client') {
+              steps {
+                sh 'make public.tar.gz'
+                archiveArtifacts(artifacts: 'public.tar.gz')
+              }
+              post {
+                cleanup {
+                  sh 'rm -f public.tar.gz'
+                }
+              }
+            }
+{% endif %}
           }
           post {
             cleanup {
