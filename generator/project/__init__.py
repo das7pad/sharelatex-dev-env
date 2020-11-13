@@ -337,6 +337,7 @@ class Project:
             'lock': 'LOCK',
             'new_history': 'NEW_HISTORY',
             'pubsub': 'PUBSUB',
+            'queues': 'QUEUES',
             'realtime': 'REAL_TIME',
             'web': 'WEB',
             'websessions': 'WEB_SESSIONS',
