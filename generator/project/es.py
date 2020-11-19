@@ -47,6 +47,7 @@ class ESProject(Project):
             'has_frontend_test_bootstrap': 'test/frontend/bootstrap.js',
             'has_index_js': 'index.js',
             'has_locales': 'locales/',
+            'has_postcss_config_js': 'postcss.config.js',
             'has_unit_test_bootstrap': 'test/unit/bootstrap.js',
             'has_webpack_config_js': 'webpack.config.js',
         })
