@@ -8,7 +8,7 @@ services:
     image: ${IMAGE_CI}-dev
     user: node
     environment:
-      NODE_OPTIONS: "--unhandled-rejections=strict"
+      NODE_OPTIONS: "--unhandled-rejections=strict --trace-deprecation"
     entrypoint:
       - npx
       - mocha
@@ -74,7 +74,7 @@ services:
       LINKED_URL_PROXY: 'http://localhost:6543'
       SHARELATEX_CONFIG: /app/test/acceptance/config/settings.test.coffee
       NODE_ENV: test
-      NODE_OPTIONS: "--unhandled-rejections=strict"
+      NODE_OPTIONS: "--unhandled-rejections=strict --trace-deprecation"
 {% endif %}
 {% if name == 'read-only' %}
       SHARELATEX_CONFIG: /app/config/settings.test.js
@@ -142,7 +142,7 @@ services:
     working_dir: /app
     command: npm run test:frontend:single
     environment:
-      NODE_OPTIONS: "--unhandled-rejections=strict"
+      NODE_OPTIONS: "--unhandled-rejections=strict --trace-deprecation"
     user: node
     volumes:
       - ./output:/home/node:z
@@ -153,7 +153,7 @@ services:
     image: ${IMAGE_CI}-dev
     user: node
     environment:
-      NODE_OPTIONS: "--unhandled-rejections=strict"
+      NODE_OPTIONS: "--unhandled-rejections=strict --trace-deprecation"
     entrypoint:
       - npx
       - mocha
@@ -185,7 +185,7 @@ services:
     working_dir: /app
     command: npm run test:karma:single
     environment:
-      NODE_OPTIONS: "--unhandled-rejections=strict"
+      NODE_OPTIONS: "--unhandled-rejections=strict --trace-deprecation"
     user: node
     volumes:
       - ./output:/home/node:z
