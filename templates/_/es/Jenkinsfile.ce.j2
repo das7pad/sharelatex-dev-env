@@ -239,7 +239,8 @@ pipeline {
           }
           steps {
             sh 'make prepare_ci_stage'
-            sh 'make test_karma_build_run'
+            sh 'make test_karma_build'
+            sh 'make test_karma_run'
           }
           post {
             always {

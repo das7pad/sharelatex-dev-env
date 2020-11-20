@@ -281,6 +281,7 @@ clean_test_frontend:
 KARMA_DOCKER_COMPOSE ?= \
 	COMPOSE_PROJECT_NAME=karma_$(BUILD_DIR_NAME) $(DOCKER_COMPOSE)
 
+test_karma_build: build_test_karma
 build_test_karma:
 	$(KARMA_DOCKER_COMPOSE) build --force-rm test_karma
 
