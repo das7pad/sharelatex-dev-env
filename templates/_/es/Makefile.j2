@@ -391,15 +391,12 @@ build_prod: clean_build_artifacts
 
 	docker run \
 		--rm \
-		--entrypoint tar \
 {% if has_webpack_config_js %}
 		$(IMAGE_CI)-webpack \
 {% else %}
 		$(IMAGE_CI)-dev \
 {% endif %}
-			--create \
-			--gzip \
-			$(TAR_FLAGS_REPRODUCIBLE) \
+		$(TAR_CREATE_REPRODUCIBLE) \
 {% if has_index_js %}
 			index.js \
 {% endif %}
@@ -445,6 +442,7 @@ build_prod: clean_build_artifacts
 {% if has_smoke_tests %}
 			test/smoke/{{ src_dir }} \
 {% endif %}
+	| gzip \
 	> build_artifacts.tar.gz
 	$(TOUCH_REPRODUCIBLE) build_artifacts.tar.gz
 
