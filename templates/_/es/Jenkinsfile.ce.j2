@@ -123,30 +123,6 @@ pipeline {
         }
 {% endif %}
 
-{% if has_modules %}
-        stage('Module Unit Tests') {
-          agent {
-            label '{{ agent_label_test }}'
-          }
-          environment {
-            SUFFIX = '-test-unit-modules'
-          }
-          steps {
-            sh 'make prepare_ci_stage'
-            sh 'make test_unit_modules_run_ci'
-          }
-          post {
-            always {
-              junit 'output/unit_module_*.xml'
-            }
-            cleanup {
-              sh 'make clean_test_unit_modules'
-              sh 'make clean_ci_stage'
-            }
-          }
-        }
-{% endif %}
-
 {% if has_acceptance_tests %}
         stage('App Acceptance Tests') {
 {% if name == 'clsi' %}

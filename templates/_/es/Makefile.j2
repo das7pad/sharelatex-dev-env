@@ -606,9 +606,6 @@ test_unit_modules: test_unit_modules_run
 TEST_UNIT_MODULES = $(addsuffix /test_unit,$(MODULE_DIRS))
 test_unit_modules_run: $(TEST_UNIT_MODULES)
 
-TEST_UNIT_CI_MODULES = $(addsuffix /test_unit_ci,$(MODULE_DIRS))
-test_unit_modules_run_ci: $(TEST_UNIT_CI_MODULES)
-
 clean_test_unit: clean_test_unit_modules
 CLEAN_TEST_UNIT_MODULES = $(addsuffix /clean_test_unit,$(MODULE_DIRS))
 clean_test_unit_modules: $(CLEAN_TEST_UNIT_MODULES)
@@ -618,7 +615,6 @@ MODULE_TARGETS = \
 	$(TEST_ACCEPTANCE_CI_MODULES) \
 	$(CLEAN_TEST_ACCEPTANCE_MODULES) \
 	$(TEST_UNIT_MODULES) \
-	$(TEST_UNIT_CI_MODULES) \
 	$(CLEAN_TEST_UNIT_MODULES) \
 
 $(MODULE_TARGETS): $(MODULE_MAKEFILES)

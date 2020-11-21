@@ -48,18 +48,11 @@ endif
 
 ifeq (,$(wildcard test/unit))
 test_unit:
-test_unit_ci:
 clean_test_unit:
 
 else
 test_unit:
 	$(UNIT_TEST_DOCKER_COMPOSE) run --rm test_unit npm -q run test:unit:run_dir -- ${MOCHA_ARGS} $(MODULE_DIR)/test/unit/{{ src_dir }}
-	$(MAKE) clean_test_unit
-
-test_unit_ci:
-	$(UNIT_TEST_DOCKER_COMPOSE) run --rm test_unit \
-		output=/home/node/unit_module_$(MODULE_NAME).xml,suiteName='Module $(MODULE_NAME) Unit Tests' \
-		$(MODULE_DIR)/test/unit/{{ src_dir }}
 	$(MAKE) clean_test_unit
 
 clean_test_unit:
