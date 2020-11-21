@@ -352,7 +352,7 @@ pipeline {
               }
               post {
                 cleanup {
-                  sh 'rm -f public.tar.gz'
+                  sh 'make clean/public.tar.gz'
                 }
               }
             }
@@ -366,7 +366,7 @@ pipeline {
               }
               post {
                 cleanup {
-                  sh 'rm -f public.tar.gz'
+                  sh 'make clean/public.tar.gz'
                 }
               }
             }
