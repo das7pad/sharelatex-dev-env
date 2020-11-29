@@ -532,7 +532,7 @@ log_image_digest:
 	| cut -d: -f2 \
 	> docker-image$(R_TARGET).digest.txt
 
-clean_push:
+clean_push_prod:
 	rm -f docker-image$(R_TARGET).digest.txt
 	docker rmi --force \
 		$(IMAGE)$(R_TARGET) \
@@ -540,6 +540,10 @@ clean_push:
 		$(IMAGE_CACHE_BRANCH) \
 		$(IMAGE_CACHE_BRANCH)-prod-base \
 
+clean_push_dev_deps:
+	docker rmi --force \
+		$(IMAGE_CACHE_CONTENT_SHA) \
+		$(IMAGE_CACHE_BRANCH) \
 
 prepare_ci_stage: build_dev_with_cache
 build_dev_with_cache: pull_node

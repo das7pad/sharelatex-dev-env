@@ -84,7 +84,7 @@ pipeline {
               }
               post {
                 cleanup {
-                  sh 'make clean_push'
+                  sh 'make clean_push_dev_deps'
                 }
               }
             }
@@ -318,7 +318,7 @@ pipeline {
                   }
                   post {
                     cleanup {
-                      sh 'make clean_push'
+                      sh 'make clean_push_prod'
                     }
                   }
                 }
