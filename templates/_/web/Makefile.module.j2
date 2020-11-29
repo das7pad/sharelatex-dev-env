@@ -36,7 +36,7 @@ test_acceptance:
 
 test_acceptance_ci:
 	$(ACCEPTANCE_TEST_DOCKER_COMPOSE) run --rm test_acceptance \
-		output=/home/node/acceptance_module_$(MODULE_NAME).xml,suiteName='Module $(MODULE_NAME) Acceptance Tests' \
+		output=/home/node/acceptance_module_$(MODULE_NAME).xml,suiteName='ModuleAcceptanceTests-$(MODULE_NAME)' \
 		$(MODULE_DIR)/test/acceptance/{{ src_dir }}/Init.js \
 		$(MODULE_DIR)/test/acceptance/{{ src_dir }}
 	$(MAKE) clean_test_acceptance

@@ -32,7 +32,7 @@ services:
       - --reporter
       - xunit
       - --reporter-options
-      - output=/home/node/unit.xml,suiteName='Unit Tests'
+      - output=/home/node/unit.xml,suiteName='UnitTests'
       - test/unit/{{ src_dir }}
 {% if has_modules %}
       - modules/*/test/unit/{{ src_dir }}
@@ -121,7 +121,7 @@ services:
       - xunit
       - --reporter-options
     command:
-      - output=/home/node/acceptance.xml,suiteName='App Acceptance Tests'
+      - output=/home/node/acceptance.xml,suiteName='AppAcceptanceTests'
 {% if has_acceptance_test_init %}
       - test/acceptance/{{ src_dir }}/Init.js
 {% endif %}
@@ -180,7 +180,7 @@ services:
       - xunit
       - --reporter-options
     command:
-      - output=/home/node/jsdom.xml,suiteName='JSDOM Tests'
+      - output=/home/node/jsdom.xml,suiteName='JSDOMTests'
       - test/frontend
     volumes:
       - ./output:/home/node:z
