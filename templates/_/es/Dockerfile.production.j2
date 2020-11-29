@@ -2,7 +2,7 @@
 {{ header('#') }}
 
 ARG BASE
-FROM $BASE
+FROM $BASE as prod-base
 
 {% if monkey_patch_npm_ci__from %}
 # monkey patch npm ci --only=prod
@@ -13,6 +13,8 @@ RUN sed -i -E \
 {% endif %}
 
 RUN /docker_cleanup.sh npm ci --only=prod
+
+FROM prod-base
 
 ADD build_artifacts.tar.gz /app
 
