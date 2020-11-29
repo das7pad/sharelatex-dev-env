@@ -539,6 +539,7 @@ clean_push_prod:
 		$(IMAGE_CACHE_CONTENT_SHA) \
 		$(IMAGE_CACHE_BRANCH) \
 		$(IMAGE_CACHE_BRANCH)-prod-base \
+		$(IMAGE_CI)-prod-base \
 
 clean_push_dev_deps:
 	docker rmi --force \
@@ -563,7 +564,6 @@ clean_stage_images:
 		$(IMAGE_CACHE_CONTENT_SHA)-dev-deps \
 		$(IMAGE_CI)-dev-deps \
 		$(IMAGE_CI)-dev \
-		$(IMAGE_CI)-prod-base \
 		$(IMAGE_CI)-prod-base-cache \
 
 {% if has_webpack_config_js %}
