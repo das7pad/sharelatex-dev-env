@@ -81,7 +81,6 @@ pipeline {
               steps {
                 sh 'make push_cache'
                 sh 'make push_cache_branch'
-                sh 'make push_target'
               }
               post {
                 cleanup {
