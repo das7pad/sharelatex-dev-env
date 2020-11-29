@@ -538,6 +538,7 @@ clean_push:
 		$(IMAGE)$(R_TARGET) \
 		$(IMAGE_CACHE_CONTENT_SHA) \
 		$(IMAGE_CACHE_BRANCH) \
+		$(IMAGE_CACHE_BRANCH)-prod-base \
 
 
 prepare_ci_stage: build_dev_with_cache
@@ -558,6 +559,8 @@ clean_stage_images:
 		$(IMAGE)-dev-deps \
 		$(IMAGE_CI)-dev-deps \
 		$(IMAGE_CI)-dev \
+		$(IMAGE_CI)-prod-base \
+		$(IMAGE_CI)-prod-base-cache \
 
 {% if has_webpack_config_js %}
 compress_public: public.tar.gz
