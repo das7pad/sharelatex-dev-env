@@ -43,6 +43,8 @@ class ESProject(Project):
             'has_app_js': 'app.js',
             'has_app_src': 'app/%s' % src_dir,
             'has_acceptance_test_bootstrap': 'test/acceptance/bootstrap.js',
+            'has_acceptance_test_config_js':
+                'test/acceptance/config/settings.test.js',
             'has_acceptance_test_init': 'test/acceptance/%s/Init.js' % src_dir,
             'has_frontend_test_bootstrap': 'test/frontend/bootstrap.js',
             'has_index_js': 'index.js',
