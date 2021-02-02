@@ -7,7 +7,11 @@
 
 {% block tool_config %}
 {{ super() }}
+{% if has_babel_config_json %}
+!/babel.config.json
+{% else %}
 !/.babelrc
+{% endif %}
 
 !/.eslintignore
 
