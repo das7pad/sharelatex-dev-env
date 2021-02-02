@@ -186,7 +186,8 @@ format: format_full
 format_fix: format_fix_full
 endif
 
-RUN_FORMAT ?= $(LINT_RUNNER) prettier-eslint
+{% set prettier = 'prettier' if name == 'web' else 'prettier-eslint' %}
+RUN_FORMAT ?= $(LINT_RUNNER) {{ prettier }}
 format_full:
 	$(RUN_FORMAT) '$(PWD)/**/*.{js,less}' --list-different
 format_fix_full:
