@@ -46,11 +46,11 @@ services:
     environment:
       LOG_LEVEL: fatal
 {% for dependency in dependencies %}
-{% if dependency.startswith('redis') %}
+{%   if dependency.startswith('redis') %}
       {{ env_prefix[dependency[6:]] }}_REDIS_HOST: {{ dependency }}
-{% elif dependency == 'mongo' %}
+{%   elif dependency == 'mongo' %}
       MONGO_HOST: mongo
-{% endif %}
+{%   endif %}
 {% endfor %}
 {% if 'minio' in dependencies %}
       AWS_S3_ENDPOINT: ${AWS_S3_ENDPOINT}
@@ -82,11 +82,11 @@ services:
       PROJECT_HISTORY_ENABLED: 'true'
       ENABLED_LINKED_FILE_TYPES: 'url,project_file,project_output_file,mendeley,zotero'
       LINKED_URL_PROXY: 'http://localhost:6543'
-{% if has_acceptance_test_config_js %}
+{%   if has_acceptance_test_config_js %}
       SHARELATEX_CONFIG: /app/test/acceptance/config/settings.test.js
-{% else %}
+{%   else %}
       SHARELATEX_CONFIG: /app/test/acceptance/config/settings.test.coffee
-{% endif %}
+{%   endif %}
       NODE_ENV: test
       NODE_OPTIONS: "--unhandled-rejections=strict --trace-deprecation"
 {% endif %}
@@ -242,13 +242,13 @@ services:
       - >
         sleep 2
         && mc config host add minio http://minio:9000 ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY}
-    {% if name == 'filestore' %}
+{%     if name == 'filestore' %}
         && mc mb --ignore-existing minio/${AWS_BUCKET_USER}
         && mc mb --ignore-existing minio/${AWS_BUCKET_TEMPLATE}
         && mc mb --ignore-existing minio/${AWS_BUCKET_PUBLIC}
-    {% else %}
+{%     else %}
         && mc mb --ignore-existing minio/${AWS_BUCKET}
-    {% endif %}
+{%     endif %}
     depends_on:
       - minio
 

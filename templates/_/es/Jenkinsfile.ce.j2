@@ -128,7 +128,7 @@ pipeline {
 
 {% if has_acceptance_tests %}
         stage('App Acceptance Tests') {
-{% if name == 'clsi' %}
+{%   if name == 'clsi' %}
           agent {
             label '{{ agent_label_test }} && docker_socket_access'
           }
@@ -138,14 +138,14 @@ pipeline {
             PULL_TEXLIVE_BEFORE_RUN = "true"
             SUFFIX = 'test-acceptance'
           }
-{% else %}
+{%   else %}
           agent {
             label '{{ agent_label_test }}'
           }
           environment {
             SUFFIX = '-test-acceptance'
           }
-{% endif %}
+{%   endif %}
           steps {
             sh 'make prepare_ci_stage'
             sh 'make test_acceptance_app'
