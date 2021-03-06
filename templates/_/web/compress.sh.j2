@@ -3,14 +3,13 @@
 FILES=$(find -type f -not -name '*.gz')
 
 for file in ${FILES}; do
-    dest=${file}.gz
+  file_gzipped="$file.gz"
 
-    current_size=$(stat -c%s ${file})
+  gzip -6 --no-name --stdout "$file" > "$file_gzipped"
 
-    new_size=$(gzip -9 --no-name --stdout ${file} | wc -c)
-    if [[ ${new_size} -ge ${current_size} ]]; then
-        continue;
-    fi
-
-    gzip -9 --no-name --stdout ${file} > ${dest}
+  before=$(stat -c%s "$file")
+  after=$(stat -c%s "$file_gzipped")
+  if [[ "$after" -ge "$before" ]]; then
+    rm "$file_gzipped"
+  fi
 done
