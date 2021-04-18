@@ -48,19 +48,9 @@ VOLUME /app/{{ volumes|default(data_dirs)|join(' /app/') }}
 USER node
 {% endif %}
 
-{% if has_webpack_config_js %}
-FROM dev as webpack
+{% if has_esbuild_js or has_locales or has_populatePublicVendor_js %}
+FROM dev as dist
 USER root
 
-{% if has_locales %}
-# generate the translations modules -- used by backend and frontend
-RUN /docker_cleanup.sh make build_lngs_full
-{% endif %}
-
-RUN /docker_cleanup.sh npm run webpack:production
-
-{%   if has_app_views %}
-# precompile views
-RUN /docker_cleanup.sh make build_views_full
-{%   endif %}
+RUN /docker_cleanup.sh make dist
 {% endif %}

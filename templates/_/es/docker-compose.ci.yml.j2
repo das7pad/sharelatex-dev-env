@@ -180,21 +180,13 @@ services:
       - npx
       - mocha
       - --exit
-      - --recursive
-{%   if has_frontend_test_bootstrap %}
-{%     if mocha_6 is defined %}
-      - --file
-{%     else %}
-      - --require
-{%     endif %}
-      - test/frontend/bootstrap.js
-{%   endif %}
+      - --delay
       - --reporter
       - xunit
       - --reporter-options
     command:
       - output=/home/node/jsdom.xml,suiteName='JSDOMTests'
-      - test/frontend
+      - test/frontend/buildAndRun.js
     volumes:
       - ./output:/home/node:z
 

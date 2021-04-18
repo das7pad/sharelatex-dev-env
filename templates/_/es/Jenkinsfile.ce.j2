@@ -258,7 +258,7 @@ pipeline {
 {% endif %}
 
 {% set label = (
-        ('Webpack and ' if has_webpack_config_js else '')
+        ('Dist and ' if has_esbuild_js else '')
         + 'Production build'
       ) %}
         stage('{{ label }}') {
@@ -266,11 +266,11 @@ pipeline {
             label '{{ agent_label_build }}'
           }
           stages {
-{% if has_webpack_config_js %}
-            stage('Build webpack') {
+{% if has_esbuild_js %}
+            stage('Build dist') {
               steps {
                 sh 'make prepare_ci_stage'
-                sh 'make build_webpack'
+                sh 'make build_dist'
               }
               post {
                 cleanup {
@@ -299,7 +299,7 @@ pipeline {
                 }
                 stage('Build production') {
                   steps {
-{% if not has_webpack_config_js %}
+{% if not has_esbuild_js %}
                     sh 'make build_dev_with_cache'
 {% endif %}
                     sh 'make build_prod'
@@ -327,7 +327,7 @@ pipeline {
                 }
               }
             }
-{% if has_webpack_config_js %}
+{% if has_esbuild_js %}
 
             stage('archive public') {
               steps {

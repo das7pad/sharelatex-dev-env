@@ -17,15 +17,16 @@
 
 !/.prettierignore
 
+!/esbuild
+!/esbuild.js
+
 !/karma.conf.js
+
+!/populatePublicVendor.js
 
 {% if has_postcss_config_js %}
 !/postcss.config.js
 {% endif %}
-
-!/webpack.config.js
-!/webpack.config.prod.js
-!/webpack.config.test.js
 
 !/.eastrc
 {% endblock %}

@@ -75,8 +75,8 @@ clean_docker_images:
 		$(IMAGE_CI)-dev-deps \
 		$(IMAGE_CI)-dev \
 		$(IMAGE_CI)-prod \
-{% if has_webpack_config_js %}
-		$(IMAGE_CI)-webpack \
+{% if has_esbuild_js %}
+		$(IMAGE_CI)-dist \
 {% endif %}
 		$(IMAGE_CI)-dev-deps-cache \
 		$(IMAGE_CI)-prod-cache \
@@ -335,6 +335,7 @@ VIEW_FILES:=$(shell \
 	| sed 's|^|generated/views/|;s/.pug/.js/' \
 )
 
+dist: build_views_full
 build_views_full:
 	node build/views
 
@@ -345,6 +346,7 @@ $(VIEW_FILES): generated/views/%.js:
 {% endif %}
 
 {% if has_locales %}
+dist: build_lngs_full
 build_lngs_full:
 	node build/translations
 
@@ -354,10 +356,21 @@ $(LNGS): $(wildcard build/translations/*.js)
 $(LNGS): locales/en.json
 $(LNGS): generated/lng/%.js: locales/%.json
 	node build/translations $*
+{% endif %}
 
-webpack_production:
-	$(MAKE) --no-print-directory -j build_lng
-	npm run webpack:production
+{% if has_esbuild_js %}
+dist: esbuild_build
+esbuild_build:
+	node esbuild.js build
+
+esbuild_watch:
+	node esbuild.js watch
+{% endif %}
+
+{% if has_populatePublicVendor_js %}
+dist: populatePublicVendor
+populatePublicVendor:
+	node populatePublicVendor.js
 {% endif %}
 
 build_dev_deps: clean_build_artifacts
@@ -384,21 +397,21 @@ build_dev: clean_build_artifacts
 		--target dev \
 		.
 
-{% if has_webpack_config_js %}
-build_webpack: clean_build_artifacts
+{% if has_esbuild_js %}
+build_dist: clean_build_artifacts
 	docker build \
 		--force-rm=true \
 		--cache-from $(IMAGE_CI)-dev \
-		--tag $(IMAGE_CI)-webpack \
-		--target webpack \
+		--tag $(IMAGE_CI)-dist \
+		--target dist \
 		.
 {% endif %}
 
 build_prod: clean_build_artifacts
 	docker build \
 		--force-rm=true \
-{% if has_webpack_config_js %}
-		--cache-from $(IMAGE_CI)-webpack \
+{% if has_esbuild_js %}
+		--cache-from $(IMAGE_CI)-dist \
 {% else %}
 		--cache-from $(IMAGE_CI)-dev \
 {% endif %}
@@ -418,8 +431,8 @@ build_prod: clean_build_artifacts
 
 	docker run \
 		--rm \
-{% if has_webpack_config_js %}
-		$(IMAGE_CI)-webpack \
+{% if has_esbuild_js %}
+		$(IMAGE_CI)-dist \
 {% else %}
 		$(IMAGE_CI)-dev \
 {% endif %}
@@ -455,8 +468,8 @@ build_prod: clean_build_artifacts
 			modules/*/app/ \
 			modules/*/index.js \
 {% endif %}
-{% if has_webpack_config_js %}
-			{{ webpack_public_path|default('public/js') }}/manifest.json \
+{% if has_esbuild_js %}
+			public/manifest.json \
 {% endif %}
 {% block build_artifacts %}
 {% endblock %}
@@ -577,7 +590,7 @@ clean_stage_images:
 		$(IMAGE_CI)-dev \
 		$(IMAGE_CI)-prod-base-cache \
 
-{% if has_webpack_config_js %}
+{% if has_esbuild_js %}
 compress_public: public.tar.gz
 .PHONY: public.tar.gz
 public.tar.gz:
@@ -586,7 +599,7 @@ public.tar.gz:
 		--volume $(PWD)/compress.sh:/compress.sh \
 		--workdir /app/public \
 		--entrypoint sh \
-		$(IMAGE_CI)-webpack \
+		$(IMAGE_CI)-dist \
 		-c '/compress.sh && $(TAR_CREATE_REPRODUCIBLE) .' \
 	| gzip -6 \
 	> public.tar.gz
@@ -612,7 +625,7 @@ public.tar.gz:
 	$(TOUCH_REPRODUCIBLE) public.tar.gz public.tar.gz.checksum.txt
 {% endif %}
 
-{% if has_webpack_config_js or name == 'real-time' %}
+{% if has_esbuild_js or name == 'real-time' %}
 clean/public.tar.gz:
 	rm -f public.tar.gz public.tar.gz.checksum.txt
 {% endif %}
