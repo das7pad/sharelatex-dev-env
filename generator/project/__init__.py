@@ -292,6 +292,9 @@ class Project:
             )
             return 0
 
+        if content.strip() == '':
+            return -1
+
         path.parent.mkdir(parents=True, exist_ok=True)
         written = path.write_text(content)
 

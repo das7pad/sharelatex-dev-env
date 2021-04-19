@@ -65,6 +65,20 @@ class TestProject(unittest.TestCase):
         self.assertEqual(actual, len('DATA'))
         self.assertEqual(target.read_text(), 'DATA')
 
+    def test_write_ignore(self):
+        project = Project(
+            name='NAME',
+            path=self.project_path,
+            dry_run=False,
+        )
+        target = self.project_path / 'dummy.txt'
+        project._write(target, 'DATA')
+        self.assertEqual(target.read_text(), 'DATA')
+
+        actual = project._write(target, '\n')
+        self.assertEqual(actual, -1)
+        self.assertEqual(target.read_text(), 'DATA')
+
     def test_write_create_parent_dir(self):
         project = Project(
             name='NAME',
