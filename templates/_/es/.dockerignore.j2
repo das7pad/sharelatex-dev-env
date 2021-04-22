@@ -80,6 +80,10 @@
 !/app/views
 {% endif %}
 
+{% if has_scripts %}
+!scripts/
+{% endif %}
+
 {% if has_acceptance_test_bootstrap %}
 !/test/acceptance/bootstrap.js
 {% endif %}

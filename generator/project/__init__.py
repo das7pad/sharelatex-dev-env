@@ -321,6 +321,7 @@ class Project:
             'has_frontend_tests': 'test/frontend',
             'has_karma_tests': 'test/karma',
             'has_pre_test_acceptance': 'test/acceptance/scripts/pre-run',
+            'has_scripts': 'scripts/',
             'has_smoke_tests': 'test/smoke',
             'has_unit_tests': 'test/unit',
         }

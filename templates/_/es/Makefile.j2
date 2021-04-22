@@ -476,6 +476,9 @@ build_prod: clean_build_artifacts
 {% if has_entrypoint %}
 			entrypoint.sh \
 {% endif %}
+{% if has_scripts %}
+			scripts/ \
+{% endif %}
 {% if has_setup_env %}
 			setup_env.sh \
 {% endif %}
