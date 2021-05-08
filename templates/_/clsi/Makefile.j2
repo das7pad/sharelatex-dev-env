@@ -28,5 +28,8 @@ clean_clsi_artifacts:
 
 {% block build_artifacts %}
 			seccomp \
+{% if has_exec_agent %}
+			bin/exec-agent \
+{% endif %}
 			bin/synctex \
 {% endblock %}

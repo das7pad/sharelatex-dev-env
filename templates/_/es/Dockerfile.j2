@@ -25,6 +25,9 @@ FROM base AS dev-deps
 
 RUN /docker_cleanup.sh npm ci
 
+{% block builder %}
+{% endblock %}
+
 FROM dev-deps as dev
 
 COPY . /app

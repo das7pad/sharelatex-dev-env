@@ -1,0 +1,12 @@
+{% extends '_/es/Dockerfile.j2' %}
+
+{% block builder %}
+FROM golang:1.14 as exec-agent
+WORKDIR /src/exec-agent
+COPY exec-agent.go .
+RUN go build .
+{% endblock %}
+
+{% block build_app %}
+COPY --from=exec-agent /src/exec-agent/exec-agent /app/bin/exec-agent
+{% endblock %}

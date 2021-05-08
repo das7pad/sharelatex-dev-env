@@ -71,6 +71,10 @@ services:
       USE_PROM_METRICS: "true"
 {% endif %}
 {% if name == 'clsi' %}
+{%   if has_exec_agent %}
+      AGENT_RUNNER: "true"
+      EXEC_AGENT_HOST_PATH: $PWD/output/exec-agent-mount/exec-agent
+{%   endif %}
       ALLOWED_IMAGES: "${TEXLIVE_IMAGE:-quay.io/sharelatex/texlive-full:2017.1}"
       TEXLIVE_IMAGE: "${TEXLIVE_IMAGE:-quay.io/sharelatex/texlive-full:2017.1}"
       TEXLIVE_IMAGE_USER: "tex"
@@ -142,6 +146,9 @@ services:
     volumes:
       - ./output:/home/node:z
 {% if name == 'clsi' %}
+{%   if has_exec_agent %}
+      - ./output/exec-agent-mount:/app/bin/exec-agent-mount:z
+{%   endif %}
       - /var/run/docker.sock:/var/run/docker.sock:rw,z
       - ./compiles:/app/compiles:z
 {% endif %}

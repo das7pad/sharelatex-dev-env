@@ -1,5 +1,12 @@
 {% extends '_/es/.dockerignore.j2' %}
 
+{% block app %}
+{{ super() }}
+{% if has_exec_agent %}
+!/exec-agent.go
+{% endif %}
+{% endblock %}
+
 {% block config %}
 {{ super() }}
 

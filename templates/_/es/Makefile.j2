@@ -610,6 +610,9 @@ build_dev_with_cache:
 prepare_ci_stage: create_output
 create_output:
 	mkdir --parents --mode=777 output
+{% if has_exec_agent %}
+	mkdir --parents --mode=777 output/exec-agent-mount
+{% endif %}
 
 clean_ci_stage: clean_output
 clean_ci_stage: clean_stage_images
